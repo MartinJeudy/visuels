@@ -1413,8 +1413,14 @@ const App = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 p-3 rounded-lg">
-                {renderVisual()}
+              <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center" style={{ minHeight: '400px' }}>
+                <div style={{ 
+                  width: '100%', 
+                  maxWidth: selectedVisual === 'post-rs' ? '400px' : '300px',
+                  margin: '0 auto'
+                }}>
+                  {renderVisual()}
+                </div>
               </div>
               <p className="text-xs text-gray-600 mt-2 text-center">
                 ✨ Modifications en temps réel
