@@ -579,20 +579,23 @@ const App = () => {
                 )}
               </div>
               
-              {/* Image carrée - 35% */}
+              {/* Image CARRÉE centrée */}
               <div style={{
+                width: '70%',
+                paddingBottom: '70%', // Carré parfait
                 position: 'relative',
-                width: '100%',
-                paddingBottom: '40%',
-                marginBottom: '20px',
+                margin: '0 auto 20px auto',
                 borderRadius: '8px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}>
                 <img 
                   src={uploadedImage} 
                   alt="Event"
                   style={{
                     position: 'absolute',
+                    top: 0,
+                    left: 0,
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover'
@@ -777,29 +780,30 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} style={visualStyle}>
-            {/* Image carrée - 70% */}
+            {/* Image carrée - 65% de l'espace */}
             <div style={{
               position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '70%',
-              overflow: 'hidden'
+              top: '10%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '80%',
+              paddingBottom: '80%', // Carré parfait
+              overflow: 'hidden',
+              borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
             }}>
               <img 
                 src={uploadedImage} 
                 alt="Event"
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover'
                 }}
               />
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.7) 100%)'
-              }}></div>
             </div>
             
             <div style={{
@@ -809,7 +813,8 @@ const App = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              color: textColor
+              color: textColor,
+              zIndex: 10
             }}>
               {/* Top badges */}
               <div style={{
@@ -821,7 +826,8 @@ const App = () => {
                   <div style={{
                     backgroundColor: 'rgba(255,255,255,0.95)',
                     padding: '6px 14px',
-                    borderRadius: '20px'
+                    borderRadius: '20px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                   }}>
                     <p style={{
                       fontSize: '10px',
@@ -836,8 +842,8 @@ const App = () => {
                   </div>
                 )}
                 <div style={{
-                  width: '56px',
-                  height: '56px',
+                  width: '52px',
+                  height: '52px',
                   borderRadius: '50%',
                   backgroundColor: 'white',
                   display: 'flex',
@@ -847,7 +853,7 @@ const App = () => {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
                 }}>
                   <span style={{
-                    fontSize: '24px',
+                    fontSize: '22px',
                     fontWeight: '900',
                     color: bgColor
                   }}>
@@ -859,28 +865,31 @@ const App = () => {
               {/* Bottom content */}
               <div>
                 <h2 style={{
-                  fontSize: '32px',
+                  fontSize: '36px',
                   fontWeight: '900',
                   textTransform: 'uppercase',
-                  lineHeight: '1',
+                  lineHeight: '0.95',
                   margin: '0 0 12px 0',
-                  letterSpacing: '-0.5px'
+                  letterSpacing: '-1px',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.3)'
                 }}>
                   {eventData.title}
                 </h2>
                 <p style={{
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
-                  margin: '0 0 4px 0'
+                  margin: '0 0 4px 0',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                 }}>
                   {eventData.date}
                 </p>
                 <p style={{
-                  fontSize: '14px',
+                  fontSize: '15px',
                   fontWeight: '600',
                   textTransform: 'uppercase',
-                  margin: '0 0 12px 0'
+                  margin: '0 0 16px 0',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                 }}>
                   {eventData.city}
                 </p>
@@ -889,12 +898,14 @@ const App = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  paddingTop: '12px'
+                  paddingTop: '12px',
+                  borderTop: `2px solid ${textColor}60`
                 }}>
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                   }}>
                     <QRCodeSVG 
                       value={eventData.eventUrl}
@@ -903,11 +914,12 @@ const App = () => {
                     />
                   </div>
                   <div style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontWeight: '900',
                     textTransform: 'uppercase',
-                    letterSpacing: '1.5px',
-                    opacity: 0.9
+                    letterSpacing: '2px',
+                    opacity: 0.95,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                   }}>
                     HORMUR
                   </div>
