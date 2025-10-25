@@ -186,11 +186,13 @@ const App = () => {
 
     const visualStyle = {
       width: '100%',
-      aspectRatio: visualType.aspect,
+      aspectRatio: visualType.aspect === 1 ? '1/1' : '210/297',
       backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      display: 'flex',
+      flexDirection: 'column'
     };
 
     switch(selectedVisual) {
@@ -373,27 +375,27 @@ const App = () => {
 
       case 'flyer-verso':
         return (
-          <div ref={visualRef} style={visualStyle}>
+          <div ref={visualRef} style={{...visualStyle, aspectRatio: '148/210'}}>
             <div style={{
-              padding: '24px',
+              padding: '20px',
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               color: textColor
             }}>
-              <div>
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                   <h2 style={{
-                    fontSize: '24px',
+                    fontSize: '20px',
                     fontWeight: '900',
                     textTransform: 'uppercase',
-                    margin: '0 0 8px 0'
+                    margin: '0 0 6px 0'
                   }}>
                     À propos
                   </h2>
                   <div style={{
-                    width: '60px',
+                    width: '50px',
                     height: '3px',
                     backgroundColor: textColor,
                     margin: '0 auto'
@@ -402,13 +404,13 @@ const App = () => {
                 
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.15)',
-                  padding: '16px',
+                  padding: '12px',
                   borderRadius: '8px',
-                  marginBottom: '16px'
+                  marginBottom: '12px'
                 }}>
                   <p style={{
-                    fontSize: '13px',
-                    lineHeight: '1.6',
+                    fontSize: '11px',
+                    lineHeight: '1.5',
                     margin: 0
                   }}>
                     {eventData.description}
@@ -418,24 +420,24 @@ const App = () => {
                 {eventData.personalMessage && (
                   <div style={{
                     backgroundColor: 'rgba(255,255,255,0.15)',
-                    padding: '16px',
+                    padding: '12px',
                     borderRadius: '8px',
                     borderLeft: `4px solid ${textColor}`,
-                    marginBottom: '16px'
+                    marginBottom: '12px'
                   }}>
                     <p style={{
-                      fontSize: '10px',
+                      fontSize: '9px',
                       fontWeight: '700',
                       textTransform: 'uppercase',
-                      margin: '0 0 8px 0',
+                      margin: '0 0 6px 0',
                       opacity: 0.9
                     }}>
                       Message de {eventData.organizerNames}
                     </p>
                     <p style={{
-                      fontSize: '12px',
+                      fontSize: '10px',
                       fontStyle: 'italic',
-                      lineHeight: '1.5',
+                      lineHeight: '1.4',
                       margin: 0
                     }}>
                       "{eventData.personalMessage}"
@@ -444,15 +446,15 @@ const App = () => {
                 )}
 
                 {eventData.chezHabitant && (
-                  <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                     <div style={{
                       display: 'inline-block',
                       backgroundColor: 'rgba(255,255,255,0.95)',
-                      padding: '8px 16px',
+                      padding: '6px 14px',
                       borderRadius: '20px'
                     }}>
                       <p style={{
-                        fontSize: '10px',
+                        fontSize: '9px',
                         fontWeight: '900',
                         textTransform: 'uppercase',
                         color: bgColor,
@@ -466,23 +468,23 @@ const App = () => {
                 )}
               </div>
 
-              <div>
+              <div style={{ flex: '0 0 auto' }}>
                 <div style={{
                   borderTop: `2px solid ${textColor}40`,
-                  paddingTop: '16px',
-                  marginBottom: '16px'
+                  paddingTop: '12px',
+                  marginBottom: '12px'
                 }}>
                   <h4 style={{
-                    fontSize: '12px',
+                    fontSize: '10px',
                     fontWeight: '700',
                     textTransform: 'uppercase',
-                    margin: '0 0 8px 0'
+                    margin: '0 0 6px 0'
                   }}>
                     Qu'est-ce qu'Hormur ?
                   </h4>
                   <p style={{
-                    fontSize: '10px',
-                    lineHeight: '1.5',
+                    fontSize: '9px',
+                    lineHeight: '1.4',
                     margin: 0,
                     opacity: 0.9
                   }}>
@@ -497,18 +499,18 @@ const App = () => {
                 }}>
                   <div style={{
                     backgroundColor: 'white',
-                    padding: '6px',
+                    padding: '5px',
                     borderRadius: '4px'
                   }}>
                     <QRCodeSVG 
                       value={eventData.eventUrl}
-                      size={44}
+                      size={40}
                       level="M"
                     />
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontWeight: '900',
                       textTransform: 'uppercase',
                       margin: '0 0 2px 0',
@@ -518,7 +520,7 @@ const App = () => {
                       HORMUR
                     </p>
                     <p style={{
-                      fontSize: '9px',
+                      fontSize: '8px',
                       margin: 0,
                       opacity: 0.7
                     }}>
