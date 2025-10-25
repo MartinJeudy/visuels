@@ -1413,10 +1413,10 @@ const App = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center" style={{ minHeight: '400px' }}>
+              <div className="bg-gray-100 p-4 rounded-lg overflow-auto" style={{ maxHeight: '80vh' }}>
                 <div style={{ 
-                  width: '100%', 
-                  maxWidth: selectedVisual === 'post-rs' ? '400px' : '300px',
+                  width: selectedVisual === 'post-rs' ? '100%' : '100%',
+                  maxWidth: selectedVisual === 'post-rs' ? '500px' : '400px',
                   margin: '0 auto'
                 }}>
                   {renderVisual()}
