@@ -535,7 +535,11 @@ const App = () => {
 
       case 'communique':
         return (
-          <div ref={visualRef} style={{...visualStyle, position: 'relative'}}>
+          <div ref={visualRef} style={{
+            ...visualStyle, 
+            position: 'relative',
+            backgroundColor: '#ffffff'
+          }}>
             {/* Template de base */}
             <img 
               src="/communique-template.png" 
@@ -546,7 +550,8 @@ const App = () => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover'
+                objectFit: 'cover',
+                zIndex: 1
               }}
             />
             
@@ -554,27 +559,25 @@ const App = () => {
             <div style={{
               position: 'absolute',
               inset: 0,
-              display: 'flex',
-              flexDirection: 'column'
+              zIndex: 2
             }}>
               {/* Zone date/titre/description - carte orange à gauche */}
               <div style={{
                 position: 'absolute',
-                left: '8.5%',
-                top: '31.5%',
-                width: '38%',
-                height: '40%'
+                left: '6.5%',
+                top: '37%',
+                width: '36%'
               }}>
                 {/* Date */}
                 <div style={{
                   backgroundColor: '#fb593d',
-                  padding: '10px 0',
+                  padding: '8px 0',
                   textAlign: 'center',
-                  marginBottom: '8px'
+                  marginBottom: '6px'
                 }}>
                   <p style={{
                     fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontWeight: '400',
                     color: 'white',
                     margin: 0,
@@ -587,12 +590,12 @@ const App = () => {
                 {/* Titre événement */}
                 <div style={{
                   backgroundColor: 'white',
-                  padding: '12px',
-                  marginBottom: '8px'
+                  padding: '10px',
+                  marginBottom: '6px'
                 }}>
                   <h2 style={{
                     fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: '20px',
+                    fontSize: '18px',
                     fontWeight: '700',
                     color: '#1a1a1a',
                     margin: 0,
@@ -603,7 +606,7 @@ const App = () => {
                   </h2>
                   <p style={{
                     fontFamily: "Georgia, serif",
-                    fontSize: '11px',
+                    fontSize: '10px',
                     fontStyle: 'italic',
                     color: '#666',
                     margin: '4px 0 0 0',
@@ -616,29 +619,29 @@ const App = () => {
                 {/* Rendez-vous */}
                 <div style={{
                   backgroundColor: 'white',
-                  padding: '10px 12px'
+                  padding: '8px 10px'
                 }}>
                   <p style={{
                     fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: '12px',
+                    fontSize: '11px',
                     fontWeight: '700',
                     color: '#1a1a1a',
-                    margin: '0 0 6px 0'
+                    margin: '0 0 4px 0'
                   }}>
                     Rendez-vous à :
                   </p>
                   <p style={{
                     fontFamily: "Arial, sans-serif",
-                    fontSize: '10px',
+                    fontSize: '9px',
                     color: '#1a1a1a',
-                    margin: '0 0 3px 0',
+                    margin: '0 0 2px 0',
                     fontWeight: '600'
                   }}>
                     {eventData.city} ({eventData.department})
                   </p>
                   <p style={{
                     fontFamily: "Arial, sans-serif",
-                    fontSize: '9px',
+                    fontSize: '8px',
                     fontStyle: 'italic',
                     color: '#666',
                     margin: 0
@@ -647,46 +650,45 @@ const App = () => {
                   </p>
                 </div>
 
-                {/* QR Code en bas */}
+                {/* QR Code */}
                 <div style={{
-                  marginTop: '12px',
+                  marginTop: '10px',
                   textAlign: 'center'
                 }}>
                   <div style={{
                     display: 'inline-block',
                     backgroundColor: 'white',
-                    padding: '6px',
+                    padding: '5px',
                     borderRadius: '4px'
                   }}>
                     <QRCodeSVG 
                       value={eventData.eventUrl}
-                      size={56}
+                      size={50}
                       level="M"
                     />
                   </div>
+                  {/* Texte sous le QR code */}
+                  <p style={{
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: '8px',
+                    fontWeight: '700',
+                    textAlign: 'center',
+                    color: '#1a1a1a',
+                    textDecoration: 'underline',
+                    margin: '5px 0 0 0'
+                  }}>
+                    Informations et<br/>réservations sur Hormur
+                  </p>
                 </div>
-
-                {/* Texte "Informations et réservations sur Hormur" */}
-                <p style={{
-                  fontFamily: "Arial, sans-serif",
-                  fontSize: '9px',
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  color: '#1a1a1a',
-                  textDecoration: 'underline',
-                  margin: '6px 0 0 0'
-                }}>
-                  Informations et réservations sur Hormur
-                </p>
               </div>
 
               {/* Image de l'événement - zone à droite */}
               <div style={{
                 position: 'absolute',
-                right: '7%',
-                top: '15%',
-                width: '42%',
-                height: '55%',
+                right: '6%',
+                top: '10.5%',
+                width: '44%',
+                height: '53%',
                 borderRadius: '12px',
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
@@ -705,13 +707,13 @@ const App = () => {
               {/* Description en bas à droite */}
               <div style={{
                 position: 'absolute',
-                right: '7%',
-                bottom: '10%',
-                width: '42%'
+                right: '6%',
+                bottom: '16%',
+                width: '44%'
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '10px',
+                  fontSize: '9px',
                   lineHeight: '1.4',
                   color: '#1a1a1a',
                   margin: 0,
