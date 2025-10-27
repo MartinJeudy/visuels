@@ -190,7 +190,7 @@ const App = () => {
       backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily: "'Bebas Neue', 'Arial Narrow', 'Impact', sans-serif",
       display: 'flex',
       flexDirection: 'column'
     };
@@ -1415,7 +1415,7 @@ const App = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 p-4 rounded-lg overflow-auto" style={{ maxHeight: '80vh' }}>
+              <div className="bg-gray-100 p-4 rounded-lg" style={{ maxHeight: 'none' }}>
                 <div style={{ 
                   width: selectedVisual === 'post-rs' ? '100%' : '100%',
                   maxWidth: selectedVisual === 'post-rs' ? '500px' : '400px',
