@@ -4,6 +4,61 @@ import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+const hormurColors = [
+  { name: 'Orange Hormur', value: '#fb593d', text: '#ffffff' },
+  { name: 'Rouge Vif', value: '#fc4735', text: '#ffffff' },
+  { name: 'Rose Bonbon', value: '#fca0ba', text: '#1a1a1a' },
+  { name: 'Rose Saumon', value: '#fd94ac', text: '#1a1a1a' },
+  { name: 'Jaune Citron', value: '#f7ce64', text: '#1a1a1a' },
+  { name: 'Vert Pomme', value: '#d7f879', text: '#1a1a1a' },
+  { name: 'Vert Émeraude', value: '#00b179', text: '#ffffff' },
+  { name: 'Bleu Océan', value: '#1380c7', text: '#ffffff' }
+];
+
+const visualTypes = [
+  {
+    id: 'affiche',
+    name: 'Affiche A4',
+    icon: '📄',
+    canvas: { width: 210, height: 297 },
+    pdf: { width: 210, height: 297 }
+  },
+  {
+    id: 'flyer-recto',
+    name: 'Flyer A5 Recto',
+    icon: '📋',
+    canvas: { width: 148, height: 210 },
+    pdf: { width: 148, height: 210 }
+  },
+  {
+    id: 'flyer-verso',
+    name: 'Flyer A5 Verso',
+    icon: '📋',
+    canvas: { width: 148, height: 210 },
+    pdf: { width: 148, height: 210 }
+  },
+  {
+    id: 'communique',
+    name: 'Communiqué',
+    icon: '📰',
+    canvas: { width: 210, height: 297 },
+    pdf: { width: 210, height: 297 }
+  },
+  {
+    id: 'post-rs',
+    name: 'Post RS',
+    icon: '📱',
+    canvas: { width: 1080, height: 1080 },
+    pdf: { width: 210, height: 210 }
+  }
+];
+
+const convivialiteOptions = [
+  { value: 'none', label: 'Aucun' },
+  { value: 'repas', label: 'Repas partagé' },
+  { value: 'apero', label: 'Apéro participatif' }
+];
+
 // Composants mémorisés pour éviter la perte de focus
 const TitleInput = memo(({ value, onChange }) => (
   <input
@@ -55,6 +110,406 @@ const EventUrlInput = memo(({ value, onChange }) => (
   />
 ));
 
+const DownloadModal = ({ onClose, onDownload, isDownloading }) => (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-xl max-w-md w-full p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-lg">Télécharger le visuel</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <X size={24} />
+        </button>
+      </div>
+
+      <p className="text-sm text-gray-600 mb-4">Choisissez le format :</p>
+
+      <div className="space-y-3">
+        <button
+          onClick={() => onDownload('pdf')}
+          disabled={isDownloading}
+          className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isDownloading ? '⏳ Génération...' : '📄 PDF (Impression)'}
+        </button>
+        <button
+          onClick={() => onDownload('jpeg')}
+          disabled={isDownloading}
+          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isDownloading ? '⏳ Génération...' : '🖼️ JPEG (Partage)'}
+        </button>
+        <button
+          onClick={() => onDownload('png')}
+          disabled={isDownloading}
+          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isDownloading ? '⏳ Génération...' : '🎨 PNG (Web)'}
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+const SendModal = ({ onClose, onConfirmSend, onShowSubscription }) => (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-xl max-w-md w-full p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-lg">Envoyer les visuels</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <X size={24} />
+        </button>
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded-lg mb-4">
+        <p className="text-sm text-blue-900 leading-relaxed">
+          <strong>📧 Envoi automatique</strong><br/>
+          Les visuels seront envoyés par email (et SMS si renseigné) aux organisateurs : artistes et hôtes.
+        </p>
+      </div>
+
+      <div className="bg-amber-50 p-3 rounded-lg mb-4">
+        <p className="text-xs text-amber-800">
+          <strong>🎁 Premier envoi gratuit !</strong> Les envois suivants nécessitent un abonnement Premium.
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onClose}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+        >
+          Annuler
+        </button>
+        <button
+          onClick={onConfirmSend}
+          className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold"
+        >
+          Envoyer
+        </button>
+      </div>
+
+      <button
+        onClick={onShowSubscription}
+        className="w-full mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
+      >
+        Voir l'abonnement Premium →
+      </button>
+    </div>
+  </div>
+);
+
+const SubscriptionModal = ({ onClose }) => (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-bold text-2xl">Formules d'abonnement</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <X size={24} />
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Gratuit */}
+        <div className="border-2 border-gray-200 rounded-xl p-6">
+          <div className="text-center mb-4">
+            <h4 className="font-bold text-xl mb-2">Gratuit</h4>
+            <div className="text-4xl font-black text-gray-900">0€</div>
+            <p className="text-sm text-gray-600">par mois</p>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+              <span>1 envoi email/SMS gratuit</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+              <span>Téléchargements illimités</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+              <span>Tous les formats (PDF, JPG, PNG)</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+              <span>5 types de visuels</span>
+            </li>
+          </ul>
+          <button className="w-full py-2 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50">
+            Gratuit
+          </button>
+        </div>
+
+        {/* Premium */}
+        <div className="border-4 border-orange-500 rounded-xl p-6 relative">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold">
+            RECOMMANDÉ
+          </div>
+          <div className="text-center mb-4">
+            <h4 className="font-bold text-xl mb-2">Premium</h4>
+            <div className="text-4xl font-black text-orange-500">9€</div>
+            <p className="text-sm text-gray-600">par mois</p>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+              <span><strong>Envois illimités</strong> email/SMS</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+              <span>Téléchargements illimités HD</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+              <span>10+ templates exclusifs</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+              <span><strong>Suggestions IA</strong> (titres)</span>
+            </li>
+            <li className="flex items-start gap-2 text-sm">
+              <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+              <span>Support prioritaire</span>
+            </li>
+          </ul>
+          <button className="w-full py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">
+            Essayer 7 jours gratuits
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+        <p className="text-xs text-gray-600 text-center">
+          💡 L'abonnement Premium est idéal si vous organisez plus de 2 événements par mois.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const EditPanel = memo(({
+  visualTypes,
+  selectedVisual,
+  setSelectedVisual,
+  eventData,
+  onTitleChange,
+  onDescriptionChange,
+  onOrganizerChange,
+  onChezHabitantChange,
+  onPersonalMessageChange,
+  onEventUrlChange,
+  convivialiteOptions,
+  onConvivialiteChange,
+  dragActive,
+  onDrag,
+  onDrop,
+  uploadedImage,
+  fileInputRef,
+  onImageUpload,
+  hormurColors,
+  selectedColor,
+  setSelectedColor
+}) => (
+  <div className="space-y-4">
+    {/* Type de visuel */}
+    <div className="bg-white rounded-xl p-4 shadow-sm">
+      <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+        <FileText size={18} className="text-orange-500" />
+        Type de visuel
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {visualTypes.map(type => (
+          <button
+            key={type.id}
+            onClick={() => setSelectedVisual(type.id)}
+            className={`p-2 rounded-lg border-2 transition-all ${
+              selectedVisual === type.id
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <div className="text-xl mb-1">{type.icon}</div>
+            <div className="text-xs font-medium text-gray-700">{type.name}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Contenu */}
+    <div className="bg-white rounded-xl p-4 shadow-sm">
+      <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+        <Type size={18} className="text-orange-500" />
+        Contenu
+      </h2>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Titre <span className="text-gray-400">(max 40 car.)</span>
+          </label>
+          <TitleInput
+            value={eventData.title}
+            onChange={onTitleChange}
+          />
+          <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/40</div>
+        </div>
+
+        {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <DescriptionInput
+              value={eventData.description}
+              onChange={onDescriptionChange}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Organisateurs */}
+    <div className="bg-white rounded-xl p-4 shadow-sm">
+      <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+        <Home size={18} className="text-orange-500" />
+        Informations organisateurs
+      </h2>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Prénoms (hôte & artiste)
+          </label>
+          <OrganizerInput
+            value={eventData.organizerNames}
+            onChange={onOrganizerChange}
+          />
+          <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
+        </div>
+
+        <div className="flex items together gap-2">
+          <input
+            type="checkbox"
+            id="chezHabitant"
+            checked={eventData.chezHabitant}
+            onChange={onChezHabitantChange}
+            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+          />
+          <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
+            🏠 Afficher "Chez l'habitant"
+          </label>
+        </div>
+
+        {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Message personnel <span className="text-gray-400">(max 120 car.)</span>
+            </label>
+            <PersonalMessageInput
+              value={eventData.personalMessage}
+              onChange={onPersonalMessageChange}
+            />
+            <div className="text-xs text-gray-500 mt-1">{eventData.personalMessage.length}/120</div>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Convivialité
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {convivialiteOptions.map(option => (
+              <button
+                key={option.value}
+                onClick={() => onConvivialiteChange(option.value)}
+                className={`p-2 rounded-lg border-2 transition-all text-xs font-medium ${
+                  eventData.convivialite === option.value
+                    ? 'border-orange-500 bg-orange-50 text-orange-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            URL de l'événement
+          </label>
+          <EventUrlInput
+            value={eventData.eventUrl}
+            onChange={onEventUrlChange}
+          />
+          <p className="text-xs text-gray-500 mt-1">Pour le QR code</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Image */}
+    <div className="bg-white rounded-xl p-4 shadow-sm">
+      <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+        <ImagePlus size={18} className="text-orange-500" />
+        Image (format carré recommandé)
+      </h2>
+      <div className="space-y-2">
+        <div
+          className={`relative h-40 rounded-lg overflow-hidden border-2 border-dashed transition-colors ${
+            dragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
+          }`}
+          onDragEnter={onDrag}
+          onDragLeave={onDrag}
+          onDragOver={onDrag}
+          onDrop={onDrop}
+        >
+          <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover" />
+          {dragActive && (
+            <div className="absolute inset-0 bg-orange-100 bg-opacity-90 flex items-center justify-center">
+              <p className="text-orange-700 font-semibold">Déposer l'image ici</p>
+            </div>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={onImageUpload}
+          className="hidden"
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full px-3 py-2 text-sm border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors text-gray-700 font-medium"
+        >
+          Choisir une image ou glisser-déposer
+        </button>
+        <p className="text-xs text-gray-500 text-center">💡 Utilisez une image carrée pour un meilleur rendu</p>
+      </div>
+    </div>
+
+    {/* Couleur */}
+    {selectedVisual !== 'communique' && (
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+          <Palette size={18} className="text-orange-500" />
+          Couleur
+        </h2>
+        <div className="grid grid-cols-4 gap-2">
+          {hormurColors.map(color => (
+            <button
+              key={color.value}
+              onClick={() => setSelectedColor(color.value)}
+              className={`aspect-square rounded-lg transition-all ${
+                selectedColor === color.value
+                  ? 'ring-4 ring-gray-900 ring-offset-2 scale-105'
+                  : 'hover:scale-105'
+              }`}
+              style={{ backgroundColor: color.value }}
+              title={color.name}
+            />
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+));
+
 const App = () => {
   const [eventData, setEventData] = useState({
     title: "Trio de contrebasses",
@@ -82,34 +537,19 @@ const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  
+
+  const handleSendConfirm = useCallback(() => {
+    alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
+    setShowSendModal(false);
+  }, [setShowSendModal]);
+
+  const handleShowSubscriptionFromSend = useCallback(() => {
+    setShowSendModal(false);
+    setShowSubscriptionModal(true);
+  }, [setShowSendModal, setShowSubscriptionModal]);
+
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
-
-  const hormurColors = [
-    { name: 'Orange Hormur', value: '#fb593d', text: '#ffffff' },
-    { name: 'Rouge Vif', value: '#fc4735', text: '#ffffff' },
-    { name: 'Rose Bonbon', value: '#fca0ba', text: '#1a1a1a' },
-    { name: 'Rose Saumon', value: '#fd94ac', text: '#1a1a1a' },
-    { name: 'Jaune Citron', value: '#f7ce64', text: '#1a1a1a' },
-    { name: 'Vert Pomme', value: '#d7f879', text: '#1a1a1a' },
-    { name: 'Vert Émeraude', value: '#00b179', text: '#ffffff' },
-    { name: 'Bleu Océan', value: '#1380c7', text: '#ffffff' }
-  ];
-
-  const visualTypes = [
-    { id: 'affiche', name: 'Affiche A4', icon: '📄', aspect: 297/210 },
-    { id: 'flyer-recto', name: 'Flyer A5 Recto', icon: '📋', aspect: 210/148 },
-    { id: 'flyer-verso', name: 'Flyer A5 Verso', icon: '📋', aspect: 210/148 },
-    { id: 'communique', name: 'Communiqué', icon: '📰', aspect: 297/210 },
-    { id: 'post-rs', name: 'Post RS', icon: '📱', aspect: 1 }
-  ];
-
-  const convivialiteOptions = [
-    { value: 'none', label: 'Aucun' },
-    { value: 'repas', label: 'Repas partagé' },
-    { value: 'apero', label: 'Apéro participatif' }
-  ];
 
   // Handlers stabilisés avec useCallback
   const handleTitleChange = useCallback((e) => {
@@ -136,6 +576,10 @@ const App = () => {
     setEventData(prev => ({...prev, chezHabitant: e.target.checked}));
   }, []);
 
+  const handleConvivialiteChange = useCallback((value) => {
+    setEventData(prev => ({ ...prev, convivialite: value }));
+  }, [setEventData]);
+
   const getCurrentColor = () => {
     return hormurColors.find(c => c.value === selectedColor) || hormurColors[0];
   };
@@ -158,7 +602,7 @@ const App = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0]);
     }
@@ -189,7 +633,7 @@ const App = () => {
 
   const handleDownload = async (format) => {
     setIsDownloading(true);
-    
+
     try {
       const element = visualRef.current;
       if (!element) return;
@@ -205,35 +649,37 @@ const App = () => {
       });
 
       const visualType = getCurrentVisualType();
-      const filename = `hormur-${selectedVisual}-${eventData.title.replace(/\s+/g, '-')}`;
+      const sanitize = (value) =>
+        value
+          .toString()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .replace(/[^a-zA-Z0-9-_]+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+          .toLowerCase();
+
+      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}`;
+
+      const pdfSize = visualType?.pdf || { width: 210, height: 297 };
+      const pdfWidth = pdfSize.width || 210;
+      const pdfHeight = pdfSize.height || 297;
 
       if (format === 'pdf') {
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        
-        let pdfWidth, pdfHeight;
-        if (selectedVisual === 'affiche' || selectedVisual === 'communique') {
-          pdfWidth = 210;
-          pdfHeight = 297;
-        } else if (selectedVisual === 'flyer-recto' || selectedVisual === 'flyer-verso') {
-          pdfWidth = 148;
-          pdfHeight = 210;
-        } else {
-          pdfWidth = 210;
-          pdfHeight = 210;
-        }
 
         const pdf = new jsPDF({
-          orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+          orientation: pdfHeight >= pdfWidth ? 'portrait' : 'landscape',
           unit: 'mm',
           format: [pdfWidth, pdfHeight]
         });
-        
+
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
         pdf.save(`${filename}.pdf`);
       } else {
         const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
         const quality = format === 'jpeg' ? 0.95 : 1.0;
-        
+
         canvas.toBlob((blob) => {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -259,10 +705,16 @@ const App = () => {
     const textColor = colorObj.text;
     const bgColor = colorObj.value;
     const visualType = getCurrentVisualType();
+    const aspectRatio = visualType?.canvas?.width && visualType?.canvas?.height
+      ? visualType.canvas.width / visualType.canvas.height
+      : 1;
+    const aspectRatioValue = Number.isFinite(aspectRatio) && aspectRatio > 0
+      ? Number(aspectRatio.toFixed(4))
+      : 1;
 
     const visualStyle = {
       width: '100%',
-      aspectRatio: visualType.aspect === 1 ? '1/1' : `${210}/${297}`,
+      aspectRatio: aspectRatioValue,
       backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
       position: 'relative',
       overflow: 'hidden',
@@ -277,19 +729,19 @@ const App = () => {
         return (
           <div ref={visualRef} style={visualStyle}>
             {/* Image carrée - 60% hauteur */}
-            <div style={{ 
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              right: 0, 
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
               height: '60%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden'
             }}>
-              <img 
-                src={uploadedImage} 
+              <img
+                src={uploadedImage}
                 alt="Event"
                 style={{
                   width: '100%',
@@ -331,7 +783,7 @@ const App = () => {
                 marginLeft: 'auto',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
               }}>
-                <span style={{ 
+                <span style={{
                   fontSize: selectedVisual === 'affiche' ? '22px' : '18px',
                   fontWeight: '900',
                   color: bgColor
@@ -366,7 +818,7 @@ const App = () => {
                 }}>
                   {eventData.title}
                 </h1>
-                
+
                 <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
                   <p style={{
                     fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
@@ -427,7 +879,7 @@ const App = () => {
                     padding: '6px',
                     borderRadius: '4px'
                   }}>
-                    <QRCodeSVG 
+                    <QRCodeSVG
                       value={eventData.eventUrl}
                       size={selectedVisual === 'affiche' ? 56 : 48}
                       level="M"
@@ -451,7 +903,7 @@ const App = () => {
 
       case 'flyer-verso':
         return (
-          <div ref={visualRef} style={{...visualStyle, aspectRatio: '148/210'}}>
+          <div ref={visualRef} style={visualStyle}>
             <div style={{
               padding: '20px',
               height: '100%',
@@ -477,7 +929,7 @@ const App = () => {
                     margin: '0 auto'
                   }}></div>
                 </div>
-                
+
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.15)',
                   padding: '12px',
@@ -578,7 +1030,7 @@ const App = () => {
                     padding: '5px',
                     borderRadius: '4px'
                   }}>
-                    <QRCodeSVG 
+                    <QRCodeSVG
                       value={eventData.eventUrl}
                       size={40}
                       level="M"
@@ -612,13 +1064,13 @@ const App = () => {
       case 'communique':
         return (
           <div ref={visualRef} style={{
-            ...visualStyle, 
+            ...visualStyle,
             position: 'relative',
             backgroundColor: '#ffffff'
           }}>
             {/* Template de base */}
-            <img 
-              src="/communique-template.png" 
+            <img
+              src="/communique-template.png"
               alt="Template communiqué"
               style={{
                 position: 'absolute',
@@ -630,7 +1082,7 @@ const App = () => {
                 zIndex: 1
               }}
             />
-            
+
             {/* Overlay - POSITIONS EXACTES STENCIL */}
             <div style={{
               position: 'absolute',
@@ -647,8 +1099,8 @@ const App = () => {
                 borderRadius: '12px',
                 overflow: 'hidden'
               }}>
-                <img 
-                  src={uploadedImage} 
+                <img
+                  src={uploadedImage}
                   alt="Event"
                   style={{
                     width: '100%',
@@ -725,7 +1177,7 @@ const App = () => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <QRCodeSVG 
+                <QRCodeSVG
                   value={eventData.eventUrl}
                   size={60}
                   level="M"
@@ -823,8 +1275,8 @@ const App = () => {
               borderRadius: '12px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
             }}>
-              <img 
-                src={uploadedImage} 
+              <img
+                src={uploadedImage}
                 alt="Event"
                 style={{
                   position: 'absolute',
@@ -836,7 +1288,7 @@ const App = () => {
                 }}
               />
             </div>
-            
+
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -924,7 +1376,7 @@ const App = () => {
                 }}>
                   {eventData.city}
                 </p>
-                
+
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -938,7 +1390,7 @@ const App = () => {
                     borderRadius: '4px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                   }}>
-                    <QRCodeSVG 
+                    <QRCodeSVG
                       value={eventData.eventUrl}
                       size={48}
                       level="M"
@@ -964,390 +1416,6 @@ const App = () => {
         return null;
     }
   };
-
-  const DownloadModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Télécharger le visuel</h3>
-          <button onClick={() => setShowDownloadModal(false)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-4">Choisissez le format :</p>
-        
-        <div className="space-y-3">
-          <button
-            onClick={() => handleDownload('pdf')}
-            disabled={isDownloading}
-            className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isDownloading ? '⏳ Génération...' : '📄 PDF (Impression)'}
-          </button>
-          <button
-            onClick={() => handleDownload('jpeg')}
-            disabled={isDownloading}
-            className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isDownloading ? '⏳ Génération...' : '🖼️ JPEG (Partage)'}
-          </button>
-          <button
-            onClick={() => handleDownload('png')}
-            disabled={isDownloading}
-            className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isDownloading ? '⏳ Génération...' : '🎨 PNG (Web)'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const SendModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Envoyer les visuels</h3>
-          <button onClick={() => setShowSendModal(false)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
-        </div>
-        
-        <div className="bg-blue-50 p-4 rounded-lg mb-4">
-          <p className="text-sm text-blue-900 leading-relaxed">
-            <strong>📧 Envoi automatique</strong><br/>
-            Les visuels seront envoyés par email (et SMS si renseigné) aux organisateurs : artistes et hôtes.
-          </p>
-        </div>
-
-        <div className="bg-amber-50 p-3 rounded-lg mb-4">
-          <p className="text-xs text-amber-800">
-            <strong>🎁 Premier envoi gratuit !</strong> Les envois suivants nécessitent un abonnement Premium.
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <button 
-            onClick={() => setShowSendModal(false)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
-          >
-            Annuler
-          </button>
-          <button 
-            onClick={() => {
-              alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
-              setShowSendModal(false);
-            }}
-            className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold"
-          >
-            Envoyer
-          </button>
-        </div>
-
-        <button
-          onClick={() => {
-            setShowSendModal(false);
-            setShowSubscriptionModal(true);
-          }}
-          className="w-full mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
-        >
-          Voir l'abonnement Premium →
-        </button>
-      </div>
-    </div>
-  );
-
-  const SubscriptionModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="font-bold text-2xl">Formules d'abonnement</h3>
-          <button onClick={() => setShowSubscriptionModal(false)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Gratuit */}
-          <div className="border-2 border-gray-200 rounded-xl p-6">
-            <div className="text-center mb-4">
-              <h4 className="font-bold text-xl mb-2">Gratuit</h4>
-              <div className="text-4xl font-black text-gray-900">0€</div>
-              <p className="text-sm text-gray-600">par mois</p>
-            </div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                <span>1 envoi email/SMS gratuit</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Téléchargements illimités</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Tous les formats (PDF, JPG, PNG)</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                <span>5 types de visuels</span>
-              </li>
-            </ul>
-            <button className="w-full py-2 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50">
-              Gratuit
-            </button>
-          </div>
-
-          {/* Premium */}
-          <div className="border-4 border-orange-500 rounded-xl p-6 relative">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold">
-              RECOMMANDÉ
-            </div>
-            <div className="text-center mb-4">
-              <h4 className="font-bold text-xl mb-2">Premium</h4>
-              <div className="text-4xl font-black text-orange-500">9€</div>
-              <p className="text-sm text-gray-600">par mois</p>
-            </div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                <span><strong>Envois illimités</strong> email/SMS</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                <span>Téléchargements illimités HD</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                <span>10+ templates exclusifs</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                <span><strong>Suggestions IA</strong> (titres)</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <Check size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                <span>Support prioritaire</span>
-              </li>
-            </ul>
-            <button className="w-full py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">
-              Essayer 7 jours gratuits
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-          <p className="text-xs text-gray-600 text-center">
-            💡 L'abonnement Premium est idéal si vous organisez plus de 2 événements par mois.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const EditPanel = () => (
-    <div className="space-y-4">
-      {/* Type de visuel */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-          <FileText size={18} className="text-orange-500" />
-          Type de visuel
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {visualTypes.map(type => (
-            <button
-              key={type.id}
-              onClick={() => setSelectedVisual(type.id)}
-              className={`p-2 rounded-lg border-2 transition-all ${
-                selectedVisual === type.id
-                  ? 'border-orange-500 bg-orange-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="text-xl mb-1">{type.icon}</div>
-              <div className="text-xs font-medium text-gray-700">{type.name}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Contenu */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-          <Type size={18} className="text-orange-500" />
-          Contenu
-        </h2>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Titre <span className="text-gray-400">(max 40 car.)</span>
-            </label>
-            <TitleInput 
-              value={eventData.title}
-              onChange={handleTitleChange}
-            />
-            <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/40</div>
-          </div>
-
-          {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <DescriptionInput
-                value={eventData.description}
-                onChange={handleDescriptionChange}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Organisateurs */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-          <Home size={18} className="text-orange-500" />
-          Informations organisateurs
-        </h2>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Prénoms (hôte & artiste)
-            </label>
-            <OrganizerInput
-              value={eventData.organizerNames}
-              onChange={handleOrganizerChange}
-            />
-            <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="chezHabitant"
-              checked={eventData.chezHabitant}
-              onChange={handleChezHabitantChange}
-              className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-            />
-            <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
-              🏠 Afficher "Chez l'habitant"
-            </label>
-          </div>
-
-          {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message personnel <span className="text-gray-400">(max 120 car.)</span>
-              </label>
-              <PersonalMessageInput
-                value={eventData.personalMessage}
-                onChange={handlePersonalMessageChange}
-              />
-              <div className="text-xs text-gray-500 mt-1">{eventData.personalMessage.length}/120</div>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Convivialité
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {convivialiteOptions.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => setEventData(prev => ({...prev, convivialite: option.value}))}
-                  className={`p-2 rounded-lg border-2 transition-all text-xs font-medium ${
-                    eventData.convivialite === option.value
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL de l'événement
-            </label>
-            <EventUrlInput
-              value={eventData.eventUrl}
-              onChange={handleEventUrlChange}
-            />
-            <p className="text-xs text-gray-500 mt-1">Pour le QR code</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Image */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-          <ImagePlus size={18} className="text-orange-500" />
-          Image (format carré recommandé)
-        </h2>
-        <div className="space-y-2">
-          <div 
-            className={`relative h-40 rounded-lg overflow-hidden border-2 border-dashed transition-colors ${
-              dragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover" />
-            {dragActive && (
-              <div className="absolute inset-0 bg-orange-100 bg-opacity-90 flex items-center justify-center">
-                <p className="text-orange-700 font-semibold">Déposer l'image ici</p>
-              </div>
-            )}
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full px-3 py-2 text-sm border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors text-gray-700 font-medium"
-          >
-            Choisir une image ou glisser-déposer
-          </button>
-          <p className="text-xs text-gray-500 text-center">💡 Utilisez une image carrée pour un meilleur rendu</p>
-        </div>
-      </div>
-
-      {/* Couleur */}
-      {selectedVisual !== 'communique' && (
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-            <Palette size={18} className="text-orange-500" />
-            Couleur
-          </h2>
-          <div className="grid grid-cols-4 gap-2">
-            {hormurColors.map(color => (
-              <button
-                key={color.value}
-                onClick={() => setSelectedColor(color.value)}
-                className={`aspect-square rounded-lg transition-all ${
-                  selectedColor === color.value
-                    ? 'ring-4 ring-gray-900 ring-offset-2 scale-105'
-                    : 'hover:scale-105'
-                }`}
-                style={{ backgroundColor: color.value }}
-                title={color.name}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 touch-manipulation">
@@ -1396,15 +1464,51 @@ const App = () => {
         </div>
       )}
 
-      {showDownloadModal && <DownloadModal />}
-      {showSendModal && <SendModal />}
-      {showSubscriptionModal && <SubscriptionModal />}
+      {showDownloadModal && (
+        <DownloadModal
+          onClose={() => setShowDownloadModal(false)}
+          onDownload={handleDownload}
+          isDownloading={isDownloading}
+        />
+      )}
+      {showSendModal && (
+        <SendModal
+          onClose={() => setShowSendModal(false)}
+          onConfirmSend={handleSendConfirm}
+          onShowSubscription={handleShowSubscriptionFromSend}
+        />
+      )}
+      {showSubscriptionModal && (
+        <SubscriptionModal onClose={() => setShowSubscriptionModal(false)} />
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24 lg:pb-4">
         <div className="grid lg:grid-cols-2 gap-4">
           {/* Panel d'édition */}
           <div className={`${mobileView === 'preview' ? 'hidden lg:block' : ''}`}>
-            <EditPanel />
+            <EditPanel
+              visualTypes={visualTypes}
+              selectedVisual={selectedVisual}
+              setSelectedVisual={setSelectedVisual}
+              eventData={eventData}
+              onTitleChange={handleTitleChange}
+              onDescriptionChange={handleDescriptionChange}
+              onOrganizerChange={handleOrganizerChange}
+              onChezHabitantChange={handleChezHabitantChange}
+              onPersonalMessageChange={handlePersonalMessageChange}
+              onEventUrlChange={handleEventUrlChange}
+              convivialiteOptions={convivialiteOptions}
+              onConvivialiteChange={handleConvivialiteChange}
+              dragActive={dragActive}
+              onDrag={handleDrag}
+              onDrop={handleDrop}
+              uploadedImage={uploadedImage}
+              fileInputRef={fileInputRef}
+              onImageUpload={handleImageUpload}
+              hormurColors={hormurColors}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+            />
           </div>
 
           {/* Aperçu */}
@@ -1413,14 +1517,14 @@ const App = () => {
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-bold text-base">Aperçu</h2>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => setShowSendModal(true)}
                     className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                   >
                     <Mail size={16} />
                     <span className="hidden sm:inline">Envoyer</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => setShowDownloadModal(true)}
                     className="flex items-center gap-1 px-3 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                   >
@@ -1430,7 +1534,7 @@ const App = () => {
                 </div>
               </div>
               <div className="bg-gray-100 p-4 rounded-lg" style={{ maxHeight: 'none' }}>
-                <div style={{ 
+                <div style={{
                   width: '100%',
                   maxWidth: selectedVisual === 'post-rs' ? '400px' : '350px',
                   margin: '0 auto'
@@ -1452,8 +1556,8 @@ const App = () => {
           <button
             onClick={() => setMobileView('edit')}
             className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-              mobileView === 'edit' 
-                ? 'bg-orange-500 text-white' 
+              mobileView === 'edit'
+                ? 'bg-orange-500 text-white'
                 : 'bg-white text-gray-600'
             }`}
           >
@@ -1463,8 +1567,8 @@ const App = () => {
           <button
             onClick={() => setMobileView('preview')}
             className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-              mobileView === 'preview' 
-                ? 'bg-orange-500 text-white' 
+              mobileView === 'preview'
+                ? 'bg-orange-500 text-white'
                 : 'bg-white text-gray-600'
             }`}
           >
