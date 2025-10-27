@@ -535,245 +535,190 @@ const App = () => {
 
       case 'communique':
         return (
-          <div ref={visualRef} style={visualStyle}>
+          <div ref={visualRef} style={{...visualStyle, position: 'relative'}}>
+            {/* Template de base */}
+            <img 
+              src="/communique-template.png" 
+              alt="Template communiqué"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            
+            {/* Overlay pour les éléments dynamiques */}
             <div style={{
-              padding: '32px',
-              height: '100%',
+              position: 'absolute',
+              inset: 0,
               display: 'flex',
-              flexDirection: 'column',
-              color: '#1a1a1a'
+              flexDirection: 'column'
             }}>
-              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{
-                  fontSize: '28px',
-                  fontWeight: '900',
-                  textTransform: 'uppercase',
-                  margin: '0 0 4px 0',
-                  color: '#1a1a1a'
+              {/* Zone date/titre/description - carte orange à gauche */}
+              <div style={{
+                position: 'absolute',
+                left: '8.5%',
+                top: '31.5%',
+                width: '38%',
+                height: '40%'
+              }}>
+                {/* Date */}
+                <div style={{
+                  backgroundColor: '#fb593d',
+                  padding: '10px 0',
+                  textAlign: 'center',
+                  marginBottom: '8px'
                 }}>
-                  {eventData.title}
-                </h1>
-                <p style={{
-                  fontSize: '11px',
-                  color: '#666',
-                  fontWeight: '600',
-                  margin: '0 0 8px 0'
+                  <p style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '400',
+                    color: 'white',
+                    margin: 0,
+                    letterSpacing: '1px'
+                  }}>
+                    Le {eventData.date}
+                  </p>
+                </div>
+
+                {/* Titre événement */}
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '12px',
+                  marginBottom: '8px'
                 }}>
-                  Communiqué de Presse
-                </p>
-                {eventData.chezHabitant && (
+                  <h2 style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: '700',
+                    color: '#1a1a1a',
+                    margin: 0,
+                    lineHeight: '1.1',
+                    textAlign: 'center'
+                  }}>
+                    {eventData.title}
+                  </h2>
+                  <p style={{
+                    fontFamily: "Georgia, serif",
+                    fontSize: '11px',
+                    fontStyle: 'italic',
+                    color: '#666',
+                    margin: '4px 0 0 0',
+                    textAlign: 'center'
+                  }}>
+                    Appartement de {eventData.organizerNames}
+                  </p>
+                </div>
+
+                {/* Rendez-vous */}
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '10px 12px'
+                }}>
+                  <p style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    color: '#1a1a1a',
+                    margin: '0 0 6px 0'
+                  }}>
+                    Rendez-vous à :
+                  </p>
+                  <p style={{
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: '10px',
+                    color: '#1a1a1a',
+                    margin: '0 0 3px 0',
+                    fontWeight: '600'
+                  }}>
+                    {eventData.city} ({eventData.department})
+                  </p>
+                  <p style={{
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: '9px',
+                    fontStyle: 'italic',
+                    color: '#666',
+                    margin: 0
+                  }}>
+                    {eventData.time ? `le ${eventData.date} à ${eventData.time}` : `le ${eventData.date}`}
+                  </p>
+                </div>
+
+                {/* QR Code en bas */}
+                <div style={{
+                  marginTop: '12px',
+                  textAlign: 'center'
+                }}>
                   <div style={{
                     display: 'inline-block',
-                    backgroundColor: '#fff3e0',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    marginTop: '8px'
+                    backgroundColor: 'white',
+                    padding: '6px',
+                    borderRadius: '4px'
                   }}>
-                    <p style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#e65100',
-                      margin: 0
-                    }}>
-                      🏠 Chez l'habitant
-                    </p>
+                    <QRCodeSVG 
+                      value={eventData.eventUrl}
+                      size={56}
+                      level="M"
+                    />
                   </div>
-                )}
+                </div>
+
+                {/* Texte "Informations et réservations sur Hormur" */}
+                <p style={{
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: '9px',
+                  fontWeight: '700',
+                  textAlign: 'center',
+                  color: '#1a1a1a',
+                  textDecoration: 'underline',
+                  margin: '6px 0 0 0'
+                }}>
+                  Informations et réservations sur Hormur
+                </p>
               </div>
-              
-              {/* Image CARRÉE centrée */}
+
+              {/* Image de l'événement - zone à droite */}
               <div style={{
-                width: '70%',
-                paddingBottom: '70%', // Carré parfait
-                position: 'relative',
-                margin: '0 auto 20px auto',
-                borderRadius: '8px',
+                position: 'absolute',
+                right: '7%',
+                top: '15%',
+                width: '42%',
+                height: '55%',
+                borderRadius: '12px',
                 overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
               }}>
                 <img 
                   src={uploadedImage} 
                   alt="Event"
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover'
                   }}
                 />
-                <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ff6b35',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                }}>
-                  <span style={{
-                    fontSize: '18px',
-                    fontWeight: '900',
-                    color: 'white'
-                  }}>
-                    {eventData.department}
-                  </span>
-                </div>
               </div>
 
-              <div style={{ flex: 1, fontSize: '11px', lineHeight: '1.6' }}>
-                <p style={{ margin: '0 0 12px 0', color: '#333' }}>
-                  Le <strong>{eventData.date}</strong>, <strong>{eventData.artistName}</strong> se produira à <strong>{eventData.city}</strong> dans le cadre d'un événement artistique intimiste chez l'habitant.
-                </p>
-
-                {eventData.personalMessage && (
-                  <div style={{
-                    backgroundColor: '#fff3e0',
-                    padding: '12px',
-                    borderRadius: '6px',
-                    borderLeft: '4px solid #ff6b35',
-                    marginBottom: '12px'
-                  }}>
-                    <p style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      textTransform: 'uppercase',
-                      color: '#e65100',
-                      margin: '0 0 4px 0'
-                    }}>
-                      {eventData.organizerNames}
-                    </p>
-                    <p style={{
-                      fontSize: '10px',
-                      fontStyle: 'italic',
-                      color: '#333',
-                      margin: 0
-                    }}>
-                      "{eventData.personalMessage}"
-                    </p>
-                  </div>
-                )}
-
-                <div style={{ marginBottom: '12px' }}>
-                  <p style={{
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    color: '#1a1a1a',
-                    margin: '0 0 4px 0'
-                  }}>
-                    À propos de l'événement
-                  </p>
-                  <p style={{ margin: 0, color: '#333' }}>
-                    {eventData.description}
-                  </p>
-                </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '16px',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #e0e0e0',
-                  marginBottom: '12px'
-                }}>
-                  <div>
-                    <p style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#666',
-                      margin: '0 0 2px 0'
-                    }}>
-                      Date & Heure
-                    </p>
-                    <p style={{
-                      fontSize: '11px',
-                      color: '#1a1a1a',
-                      margin: 0
-                    }}>
-                      {eventData.date} - {eventData.time}
-                    </p>
-                  </div>
-                  <div>
-                    <p style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#666',
-                      margin: '0 0 2px 0'
-                    }}>
-                      Lieu
-                    </p>
-                    <p style={{
-                      fontSize: '11px',
-                      color: '#1a1a1a',
-                      margin: 0
-                    }}>
-                      {eventData.city}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+              {/* Description en bas à droite */}
               <div style={{
-                paddingTop: '16px',
-                borderTop: '2px solid #e0e0e0'
+                position: 'absolute',
+                right: '7%',
+                bottom: '10%',
+                width: '42%'
               }}>
                 <p style={{
+                  fontFamily: "Georgia, serif",
                   fontSize: '10px',
-                  fontWeight: '700',
+                  lineHeight: '1.4',
                   color: '#1a1a1a',
-                  margin: '0 0 6px 0'
+                  margin: 0,
+                  textAlign: 'justify'
                 }}>
-                  À propos d'Hormur
+                  {eventData.description}
                 </p>
-                <p style={{
-                  fontSize: '9px',
-                  lineHeight: '1.5',
-                  color: '#666',
-                  margin: '0 0 12px 0'
-                }}>
-                  Hormur tisse un lien entre artistes, lieux non conventionnels et publics. L'art où on ne l'attend pas !
-                </p>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div style={{
-                    backgroundColor: '#1a1a1a',
-                    padding: '4px',
-                    borderRadius: '4px'
-                  }}>
-                    <QRCodeSVG 
-                      value={eventData.eventUrl}
-                      size={36}
-                      level="M"
-                    />
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{
-                      fontSize: '12px',
-                      fontWeight: '900',
-                      textTransform: 'uppercase',
-                      color: '#1a1a1a',
-                      margin: '0 0 2px 0',
-                      letterSpacing: '1px'
-                    }}>
-                      HORMUR
-                    </p>
-                    <p style={{
-                      fontSize: '9px',
-                      color: '#666',
-                      margin: 0
-                    }}>
-                      contact@hormur.com
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
