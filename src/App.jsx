@@ -1,8 +1,59 @@
-import { useState, useRef, useCallback } from 'react';
-import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, UtensilsCrossed, Wine, Mail, CreditCard, Check } from 'lucide-react';
+import { useState, useRef, memo } from 'react';
+import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+
+// Composants mémorisés pour éviter la perte de focus
+const TitleInput = memo(({ value, onChange }) => (
+  <input
+    type="text"
+    maxLength={40}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+  />
+));
+
+const DescriptionInput = memo(({ value, onChange }) => (
+  <textarea
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    rows={3}
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+  />
+));
+
+const OrganizerInput = memo(({ value, onChange }) => (
+  <input
+    type="text"
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+    placeholder="Sophie & Martin"
+  />
+));
+
+const PersonalMessageInput = memo(({ value, onChange, length }) => (
+  <textarea
+    value={value}
+    onChange={(e) => onChange(e.target.value.slice(0, 120))}
+    rows={2}
+    maxLength={120}
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+    placeholder="Hâte de vous accueillir..."
+  />
+));
+
+const EventUrlInput = memo(({ value, onChange }) => (
+  <input
+    type="url"
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+    placeholder="https://hormur.com/event/..."
+  />
+));
 
 const App = () => {
   const [eventData, setEventData] = useState({
@@ -34,35 +85,6 @@ const App = () => {
   
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
-
-  // Handlers mémorisés pour éviter la perte de focus
-  const handleTitleChange = useCallback((e) => {
-    setEventData(prev => ({...prev, title: e.target.value}));
-  }, []);
-
-  const handleDescriptionChange = useCallback((e) => {
-    setEventData(prev => ({...prev, description: e.target.value}));
-  }, []);
-
-  const handleOrganizerNamesChange = useCallback((e) => {
-    setEventData(prev => ({...prev, organizerNames: e.target.value}));
-  }, []);
-
-  const handlePersonalMessageChange = useCallback((e) => {
-    setEventData(prev => ({...prev, personalMessage: e.target.value.slice(0, 120)}));
-  }, []);
-
-  const handleEventUrlChange = useCallback((e) => {
-    setEventData(prev => ({...prev, eventUrl: e.target.value}));
-  }, []);
-
-  const handleChezHabitantChange = useCallback((e) => {
-    setEventData(prev => ({...prev, chezHabitant: e.target.checked}));
-  }, []);
-
-  const handleConvivialiteChange = useCallback((value) => {
-    setEventData(prev => ({...prev, convivialite: value}));
-  }, []);
 
   const hormurColors = [
     { name: 'Orange Hormur', value: '#fb593d', text: '#ffffff' },
@@ -584,105 +606,26 @@ const App = () => {
               }}
             />
             
-            {/* Overlay pour les éléments dynamiques - TEXTE UNIQUEMENT */}
+            {/* Overlay - POSITIONS EXACTES STENCIL */}
             <div style={{
               position: 'absolute',
               inset: 0,
               zIndex: 2
             }}>
-              {/* DATE dans la bande orange */}
+              {/* Photo de l'événement - x:310, y:15, w:551, h:542 */}
               <div style={{
                 position: 'absolute',
-                left: '9%',
-                top: '38.5%',
-                width: '32%',
-                textAlign: 'center'
-              }}>
-                <p style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '14px',
-                  fontWeight: '400',
-                  color: 'white',
-                  margin: 0,
-                  letterSpacing: '1px'
-                }}>
-                  Le {eventData.date}
-                </p>
-              </div>
-
-              {/* TITRE de l'événement */}
-              <div style={{
-                position: 'absolute',
-                left: '9%',
-                top: '43.5%',
-                width: '32%',
-                textAlign: 'center'
-              }}>
-                <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '17px',
-                  fontWeight: '700',
-                  color: '#1a1a1a',
-                  margin: 0,
-                  lineHeight: '1.1'
-                }}>
-                  {eventData.title}
-                </h2>
-                <p style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: '9px',
-                  fontStyle: 'italic',
-                  color: '#666',
-                  margin: '3px 0 0 0'
-                }}>
-                  Appartement de {eventData.organizerNames}
-                </p>
-              </div>
-
-              {/* LIEU du rendez-vous */}
-              <div style={{
-                position: 'absolute',
-                left: '9.5%',
-                top: '53.5%',
-                width: '31%'
-              }}>
-                <p style={{
-                  fontFamily: "Arial, sans-serif",
-                  fontSize: '9px',
-                  color: '#1a1a1a',
-                  margin: '0 0 2px 0',
-                  fontWeight: '600'
-                }}>
-                  {eventData.city} ({eventData.department})
-                </p>
-                <p style={{
-                  fontFamily: "Arial, sans-serif",
-                  fontSize: '8px',
-                  fontStyle: 'italic',
-                  color: '#666',
-                  margin: 0
-                }}>
-                  {eventData.time ? `le ${eventData.date} à ${eventData.time}` : `le ${eventData.date}`}
-                </p>
-              </div>
-
-              {/* IMAGE de l'événement - FORMAT CARRÉ */}
-              <div style={{
-                position: 'absolute',
-                right: '8%',
-                top: '11%',
-                width: '42%',
-                paddingBottom: '42%', // Carré parfait
-                overflow: 'hidden',
-                borderRadius: '12px'
+                left: '35.6%',
+                top: '1.2%',
+                width: '63.3%',
+                height: '43.7%',
+                borderRadius: '12px',
+                overflow: 'hidden'
               }}>
                 <img 
                   src={uploadedImage} 
                   alt="Event"
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover'
@@ -690,17 +633,145 @@ const App = () => {
                 />
               </div>
 
-              {/* DESCRIPTION en bas à droite */}
+              {/* DATE - x:80, y:531, w:292, h:42 */}
               <div style={{
                 position: 'absolute',
-                right: '8%',
-                bottom: '16.5%',
-                width: '42%'
+                left: '9.2%',
+                top: '42.8%',
+                width: '33.5%',
+                height: '3.4%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <p style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  color: 'white',
+                  margin: 0,
+                  letterSpacing: '0.5px'
+                }}>
+                  Le {eventData.date}
+                </p>
+              </div>
+
+              {/* TITRE - x:80, y:593, w:294, h:38 */}
+              <div style={{
+                position: 'absolute',
+                left: '9.2%',
+                top: '47.8%',
+                width: '33.7%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <h2 style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: '15px',
+                  fontWeight: '900',
+                  color: '#1a1a1a',
+                  margin: 0,
+                  lineHeight: '1.1',
+                  textAlign: 'center'
+                }}>
+                  {eventData.title}
+                </h2>
+                <p style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: '8px',
+                  fontStyle: 'italic',
+                  color: '#666',
+                  margin: '2px 0 0 0',
+                  textAlign: 'center'
+                }}>
+                  Appartement de {eventData.organizerNames}
+                </p>
+              </div>
+
+              {/* QR CODE - x:255, y:653, w:93, h:101 */}
+              <div style={{
+                position: 'absolute',
+                left: '29.3%',
+                top: '52.6%',
+                width: '10.7%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <QRCodeSVG 
+                  value={eventData.eventUrl}
+                  size={60}
+                  level="M"
+                />
+              </div>
+
+              {/* ADRESSE - x:110, y:687, w:138, h:54 */}
+              <div style={{
+                position: 'absolute',
+                left: '12.6%',
+                top: '55.4%',
+                width: '15.8%'
+              }}>
+                <p style={{
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: '8px',
+                  color: '#1a1a1a',
+                  margin: '0 0 1px 0',
+                  fontWeight: '700',
+                  lineHeight: '1.2'
+                }}>
+                  {eventData.city} ({eventData.department})
+                </p>
+                <p style={{
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: '7px',
+                  fontStyle: 'italic',
+                  color: '#666',
+                  margin: 0,
+                  lineHeight: '1.2'
+                }}>
+                  {eventData.time ? `le ${eventData.date} à ${eventData.time}` : `le ${eventData.date}`}
+                </p>
+              </div>
+
+              {/* TEXTE HORMUR (description générale) - x:405, y:575, w:387, h:201 */}
+              <div style={{
+                position: 'absolute',
+                left: '46.5%',
+                top: '46.3%',
+                width: '44.4%',
+                height: '16.2%',
+                display: 'flex',
+                alignItems: 'flex-start'
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '9px',
-                  lineHeight: '1.4',
+                  fontSize: '8px',
+                  lineHeight: '1.35',
+                  color: '#1a1a1a',
+                  margin: 0,
+                  textAlign: 'justify'
+                }}>
+                  Hormur connecte artistes et hôtes dans la co-création d'évènements artistiques intimistes dans des lieux non conventionnels, accessibles au public via une billetterie en ligne. Lauréate de l'AMI "Solutions de billetterie innovantes" du Ministère de la Culture, la plateforme rassemble depuis 2021 des milliers d'artistes et de lieux pour faire vivre l'art autrement partout en France.
+                </p>
+              </div>
+
+              {/* DESCRIPTION ÉVÉNEMENT - x:404, y:785, w:387, h:131 */}
+              <div style={{
+                position: 'absolute',
+                left: '46.4%',
+                top: '63.3%',
+                width: '44.4%',
+                height: '10.6%',
+                display: 'flex',
+                alignItems: 'flex-start'
+              }}>
+                <p style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: '8px',
+                  lineHeight: '1.35',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
@@ -722,7 +793,7 @@ const App = () => {
               left: '50%',
               transform: 'translateX(-50%)',
               width: '80%',
-              paddingBottom: '80%', // Carré parfait
+              paddingBottom: '80%',
               overflow: 'hidden',
               borderRadius: '12px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
@@ -1087,12 +1158,9 @@ const App = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Titre <span className="text-gray-400">(max 40 car.)</span>
             </label>
-            <input
-              type="text"
-              maxLength={40}
+            <TitleInput 
               value={eventData.title}
-              onChange={handleTitleChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              onChange={(val) => setEventData(prev => ({...prev, title: val}))}
             />
             <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/40</div>
           </div>
@@ -1102,11 +1170,9 @@ const App = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
-              <textarea
+              <DescriptionInput
                 value={eventData.description}
-                onChange={handleDescriptionChange}
-                rows={3}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                onChange={(val) => setEventData(prev => ({...prev, description: val}))}
               />
             </div>
           )}
@@ -1124,12 +1190,9 @@ const App = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Prénoms (hôte & artiste)
             </label>
-            <input
-              type="text"
+            <OrganizerInput
               value={eventData.organizerNames}
-              onChange={handleOrganizerNamesChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="Sophie & Martin"
+              onChange={(val) => setEventData(prev => ({...prev, organizerNames: val}))}
             />
             <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
           </div>
@@ -1139,7 +1202,7 @@ const App = () => {
               type="checkbox"
               id="chezHabitant"
               checked={eventData.chezHabitant}
-              onChange={handleChezHabitantChange}
+              onChange={(e) => setEventData(prev => ({...prev, chezHabitant: e.target.checked}))}
               className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
             />
             <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
@@ -1152,13 +1215,10 @@ const App = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Message personnel <span className="text-gray-400">(max 120 car.)</span>
               </label>
-              <textarea
+              <PersonalMessageInput
                 value={eventData.personalMessage}
-                onChange={handlePersonalMessageChange}
-                rows={2}
-                maxLength={120}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Hâte de vous accueillir..."
+                onChange={(val) => setEventData(prev => ({...prev, personalMessage: val}))}
+                length={eventData.personalMessage.length}
               />
               <div className="text-xs text-gray-500 mt-1">{eventData.personalMessage.length}/120</div>
             </div>
@@ -1172,7 +1232,7 @@ const App = () => {
               {convivialiteOptions.map(option => (
                 <button
                   key={option.value}
-                  onClick={() => handleConvivialiteChange(option.value)}
+                  onClick={() => setEventData(prev => ({...prev, convivialite: option.value}))}
                   className={`p-2 rounded-lg border-2 transition-all text-xs font-medium ${
                     eventData.convivialite === option.value
                       ? 'border-orange-500 bg-orange-50 text-orange-700'
@@ -1189,12 +1249,9 @@ const App = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               URL de l'événement
             </label>
-            <input
-              type="url"
+            <EventUrlInput
               value={eventData.eventUrl}
-              onChange={handleEventUrlChange}
-              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="https://hormur.com/event/..."
+              onChange={(val) => setEventData(prev => ({...prev, eventUrl: val}))}
             />
             <p className="text-xs text-gray-500 mt-1">Pour le QR code</p>
           </div>
