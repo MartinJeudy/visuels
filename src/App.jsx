@@ -1,4 +1,4 @@
-import { useState, useRef, memo } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
@@ -10,7 +10,7 @@ const TitleInput = memo(({ value, onChange }) => (
     type="text"
     maxLength={40}
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={onChange}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
   />
 ));
@@ -18,7 +18,7 @@ const TitleInput = memo(({ value, onChange }) => (
 const DescriptionInput = memo(({ value, onChange }) => (
   <textarea
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={onChange}
     rows={3}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
   />
@@ -28,16 +28,16 @@ const OrganizerInput = memo(({ value, onChange }) => (
   <input
     type="text"
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={onChange}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
     placeholder="Sophie & Martin"
   />
 ));
 
-const PersonalMessageInput = memo(({ value, onChange, length }) => (
+const PersonalMessageInput = memo(({ value, onChange }) => (
   <textarea
     value={value}
-    onChange={(e) => onChange(e.target.value.slice(0, 120))}
+    onChange={onChange}
     rows={2}
     maxLength={120}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -49,7 +49,7 @@ const EventUrlInput = memo(({ value, onChange }) => (
   <input
     type="url"
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={onChange}
     className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
     placeholder="https://hormur.com/event/..."
   />
@@ -110,6 +110,31 @@ const App = () => {
     { value: 'repas', label: 'Repas partagé' },
     { value: 'apero', label: 'Apéro participatif' }
   ];
+
+  // Handlers stabilisés avec useCallback
+  const handleTitleChange = useCallback((e) => {
+    setEventData(prev => ({...prev, title: e.target.value}));
+  }, []);
+
+  const handleDescriptionChange = useCallback((e) => {
+    setEventData(prev => ({...prev, description: e.target.value}));
+  }, []);
+
+  const handleOrganizerChange = useCallback((e) => {
+    setEventData(prev => ({...prev, organizerNames: e.target.value}));
+  }, []);
+
+  const handlePersonalMessageChange = useCallback((e) => {
+    setEventData(prev => ({...prev, personalMessage: e.target.value.slice(0, 120)}));
+  }, []);
+
+  const handleEventUrlChange = useCallback((e) => {
+    setEventData(prev => ({...prev, eventUrl: e.target.value}));
+  }, []);
+
+  const handleChezHabitantChange = useCallback((e) => {
+    setEventData(prev => ({...prev, chezHabitant: e.target.checked}));
+  }, []);
 
   const getCurrentColor = () => {
     return hormurColors.find(c => c.value === selectedColor) || hormurColors[0];
@@ -237,7 +262,7 @@ const App = () => {
 
     const visualStyle = {
       width: '100%',
-      aspectRatio: visualType.aspect === 1 ? '1/1' : '210/297',
+      aspectRatio: visualType.aspect === 1 ? '1/1' : `${210}/${297}`,
       backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
       position: 'relative',
       overflow: 'hidden',
@@ -601,7 +626,7 @@ const App = () => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 zIndex: 1
               }}
             />
@@ -612,13 +637,13 @@ const App = () => {
               inset: 0,
               zIndex: 2
             }}>
-              {/* Photo de l'événement - x:310, y:15, w:551, h:542 */}
+              {/* Photo de l'événement - Dimensions réduites pour ne pas déborder */}
               <div style={{
                 position: 'absolute',
-                left: '35.6%',
-                top: '1.2%',
-                width: '63.3%',
-                height: '43.7%',
+                left: '35.8%',
+                top: '1.5%',
+                width: '62.5%',
+                height: '43%',
                 borderRadius: '12px',
                 overflow: 'hidden'
               }}>
@@ -1160,7 +1185,7 @@ const App = () => {
             </label>
             <TitleInput 
               value={eventData.title}
-              onChange={(val) => setEventData(prev => ({...prev, title: val}))}
+              onChange={handleTitleChange}
             />
             <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/40</div>
           </div>
@@ -1172,7 +1197,7 @@ const App = () => {
               </label>
               <DescriptionInput
                 value={eventData.description}
-                onChange={(val) => setEventData(prev => ({...prev, description: val}))}
+                onChange={handleDescriptionChange}
               />
             </div>
           )}
@@ -1192,7 +1217,7 @@ const App = () => {
             </label>
             <OrganizerInput
               value={eventData.organizerNames}
-              onChange={(val) => setEventData(prev => ({...prev, organizerNames: val}))}
+              onChange={handleOrganizerChange}
             />
             <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
           </div>
@@ -1202,7 +1227,7 @@ const App = () => {
               type="checkbox"
               id="chezHabitant"
               checked={eventData.chezHabitant}
-              onChange={(e) => setEventData(prev => ({...prev, chezHabitant: e.target.checked}))}
+              onChange={handleChezHabitantChange}
               className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
             />
             <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
@@ -1217,8 +1242,7 @@ const App = () => {
               </label>
               <PersonalMessageInput
                 value={eventData.personalMessage}
-                onChange={(val) => setEventData(prev => ({...prev, personalMessage: val}))}
-                length={eventData.personalMessage.length}
+                onChange={handlePersonalMessageChange}
               />
               <div className="text-xs text-gray-500 mt-1">{eventData.personalMessage.length}/120</div>
             </div>
@@ -1251,7 +1275,7 @@ const App = () => {
             </label>
             <EventUrlInput
               value={eventData.eventUrl}
-              onChange={(val) => setEventData(prev => ({...prev, eventUrl: val}))}
+              onChange={handleEventUrlChange}
             />
             <p className="text-xs text-gray-500 mt-1">Pour le QR code</p>
           </div>
@@ -1407,8 +1431,8 @@ const App = () => {
               </div>
               <div className="bg-gray-100 p-4 rounded-lg" style={{ maxHeight: 'none' }}>
                 <div style={{ 
-                  width: selectedVisual === 'post-rs' ? '100%' : '100%',
-                  maxWidth: selectedVisual === 'post-rs' ? '500px' : '400px',
+                  width: '100%',
+                  maxWidth: selectedVisual === 'post-rs' ? '400px' : '350px',
                   margin: '0 auto'
                 }}>
                   {renderVisual()}
