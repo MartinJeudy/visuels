@@ -59,7 +59,7 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Composants mémorisés pour éviter la perte de focus
+// Composants mémorisés
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
@@ -383,18 +383,20 @@ const EditPanel = memo(({
           <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
         </div>
 
-        <div className="flex items together gap-2">
-          <input
-            type="checkbox"
-            id="chezHabitant"
-            checked={eventData.chezHabitant}
-            onChange={onChezHabitantChange}
-            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-          />
-          <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
-            🏠 Afficher "Chez l'habitant"
-          </label>
-        </div>
+        {selectedVisual !== 'post-rs' && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="chezHabitant"
+              checked={eventData.chezHabitant}
+              onChange={onChezHabitantChange}
+              className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+            />
+            <label htmlFor="chezHabitant" className="text-sm font-medium text-gray-700">
+              🏠 Afficher "Chez l'habitant"
+            </label>
+          </div>
+        )}
 
         {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
           <div>
@@ -409,26 +411,28 @@ const EditPanel = memo(({
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Convivialité
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {convivialiteOptions.map(option => (
-              <button
-                key={option.value}
-                onClick={() => onConvivialiteChange(option.value)}
-                className={`p-2 rounded-lg border-2 transition-all text-xs font-medium ${
-                  eventData.convivialite === option.value
-                    ? 'border-orange-500 bg-orange-50 text-orange-700'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+        {(selectedVisual === 'affiche' || selectedVisual === 'flyer-recto' || selectedVisual === 'flyer-verso') && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Convivialité
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {convivialiteOptions.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => onConvivialiteChange(option.value)}
+                  className={`p-2 rounded-lg border-2 transition-all text-xs font-medium ${
+                    eventData.convivialite === option.value
+                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -447,7 +451,7 @@ const EditPanel = memo(({
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h2 className="font-bold text-base mb-3 flex items-center gap-2">
         <ImagePlus size={18} className="text-orange-500" />
-        Image (format carré recommandé)
+        Image {selectedVisual !== 'communique' && '(format carré recommandé)'}
       </h2>
       <div className="space-y-2">
         <div
@@ -479,7 +483,9 @@ const EditPanel = memo(({
         >
           Choisir une image ou glisser-déposer
         </button>
-        <p className="text-xs text-gray-500 text-center">💡 Utilisez une image carrée pour un meilleur rendu</p>
+        {selectedVisual !== 'communique' && (
+          <p className="text-xs text-gray-500 text-center">💡 Utilisez une image carrée pour un meilleur rendu</p>
+        )}
       </div>
     </div>
 
@@ -527,7 +533,7 @@ const App = () => {
   });
 
   const [selectedColor, setSelectedColor] = useState('#fb593d');
-  const [selectedVisual, setSelectedVisual] = useState('affiche');
+  const [selectedVisual, setSelectedVisual] = useState('communique');
   const [uploadedImage, setUploadedImage] = useState('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop');
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
@@ -541,17 +547,16 @@ const App = () => {
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
     setShowSendModal(false);
-  }, [setShowSendModal]);
+  }, []);
 
   const handleShowSubscriptionFromSend = useCallback(() => {
     setShowSendModal(false);
     setShowSubscriptionModal(true);
-  }, [setShowSendModal, setShowSubscriptionModal]);
+  }, []);
 
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
 
-  // Handlers stabilisés avec useCallback
   const handleTitleChange = useCallback((e) => {
     setEventData(prev => ({...prev, title: e.target.value}));
   }, []);
@@ -578,7 +583,7 @@ const App = () => {
 
   const handleConvivialiteChange = useCallback((value) => {
     setEventData(prev => ({ ...prev, convivialite: value }));
-  }, [setEventData]);
+  }, []);
 
   const getCurrentColor = () => {
     return hormurColors.find(c => c.value === selectedColor) || hormurColors[0];
@@ -636,16 +641,20 @@ const App = () => {
 
     try {
       const element = visualRef.current;
-      if (!element) return;
+      if (!element) {
+        console.error('Élément visualRef non trouvé');
+        alert('Erreur : impossible de trouver le visuel à télécharger');
+        setIsDownloading(false);
+        return;
+      }
 
-      const scale = 4;
+      const scale = 3;
       const canvas = await html2canvas(element, {
         scale: scale,
         useCORS: true,
+        allowTaint: true,
         logging: false,
-        backgroundColor: '#ffffff',
-        width: element.offsetWidth,
-        height: element.offsetHeight
+        backgroundColor: '#ffffff'
       });
 
       const visualType = getCurrentVisualType();
@@ -661,12 +670,10 @@ const App = () => {
 
       const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}`;
 
-      const pdfSize = visualType?.pdf || { width: 210, height: 297 };
-      const pdfWidth = pdfSize.width || 210;
-      const pdfHeight = pdfSize.height || 297;
-
       if (format === 'pdf') {
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfWidth = visualType.pdf.width;
+        const pdfHeight = visualType.pdf.height;
 
         const pdf = new jsPDF({
           orientation: pdfHeight >= pdfWidth ? 'portrait' : 'landscape',
@@ -674,13 +681,18 @@ const App = () => {
           format: [pdfWidth, pdfHeight]
         });
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`${filename}.pdf`);
       } else {
         const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
         const quality = format === 'jpeg' ? 0.95 : 1.0;
 
         canvas.toBlob((blob) => {
+          if (!blob) {
+            console.error('Impossible de créer le blob');
+            alert('Erreur lors de la création du fichier');
+            return;
+          }
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -693,10 +705,12 @@ const App = () => {
       }
     } catch (error) {
       console.error('Erreur téléchargement:', error);
-      alert('Erreur lors du téléchargement. Veuillez réessayer.');
+      alert('Erreur lors du téléchargement : ' + error.message);
     } finally {
-      setIsDownloading(false);
-      setShowDownloadModal(false);
+      setTimeout(() => {
+        setIsDownloading(false);
+        setShowDownloadModal(false);
+      }, 1000);
     }
   };
 
@@ -705,16 +719,11 @@ const App = () => {
     const textColor = colorObj.text;
     const bgColor = colorObj.value;
     const visualType = getCurrentVisualType();
-    const aspectRatio = visualType?.canvas?.width && visualType?.canvas?.height
-      ? visualType.canvas.width / visualType.canvas.height
-      : 1;
-    const aspectRatioValue = Number.isFinite(aspectRatio) && aspectRatio > 0
-      ? Number(aspectRatio.toFixed(4))
-      : 1;
+    const aspectRatio = visualType.canvas.width / visualType.canvas.height;
 
     const visualStyle = {
       width: '100%',
-      aspectRatio: aspectRatioValue,
+      aspectRatio: aspectRatio.toFixed(4),
       backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
       position: 'relative',
       overflow: 'hidden',
@@ -748,6 +757,7 @@ const App = () => {
                   height: '100%',
                   objectFit: 'cover'
                 }}
+                crossOrigin="anonymous"
               />
               <div style={{
                 position: 'absolute',
@@ -1081,6 +1091,7 @@ const App = () => {
                 objectFit: 'contain',
                 zIndex: 1
               }}
+              crossOrigin="anonymous"
             />
 
             {/* Calque de contenu - zIndex:2 */}
@@ -1089,12 +1100,18 @@ const App = () => {
               inset: 0,
               zIndex: 2
             }}>
-              {/* Image principale - 59.5%, 13%, 8%, 20% */}
+              {/* 
+                🎯 GUIDE DE POSITIONNEMENT RAPIDE
+                Pour déplacer un élément, changez les valeurs left/top en %
+                Format: left: 'X%', top: 'Y%', width: 'W%'
+              */}
+
+              {/* 📷 IMAGE PRINCIPALE */}
               <div style={{
                 position: 'absolute',
-                left: '59.5%',
-                top: '13%',
-                width: '8%',
+                left: '59.5%',    /* ⬅️ CHANGE MOI pour déplacer horizontalement */
+                top: '13%',       /* ⬆️ CHANGE MOI pour déplacer verticalement */
+                width: '8%',      /* ↔️ CHANGE MOI pour agrandir/réduire */
                 height: '20%',
                 borderRadius: '8px',
                 overflow: 'hidden'
@@ -1107,15 +1124,16 @@ const App = () => {
                     height: '100%',
                     objectFit: 'cover'
                   }}
+                  crossOrigin="anonymous"
                 />
               </div>
 
-              {/* Bandeau date - 9.5%, 45%, 36%, 4% */}
+              {/* 📅 BANDEAU DATE */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',
-                top: '45%',
-                width: '36%',
+                left: '9.5%',     /* ⬅️ CHANGE MOI */
+                top: '45%',       /* ⬆️ CHANGE MOI */
+                width: '36%',     /* ↔️ CHANGE MOI */
                 height: '4%',
                 display: 'flex',
                 alignItems: 'center',
@@ -1123,7 +1141,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '14px',   /* 📏 CHANGE MOI pour la taille du texte */
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
@@ -1133,16 +1151,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* Titre - 9.5%, 51%, 36% */}
+              {/* 📝 TITRE */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',
-                top: '51%',
-                width: '36%'
+                left: '9.5%',     /* ⬅️ CHANGE MOI */
+                top: '51%',       /* ⬆️ CHANGE MOI */
+                width: '36%'      /* ↔️ CHANGE MOI */
               }}>
                 <h2 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '16px',   /* 📏 CHANGE MOI */
                   fontWeight: '900',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1153,16 +1171,16 @@ const App = () => {
                 </h2>
               </div>
 
-              {/* Sous-titre - 9.5%, 53%, 36% */}
+              {/* 👥 SOUS-TITRE (Appartement de...) */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',
-                top: '53%',
-                width: '36%'
+                left: '9.5%',     /* ⬅️ CHANGE MOI */
+                top: '53%',       /* ⬆️ CHANGE MOI */
+                width: '36%'      /* ↔️ CHANGE MOI */
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '9px',
+                  fontSize: '9px',    /* 📏 CHANGE MOI */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1172,11 +1190,11 @@ const App = () => {
                 </p>
               </div>
 
-              {/* QR code - 31%, 58%, 12%, 10% */}
+              {/* 🔲 QR CODE */}
               <div style={{
                 position: 'absolute',
-                left: '31%',
-                top: '58%',
+                left: '31%',      /* ⬅️ CHANGE MOI */
+                top: '58%',       /* ⬆️ CHANGE MOI */
                 width: '12%',
                 height: '10%',
                 display: 'flex',
@@ -1185,21 +1203,21 @@ const App = () => {
               }}>
                 <QRCodeSVG
                   value={eventData.eventUrl}
-                  size={65}
+                  size={65}         /* 📏 CHANGE MOI pour la taille du QR */
                   level="M"
                 />
               </div>
 
-              {/* Lieu + heure - 12%, 59%, 18% */}
+              {/* 📍 LIEU + HEURE */}
               <div style={{
                 position: 'absolute',
-                left: '12%',
-                top: '59%',
-                width: '18%'
+                left: '12%',      /* ⬅️ CHANGE MOI */
+                top: '59%',       /* ⬆️ CHANGE MOI */
+                width: '18%'      /* ↔️ CHANGE MOI */
               }}>
                 <p style={{
                   fontFamily: "Arial, sans-serif",
-                  fontSize: '9px',
+                  fontSize: '9px',    /* 📏 CHANGE MOI */
                   color: '#1a1a1a',
                   margin: '0 0 2px 0',
                   fontWeight: '700',
@@ -1209,7 +1227,7 @@ const App = () => {
                 </p>
                 <p style={{
                   fontFamily: "Arial, sans-serif",
-                  fontSize: '8px',
+                  fontSize: '8px',    /* 📏 CHANGE MOI */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1219,16 +1237,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* Texte institutionnel Hormur - 56%, 42%, 38% */}
+              {/* ℹ️ TEXTE INSTITUTIONNEL HORMUR */}
               <div style={{
                 position: 'absolute',
-                left: '56%',
-                top: '42%',
-                width: '38%'
+                left: '56%',      /* ⬅️ CHANGE MOI */
+                top: '42%',       /* ⬆️ CHANGE MOI */
+                width: '38%'      /* ↔️ CHANGE MOI */
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '8.5px',
+                  fontSize: '8.5px',  /* 📏 CHANGE MOI */
                   lineHeight: '1.4',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1238,16 +1256,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* Description événement - 56%, 60%, 38% */}
+              {/* 📄 DESCRIPTION ÉVÉNEMENT */}
               <div style={{
                 position: 'absolute',
-                left: '56%',
-                top: '60%',
-                width: '38%'
+                left: '56%',      /* ⬅️ CHANGE MOI */
+                top: '60%',       /* ⬆️ CHANGE MOI */
+                width: '38%'      /* ↔️ CHANGE MOI */
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '8.5px',
+                  fontSize: '8.5px',  /* 📏 CHANGE MOI */
                   lineHeight: '1.4',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1263,7 +1281,6 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} style={visualStyle}>
-            {/* Image carrée - 65% de l'espace */}
             <div style={{
               position: 'absolute',
               top: '10%',
@@ -1286,6 +1303,7 @@ const App = () => {
                   height: '100%',
                   objectFit: 'cover'
                 }}
+                crossOrigin="anonymous"
               />
             </div>
 
@@ -1299,7 +1317,6 @@ const App = () => {
               color: textColor,
               zIndex: 10
             }}>
-              {/* Top badges */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1345,7 +1362,6 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Bottom content */}
               <div>
                 <h2 style={{
                   fontSize: '36px',
@@ -1440,18 +1456,18 @@ const App = () => {
 
       {/* Modals */}
       {showImageCrop && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full p-6">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Valider l'image</h3>
               <button onClick={() => setShowImageCrop(false)} className="text-gray-500 hover:text-gray-700">
                 <X size={24} />
               </button>
             </div>
-            <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4" style={{ paddingBottom: '100%' }}>
-              <img src={tempImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain" />
+            <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4" style={{ maxHeight: '60vh' }}>
+              <img src={tempImage} alt="Preview" className="w-full h-auto object-contain" />
             </div>
-            <p className="text-xs text-gray-600 mb-4">💡 Pour un meilleur rendu, utilisez une image carrée</p>
+            <p className="text-xs text-gray-600 mb-4">💡 {selectedVisual === 'communique' ? 'Image verticale recommandée' : 'Pour un meilleur rendu, utilisez une image carrée'}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowImageCrop(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
                 Annuler
@@ -1533,7 +1549,7 @@ const App = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 p-4 rounded-lg" style={{ maxHeight: 'none' }}>
+              <div className="bg-gray-100 p-4 rounded-lg">
                 <div style={{
                   width: '100%',
                   maxWidth: selectedVisual === 'post-rs' ? '400px' : '350px',
@@ -1550,7 +1566,7 @@ const App = () => {
         </div>
       </div>
 
-      {/* Mobile Toggle - EN BAS */}
+      {/* Mobile Toggle */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t shadow-2xl">
         <div className="flex">
           <button
