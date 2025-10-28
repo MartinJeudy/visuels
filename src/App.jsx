@@ -1068,7 +1068,7 @@ const App = () => {
             position: 'relative',
             backgroundColor: '#ffffff'
           }}>
-            {/* Template de base */}
+            {/* Template de base - zIndex:1 */}
             <img
               src="/communique-template.png"
               alt="Template communiqué"
@@ -1083,20 +1083,20 @@ const App = () => {
               }}
             />
 
-            {/* Overlay - POSITIONS EXACTES STENCIL */}
+            {/* Calque de contenu - zIndex:2 */}
             <div style={{
               position: 'absolute',
               inset: 0,
               zIndex: 2
             }}>
-              {/* Photo de l'événement - Dimensions réduites pour ne pas déborder */}
+              {/* Image principale - 59.5%, 13%, 8%, 20% */}
               <div style={{
                 position: 'absolute',
-                left: '35.8%',
-                top: '1.5%',
-                width: '62.5%',
-                height: '43%',
-                borderRadius: '12px',
+                left: '59.5%',
+                top: '13%',
+                width: '8%',
+                height: '20%',
+                borderRadius: '8px',
                 overflow: 'hidden'
               }}>
                 <img
@@ -1110,20 +1110,20 @@ const App = () => {
                 />
               </div>
 
-              {/* DATE - x:80, y:531, w:292, h:42 */}
+              {/* Bandeau date - 9.5%, 45%, 36%, 4% */}
               <div style={{
                 position: 'absolute',
-                left: '9.2%',
-                top: '42.8%',
-                width: '33.5%',
-                height: '3.4%',
+                left: '9.5%',
+                top: '45%',
+                width: '36%',
+                height: '4%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <p style={{
                   fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
@@ -1133,20 +1133,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* TITRE - x:80, y:593, w:294, h:38 */}
+              {/* Titre - 9.5%, 51%, 36% */}
               <div style={{
                 position: 'absolute',
-                left: '9.2%',
-                top: '47.8%',
-                width: '33.7%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
+                left: '9.5%',
+                top: '51%',
+                width: '36%'
               }}>
                 <h2 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '15px',
+                  fontSize: '16px',
                   fontWeight: '900',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1155,47 +1151,57 @@ const App = () => {
                 }}>
                   {eventData.title}
                 </h2>
+              </div>
+
+              {/* Sous-titre - 9.5%, 53%, 36% */}
+              <div style={{
+                position: 'absolute',
+                left: '9.5%',
+                top: '53%',
+                width: '36%'
+              }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '8px',
+                  fontSize: '9px',
                   fontStyle: 'italic',
                   color: '#666',
-                  margin: '2px 0 0 0',
+                  margin: 0,
                   textAlign: 'center'
                 }}>
                   Appartement de {eventData.organizerNames}
                 </p>
               </div>
 
-              {/* QR CODE - x:255, y:653, w:93, h:101 */}
+              {/* QR code - 31%, 58%, 12%, 10% */}
               <div style={{
                 position: 'absolute',
-                left: '29.3%',
-                top: '52.6%',
-                width: '10.7%',
+                left: '31%',
+                top: '58%',
+                width: '12%',
+                height: '10%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <QRCodeSVG
                   value={eventData.eventUrl}
-                  size={60}
+                  size={65}
                   level="M"
                 />
               </div>
 
-              {/* ADRESSE - x:110, y:687, w:138, h:54 */}
+              {/* Lieu + heure - 12%, 59%, 18% */}
               <div style={{
                 position: 'absolute',
-                left: '12.6%',
-                top: '55.4%',
-                width: '15.8%'
+                left: '12%',
+                top: '59%',
+                width: '18%'
               }}>
                 <p style={{
                   fontFamily: "Arial, sans-serif",
-                  fontSize: '8px',
+                  fontSize: '9px',
                   color: '#1a1a1a',
-                  margin: '0 0 1px 0',
+                  margin: '0 0 2px 0',
                   fontWeight: '700',
                   lineHeight: '1.2'
                 }}>
@@ -1203,7 +1209,7 @@ const App = () => {
                 </p>
                 <p style={{
                   fontFamily: "Arial, sans-serif",
-                  fontSize: '7px',
+                  fontSize: '8px',
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1213,20 +1219,17 @@ const App = () => {
                 </p>
               </div>
 
-              {/* TEXTE HORMUR (description générale) - x:405, y:575, w:387, h:201 */}
+              {/* Texte institutionnel Hormur - 56%, 42%, 38% */}
               <div style={{
                 position: 'absolute',
-                left: '46.5%',
-                top: '46.3%',
-                width: '44.4%',
-                height: '16.2%',
-                display: 'flex',
-                alignItems: 'flex-start'
+                left: '56%',
+                top: '42%',
+                width: '38%'
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '8px',
-                  lineHeight: '1.35',
+                  fontSize: '8.5px',
+                  lineHeight: '1.4',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
@@ -1235,20 +1238,17 @@ const App = () => {
                 </p>
               </div>
 
-              {/* DESCRIPTION ÉVÉNEMENT - x:404, y:785, w:387, h:131 */}
+              {/* Description événement - 56%, 60%, 38% */}
               <div style={{
                 position: 'absolute',
-                left: '46.4%',
-                top: '63.3%',
-                width: '44.4%',
-                height: '10.6%',
-                display: 'flex',
-                alignItems: 'flex-start'
+                left: '56%',
+                top: '60%',
+                width: '38%'
               }}>
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: '8px',
-                  lineHeight: '1.35',
+                  fontSize: '8.5px',
+                  lineHeight: '1.4',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
