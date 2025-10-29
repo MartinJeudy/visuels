@@ -1,4 +1,4 @@
-import { useState, useRef, memo, useCallback } from 'react';
+import { useState, useRef, memo, useCallback, useEffect } from 'react';
 import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
@@ -59,6 +59,36 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
+// Utilitaire pour convertir une image en base64 (évite les problèmes CORS)
+const imageUrlToBase64 = async (url) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.warn('Erreur conversion base64:', error);
+    return url; // Fallback sur l'URL originale
+  }
+};
+
+// Utilitaire pour attendre que les polices soient chargées
+const waitForFonts = async () => {
+  try {
+    if (document.fonts) {
+      await document.fonts.ready;
+      // Attendre un peu plus pour être sûr
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+  } catch (error) {
+    console.warn('Erreur chargement polices:', error);
+  }
+};
+
 // Composants mémorisés
 const TitleInput = memo(({ value, onChange }) => (
   <input
@@ -115,7 +145,7 @@ const DownloadModal = ({ onClose, onDownload, isDownloading }) => (
     <div className="bg-white rounded-xl max-w-md w-full p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-lg">Télécharger le visuel</h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={isDownloading}>
           <X size={24} />
         </button>
       </div>
@@ -126,25 +156,33 @@ const DownloadModal = ({ onClose, onDownload, isDownloading }) => (
         <button
           onClick={() => onDownload('pdf')}
           disabled={isDownloading}
-          className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isDownloading ? '⏳ Génération...' : '📄 PDF (Impression)'}
         </button>
         <button
           onClick={() => onDownload('jpeg')}
           disabled={isDownloading}
-          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isDownloading ? '⏳ Génération...' : '🖼️ JPEG (Partage)'}
         </button>
         <button
           onClick={() => onDownload('png')}
           disabled={isDownloading}
-          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isDownloading ? '⏳ Génération...' : '🎨 PNG (Web)'}
         </button>
       </div>
+
+      {isDownloading && (
+        <div className="mt-4 bg-blue-50 p-3 rounded-lg">
+          <p className="text-xs text-blue-900 text-center">
+            ⏳ Génération en cours, merci de patienter...
+          </p>
+        </div>
+      )}
     </div>
   </div>
 );
@@ -543,6 +581,7 @@ const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
@@ -556,6 +595,23 @@ const App = () => {
 
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
+
+  // Charger les polices au démarrage
+  useEffect(() => {
+    const loadFonts = async () => {
+      try {
+        if (document.fonts) {
+          await document.fonts.ready;
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        setFontsLoaded(true);
+      } catch (error) {
+        console.error('Erreur chargement polices:', error);
+        setFontsLoaded(true); // On continue même si erreur
+      }
+    };
+    loadFonts();
+  }, []);
 
   const handleTitleChange = useCallback((e) => {
     setEventData(prev => ({...prev, title: e.target.value}));
@@ -637,26 +693,52 @@ const App = () => {
   };
 
   const handleDownload = async (format) => {
+    if (isDownloading) return;
+    
     setIsDownloading(true);
 
     try {
+      console.log('🎨 Début du téléchargement:', format);
+      
+      // 1. Vérifier que l'élément existe
       const element = visualRef.current;
       if (!element) {
-        console.error('Élément visualRef non trouvé');
-        alert('Erreur : impossible de trouver le visuel à télécharger');
-        setIsDownloading(false);
-        return;
+        throw new Error('Élément visuel introuvable');
       }
 
-      const scale = 3;
+      // 2. Attendre que les polices soient chargées
+      if (!fontsLoaded) {
+        console.log('⏳ Attente du chargement des polices...');
+        await waitForFonts();
+      }
+
+      // 3. Attendre un peu pour s'assurer que tout est rendu
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 4. Déterminer le scale optimal selon l'appareil
+      const isMobile = window.innerWidth < 768;
+      const scale = isMobile ? 2 : 3; // Scale réduit sur mobile
+      
+      console.log(`📱 Appareil: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}`);
+
+      // 5. Configuration html2canvas optimisée
       const canvas = await html2canvas(element, {
         scale: scale,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: selectedVisual === 'communique' ? '#ffffff' : null,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        // Options supplémentaires pour la qualité
+        foreignObjectRendering: false,
+        imageTimeout: 15000,
+        removeContainer: true
       });
 
+      console.log('✅ Canvas généré:', canvas.width, 'x', canvas.height);
+
+      // 6. Créer le nom de fichier
       const visualType = getCurrentVisualType();
       const sanitize = (value) =>
         value
@@ -668,9 +750,13 @@ const App = () => {
           .replace(/^-|-$/g, '')
           .toLowerCase();
 
-      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}`;
+      const timestamp = new Date().getTime();
+      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}-${timestamp}`;
 
+      // 7. Générer le fichier selon le format
       if (format === 'pdf') {
+        console.log('📄 Génération PDF...');
+        
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const pdfWidth = visualType.pdf.width;
         const pdfHeight = visualType.pdf.height;
@@ -678,21 +764,25 @@ const App = () => {
         const pdf = new jsPDF({
           orientation: pdfHeight >= pdfWidth ? 'portrait' : 'landscape',
           unit: 'mm',
-          format: [pdfWidth, pdfHeight]
+          format: [pdfWidth, pdfHeight],
+          compress: true
         });
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
         pdf.save(`${filename}.pdf`);
+        
+        console.log('✅ PDF téléchargé');
       } else {
+        console.log(`🖼️ Génération ${format.toUpperCase()}...`);
+        
         const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
         const quality = format === 'jpeg' ? 0.95 : 1.0;
 
         canvas.toBlob((blob) => {
           if (!blob) {
-            console.error('Impossible de créer le blob');
-            alert('Erreur lors de la création du fichier');
-            return;
+            throw new Error('Impossible de créer le blob');
           }
+          
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -701,16 +791,22 @@ const App = () => {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
+          
+          console.log(`✅ ${format.toUpperCase()} téléchargé`);
         }, mimeType, quality);
       }
+
+      // 8. Attendre un peu avant de fermer la modal
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
     } catch (error) {
-      console.error('Erreur téléchargement:', error);
-      alert('Erreur lors du téléchargement : ' + error.message);
+      console.error('❌ Erreur téléchargement:', error);
+      alert(`Erreur lors du téléchargement: ${error.message}\n\nVeuillez réessayer ou essayer un autre format.`);
     } finally {
+      setIsDownloading(false);
       setTimeout(() => {
-        setIsDownloading(false);
         setShowDownloadModal(false);
-      }, 1000);
+      }, 500);
     }
   };
 
@@ -893,6 +989,7 @@ const App = () => {
                       value={eventData.eventUrl}
                       size={selectedVisual === 'affiche' ? 56 : 48}
                       level="M"
+                      includeMargin={false}
                     />
                   </div>
                   <div style={{
@@ -1044,6 +1141,7 @@ const App = () => {
                       value={eventData.eventUrl}
                       size={40}
                       level="M"
+                      includeMargin={false}
                     />
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -1078,21 +1176,47 @@ const App = () => {
             position: 'relative',
             backgroundColor: '#ffffff'
           }}>
-            {/* Template de base - zIndex:1 */}
-            <img
-              src="/communique-template.png"
-              alt="Template communiqué"
-              style={{
+            {/* Fond blanc simple comme template de base */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#ffffff',
+              zIndex: 1
+            }}>
+              {/* En-tête Hormur */}
+              <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                zIndex: 1
-              }}
-              crossOrigin="anonymous"
-            />
+                top: '4%',
+                left: '8%',
+                right: '8%',
+                height: '8%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: '3px solid #fb593d'
+              }}>
+                <div style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: '24px',
+                  fontWeight: '900',
+                  color: '#fb593d',
+                  letterSpacing: '2px'
+                }}>
+                  HORMUR
+                </div>
+                <div style={{
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontSize: '8px',
+                  color: '#666',
+                  textAlign: 'right'
+                }}>
+                  Communiqué de presse
+                </div>
+              </div>
+            </div>
 
             {/* Calque de contenu - zIndex:2 */}
             <div style={{
@@ -1100,29 +1224,13 @@ const App = () => {
               inset: 0,
               zIndex: 2
             }}>
-              {/* 
-                ═══════════════════════════════════════════════════════════════
-                📐 GUIDE D'AJUSTEMENT RAPIDE
-                ═══════════════════════════════════════════════════════════════
-                
-                Pour déplacer un élément, modifiez les valeurs suivantes :
-                • left: 'X%'   → Position horizontale (0% = gauche, 100% = droite)
-                • top: 'Y%'    → Position verticale (0% = haut, 100% = bas)
-                • width: 'W%'  → Largeur de l'élément
-                • fontSize     → Taille du texte en pixels (px)
-                
-                💡 Astuce : Changez les valeurs par petits incréments (1-2%)
-              */}
-
-              {/* ════════════════════════════════════════════════════════════
-                  📷 IMAGE DE L'ARTISTE (Format CARRÉ 1:1)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* IMAGE DE L'ARTISTE (Format CARRÉ 1:1) */}
               <div style={{
                 position: 'absolute',
-                left: '46.5%',    /* ⬅️➡️ Déplacer horizontalement */
-                top: '9%',     /* ⬆️⬇️ Déplacer verticalement */
-                width: '45%',     /* ↔️ Largeur de l'image */
-                paddingBottom: '45%', /* ↕️ Hauteur = largeur (crée un carré parfait) */
+                left: '46.5%',
+                top: '9%',
+                width: '45%',
+                paddingBottom: '45%',
                 borderRadius: '16px',
                 overflow: 'hidden',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
@@ -1142,22 +1250,21 @@ const App = () => {
                 />
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  📅 BANDEAU DATE (avec fond orange/rouge)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* BANDEAU DATE */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '42.5%',     /* ⬆️⬇️ Position verticale */
-                width: '36.5%',   /* ↔️ Largeur du bandeau */
-                height: '3.5%',   /* ↕️ Hauteur du bandeau */
+                left: '9.5%',
+                top: '42.5%',
+                width: '36.5%',
+                height: '3.5%',
+                backgroundColor: '#fb593d',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '10px',      /* 📏 Taille du texte de la date */
+                  fontSize: '10px',
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
@@ -1167,18 +1274,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  📝 TITRE DE L'ÉVÉNEMENT (typo Open Sans Bold)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* TITRE DE L'ÉVÉNEMENT */}
               <div style={{
                 position: 'absolute',
-                left: '8%',     /* ⬅️➡️ Position horizontale */
-                top: '47%',     /* ⬆️⬇️ Position verticale */
-                width: '36.5%'    /* ↔️ Largeur du titre */
+                left: '8%',
+                top: '47%',
+                width: '36.5%'
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '8px',      /* 📏 Taille du titre */
+                  fontSize: '8px',
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1189,18 +1294,16 @@ const App = () => {
                 </h2>
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  👥 SOUS-TITRE (Appartement de...)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* SOUS-TITRE (Appartement de...) */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '49%',       /* ⬆️⬇️ Position verticale */
-                width: '36.5%'    /* ↔️ Largeur */
+                left: '9.5%',
+                top: '49%',
+                width: '36.5%'
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '5px',      /* 📏 Taille du sous-titre */
+                  fontSize: '5px',
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1210,13 +1313,11 @@ const App = () => {
                 </p>
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  🔲 QR CODE
-                  ════════════════════════════════════════════════════════════ */}
+              {/* QR CODE */}
               <div style={{
                 position: 'absolute',
-                left: '28%',      /* ⬅️➡️ Position horizontale */
-                top: '51%',       /* ⬆️⬇️ Position verticale */
+                left: '28%',
+                top: '51%',
                 width: '11%',
                 height: '11%',
                 display: 'flex',
@@ -1225,23 +1326,22 @@ const App = () => {
               }}>
                 <QRCodeSVG
                   value={eventData.eventUrl}
-                  size={70}       /* 📏 Taille du QR code en pixels */
+                  size={70}
                   level="M"
+                  includeMargin={false}
                 />
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  📍 ADRESSE + HORAIRE (typo Open Sans)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* ADRESSE + HORAIRE */}
               <div style={{
                 position: 'absolute',
-                left: '12.5%',      /* ⬅️➡️ Position horizontale */
-                top: '56%',       /* ⬆️⬇️ Position verticale */
-                width: '18%'      /* ↔️ Largeur */
+                left: '12.5%',
+                top: '56%',
+                width: '18%'
               }}>
                 <p style={{
                   fontFamily: "'Open Sans', Arial, sans-serif",
-                  fontSize: '4px',     /* 📏 Taille du texte de la ville */
+                  fontSize: '4px',
                   color: '#1a1a1a',
                   margin: '0 0 4px 0',
                   fontWeight: '700',
@@ -1251,7 +1351,7 @@ const App = () => {
                 </p>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '4.5px',     /* 📏 Taille de l'horaire */
+                  fontSize: '4.5px',
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1261,18 +1361,16 @@ const App = () => {
                 </p>
               </div>
 
-              {/* ════════════════════════════════════════════════════════════
-                  📄 DESCRIPTION DE L'ÉVÉNEMENT (typo Buenard)
-                  ════════════════════════════════════════════════════════════ */}
+              {/* DESCRIPTION DE L'ÉVÉNEMENT */}
               <div style={{
                 position: 'absolute',
-                left: '47.3%',    /* ⬅️➡️ Position horizontale */
-                top: '64%',       /* ⬆️⬇️ Position verticale */
-                width: '41%'      /* ↔️ Largeur */
+                left: '47.3%',
+                top: '64%',
+                width: '41%'
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '7px',       /* 📏 Taille de la description */
+                  fontSize: '7px',
                   fontWeight: '700',
                   lineHeight: '1',
                   color: '#1a1a1a',
@@ -1281,6 +1379,34 @@ const App = () => {
                 }}>
                   {eventData.description}
                 </p>
+              </div>
+
+              {/* Pied de page */}
+              <div style={{
+                position: 'absolute',
+                bottom: '4%',
+                left: '8%',
+                right: '8%',
+                borderTop: '2px solid #f0f0f0',
+                paddingTop: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontSize: '6px',
+                  color: '#999'
+                }}>
+                  hormur.com
+                </div>
+                <div style={{
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontSize: '6px',
+                  color: '#999'
+                }}>
+                  Contact: contact@hormur.com
+                </div>
               </div>
             </div>
           </div>
@@ -1418,6 +1544,7 @@ const App = () => {
                       value={eventData.eventUrl}
                       size={48}
                       level="M"
+                      includeMargin={false}
                     />
                   </div>
                   <div style={{
@@ -1490,7 +1617,7 @@ const App = () => {
 
       {showDownloadModal && (
         <DownloadModal
-          onClose={() => setShowDownloadModal(false)}
+          onClose={() => !isDownloading && setShowDownloadModal(false)}
           onDownload={handleDownload}
           isDownloading={isDownloading}
         />
@@ -1550,7 +1677,8 @@ const App = () => {
                   </button>
                   <button
                     onClick={() => setShowDownloadModal(true)}
-                    className="flex items-center gap-1 px-3 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    disabled={isDownloading}
+                    className="flex items-center gap-1 px-3 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                   >
                     <Download size={16} />
                     <span className="hidden sm:inline">Télécharger</span>
