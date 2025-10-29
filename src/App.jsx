@@ -1119,7 +1119,7 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '53.5%',    /* ⬅️➡️ Déplacer horizontalement */
+                left: '51.5%',    /* ⬅️➡️ Déplacer horizontalement */
                 top: '9%',     /* ⬆️⬇️ Déplacer verticalement */
                 width: '45%',     /* ↔️ Largeur de l'image */
                 paddingBottom: '45%', /* ↕️ Hauteur = largeur (crée un carré parfait) */
