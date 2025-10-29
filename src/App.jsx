@@ -1161,7 +1161,7 @@ const App = () => {
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
-                  letterSpacing: '1px'
+                  letterSpacing: '0.8px'
                 }}>
                   Le {eventData.date}
                 </p>
