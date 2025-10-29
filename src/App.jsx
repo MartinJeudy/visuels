@@ -1217,8 +1217,8 @@ const App = () => {
                 position: 'absolute',
                 left: '28%',      /* ⬅️➡️ Position horizontale */
                 top: '57%',       /* ⬆️⬇️ Position verticale */
-                width: '13%',
-                height: '13%',
+                width: '12%',
+                height: '12%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -1236,12 +1236,12 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '10%',      /* ⬅️➡️ Position horizontale */
-                top: '62%',       /* ⬆️⬇️ Position verticale */
+                top: '59%',       /* ⬆️⬇️ Position verticale */
                 width: '18%'      /* ↔️ Largeur */
               }}>
                 <p style={{
                   fontFamily: "'Open Sans', Arial, sans-serif",
-                  fontSize: '9.5px',     /* 📏 Taille du texte de la ville */
+                  fontSize: '7px',     /* 📏 Taille du texte de la ville */
                   color: '#1a1a1a',
                   margin: '0 0 4px 0',
                   fontWeight: '700',
