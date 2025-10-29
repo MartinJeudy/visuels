@@ -1101,20 +1101,31 @@ const App = () => {
               zIndex: 2
             }}>
               {/* 
-                🎯 GUIDE DE POSITIONNEMENT RAPIDE
-                Pour déplacer un élément, changez les valeurs left/top en %
-                Format: left: 'X%', top: 'Y%', width: 'W%'
+                ═══════════════════════════════════════════════════════════════
+                📐 GUIDE D'AJUSTEMENT RAPIDE
+                ═══════════════════════════════════════════════════════════════
+                
+                Pour déplacer un élément, modifiez les valeurs suivantes :
+                • left: 'X%'   → Position horizontale (0% = gauche, 100% = droite)
+                • top: 'Y%'    → Position verticale (0% = haut, 100% = bas)
+                • width: 'W%'  → Largeur de l'élément
+                • fontSize     → Taille du texte en pixels (px)
+                
+                💡 Astuce : Changez les valeurs par petits incréments (1-2%)
               */}
 
-              {/* 📷 IMAGE PRINCIPALE */}
+              {/* ════════════════════════════════════════════════════════════
+                  📷 IMAGE DE L'ARTISTE (Photo verticale recommandée)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '59.5%',    /* ⬅️ CHANGE MOI pour déplacer horizontalement */
-                top: '13%',       /* ⬆️ CHANGE MOI pour déplacer verticalement */
-                width: '8%',      /* ↔️ CHANGE MOI pour agrandir/réduire */
-                height: '20%',
-                borderRadius: '8px',
-                overflow: 'hidden'
+                left: '53.5%',    /* ⬅️➡️ Déplacer horizontalement */
+                top: '12.5%',     /* ⬆️⬇️ Déplacer verticalement */
+                width: '41%',     /* ↔️ Largeur de l'image */
+                height: '38%',    /* ↕️ Hauteur de l'image */
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
               }}>
                 <img
                   src={uploadedImage}
@@ -1128,59 +1139,65 @@ const App = () => {
                 />
               </div>
 
-              {/* 📅 BANDEAU DATE */}
+              {/* ════════════════════════════════════════════════════════════
+                  📅 BANDEAU DATE (avec fond orange/rouge)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️ CHANGE MOI */
-                top: '45%',       /* ⬆️ CHANGE MOI */
-                width: '36%',     /* ↔️ CHANGE MOI */
-                height: '4%',
+                left: '9.5%',     /* ⬅️➡️ Position horizontale */
+                top: '45.2%',     /* ⬆️⬇️ Position verticale */
+                width: '36.5%',   /* ↔️ Largeur du bandeau */
+                height: '4.2%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <p style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '14px',   /* 📏 CHANGE MOI pour la taille du texte */
+                  fontFamily: "'Buenard', Georgia, serif",
+                  fontSize: '14px',      /* 📏 Taille du texte de la date */
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
-                  letterSpacing: '0.5px'
+                  letterSpacing: '1px'
                 }}>
                   Le {eventData.date}
                 </p>
               </div>
 
-              {/* 📝 TITRE */}
+              {/* ════════════════════════════════════════════════════════════
+                  📝 TITRE DE L'ÉVÉNEMENT (typo Open Sans Bold)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️ CHANGE MOI */
-                top: '51%',       /* ⬆️ CHANGE MOI */
-                width: '36%'      /* ↔️ CHANGE MOI */
+                left: '9.5%',     /* ⬅️➡️ Position horizontale */
+                top: '51.5%',     /* ⬆️⬇️ Position verticale */
+                width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '16px',   /* 📏 CHANGE MOI */
-                  fontWeight: '900',
+                  fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
+                  fontSize: '17px',      /* 📏 Taille du titre */
+                  fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
-                  lineHeight: '1.1',
+                  lineHeight: '1.15',
                   textAlign: 'center'
                 }}>
                   {eventData.title}
                 </h2>
               </div>
 
-              {/* 👥 SOUS-TITRE (Appartement de...) */}
+              {/* ════════════════════════════════════════════════════════════
+                  👥 SOUS-TITRE (Appartement de...)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️ CHANGE MOI */
-                top: '53%',       /* ⬆️ CHANGE MOI */
-                width: '36%'      /* ↔️ CHANGE MOI */
+                left: '9.5%',     /* ⬅️➡️ Position horizontale */
+                top: '57%',       /* ⬆️⬇️ Position verticale */
+                width: '36.5%'    /* ↔️ Largeur */
               }}>
                 <p style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: '9px',    /* 📏 CHANGE MOI */
+                  fontFamily: "'Buenard', Georgia, serif",
+                  fontSize: '10px',      /* 📏 Taille du sous-titre */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1190,64 +1207,70 @@ const App = () => {
                 </p>
               </div>
 
-              {/* 🔲 QR CODE */}
+              {/* ════════════════════════════════════════════════════════════
+                  🔲 QR CODE
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '31%',      /* ⬅️ CHANGE MOI */
-                top: '58%',       /* ⬆️ CHANGE MOI */
-                width: '12%',
-                height: '10%',
+                left: '30%',      /* ⬅️➡️ Position horizontale */
+                top: '61%',       /* ⬆️⬇️ Position verticale */
+                width: '16%',
+                height: '16%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <QRCodeSVG
                   value={eventData.eventUrl}
-                  size={65}         /* 📏 CHANGE MOI pour la taille du QR */
+                  size={70}       /* 📏 Taille du QR code en pixels */
                   level="M"
                 />
               </div>
 
-              {/* 📍 LIEU + HEURE */}
+              {/* ════════════════════════════════════════════════════════════
+                  📍 ADRESSE + HORAIRE (typo Open Sans)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '12%',      /* ⬅️ CHANGE MOI */
-                top: '59%',       /* ⬆️ CHANGE MOI */
-                width: '18%'      /* ↔️ CHANGE MOI */
+                left: '10%',      /* ⬅️➡️ Position horizontale */
+                top: '62%',       /* ⬆️⬇️ Position verticale */
+                width: '18%'      /* ↔️ Largeur */
               }}>
                 <p style={{
-                  fontFamily: "Arial, sans-serif",
-                  fontSize: '9px',    /* 📏 CHANGE MOI */
+                  fontFamily: "'Open Sans', Arial, sans-serif",
+                  fontSize: '9.5px',     /* 📏 Taille du texte de la ville */
                   color: '#1a1a1a',
-                  margin: '0 0 2px 0',
+                  margin: '0 0 4px 0',
                   fontWeight: '700',
-                  lineHeight: '1.2'
+                  lineHeight: '1.3'
                 }}>
                   {eventData.city} ({eventData.department})
                 </p>
                 <p style={{
-                  fontFamily: "Arial, sans-serif",
-                  fontSize: '8px',    /* 📏 CHANGE MOI */
+                  fontFamily: "'Buenard', Georgia, serif",
+                  fontSize: '8.5px',     /* 📏 Taille de l'horaire */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
-                  lineHeight: '1.2'
+                  lineHeight: '1.3'
                 }}>
                   {eventData.time ? `le ${eventData.date} à ${eventData.time}` : `le ${eventData.date}`}
                 </p>
               </div>
 
-              {/* ℹ️ TEXTE INSTITUTIONNEL HORMUR */}
+              {/* ════════════════════════════════════════════════════════════
+                  ℹ️ TEXTE INSTITUTIONNEL HORMUR (Colonne droite)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '56%',      /* ⬅️ CHANGE MOI */
-                top: '42%',       /* ⬆️ CHANGE MOI */
-                width: '38%'      /* ↔️ CHANGE MOI */
+                left: '53.5%',    /* ⬅️➡️ Position horizontale */
+                top: '54%',       /* ⬆️⬇️ Position verticale */
+                width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: '8.5px',  /* 📏 CHANGE MOI */
-                  lineHeight: '1.4',
+                  fontFamily: "'Buenard', Georgia, serif",
+                  fontSize: '9px',       /* 📏 Taille du texte institutionnel */
+                  lineHeight: '1.55',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
@@ -1256,17 +1279,19 @@ const App = () => {
                 </p>
               </div>
 
-              {/* 📄 DESCRIPTION ÉVÉNEMENT */}
+              {/* ════════════════════════════════════════════════════════════
+                  📄 DESCRIPTION DE L'ÉVÉNEMENT (typo Buenard)
+                  ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '56%',      /* ⬅️ CHANGE MOI */
-                top: '60%',       /* ⬆️ CHANGE MOI */
-                width: '38%'      /* ↔️ CHANGE MOI */
+                left: '53.5%',    /* ⬅️➡️ Position horizontale */
+                top: '70%',       /* ⬆️⬇️ Position verticale */
+                width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: '8.5px',  /* 📏 CHANGE MOI */
-                  lineHeight: '1.4',
+                  fontFamily: "'Buenard', Georgia, serif",
+                  fontSize: '9px',       /* 📏 Taille de la description */
+                  lineHeight: '1.55',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
