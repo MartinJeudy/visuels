@@ -1170,7 +1170,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '51.5%',     /* ⬆️⬇️ Position verticale */
+                top: '45%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
