@@ -59,29 +59,11 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Utilitaire pour convertir une image en base64 (évite les problèmes CORS)
-const imageUrlToBase64 = async (url) => {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.warn('Erreur conversion base64:', error);
-    return url; // Fallback sur l'URL originale
-  }
-};
-
 // Utilitaire pour attendre que les polices soient chargées
 const waitForFonts = async () => {
   try {
     if (document.fonts) {
       await document.fonts.ready;
-      // Attendre un peu plus pour être sûr
       await new Promise(resolve => setTimeout(resolve, 300));
     }
   } catch (error) {
@@ -607,7 +589,7 @@ const App = () => {
         setFontsLoaded(true);
       } catch (error) {
         console.error('Erreur chargement polices:', error);
-        setFontsLoaded(true); // On continue même si erreur
+        setFontsLoaded(true);
       }
     };
     loadFonts();
@@ -707,61 +689,98 @@ const App = () => {
       }
 
       // 2. Attendre que les polices soient chargées
-      if (!fontsLoaded) {
-        console.log('⏳ Attente du chargement des polices...');
-        await waitForFonts();
-      }
+      console.log('⏳ Attente du chargement des polices...');
+      await waitForFonts();
+      
+      // Attendre encore un peu
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // 3. Attendre un peu pour s'assurer que tout est rendu
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 3.5. Attendre que toutes les images soient chargées
+      // 3. Attendre que toutes les images soient chargées
       const images = element.querySelectorAll('img');
+      console.log(`📷 Chargement de ${images.length} images...`);
+      
       await Promise.all(
         Array.from(images).map(img => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = () => {
-              console.warn('Image non chargée:', img.src);
-              resolve(); // Continue même si une image échoue
+          if (img.complete && img.naturalHeight !== 0) {
+            console.log('✅ Image déjà chargée:', img.src.substring(0, 50));
+            return Promise.resolve();
+          }
+          return new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+              console.warn('⏱️ Timeout image:', img.src.substring(0, 50));
+              resolve();
+            }, 5000);
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              console.log('✅ Image chargée:', img.src.substring(0, 50));
+              resolve();
             };
-            // Timeout de sécurité
-            setTimeout(resolve, 3000);
+            img.onerror = () => {
+              clearTimeout(timeout);
+              console.warn('❌ Erreur chargement image:', img.src.substring(0, 50));
+              resolve();
+            };
           });
         })
       );
 
-      // Petit délai supplémentaire pour être sûr
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Délai supplémentaire pour stabiliser le rendu
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // 4. Déterminer le scale optimal selon l'appareil
+      // 4. Configuration selon le type de visuel
+      const isCommunique = selectedVisual === 'communique';
       const isMobile = window.innerWidth < 768;
-      const scale = isMobile ? 2 : 3; // Scale réduit sur mobile
+      const scale = isMobile ? 2 : 3;
       
-      console.log(`📱 Appareil: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}`);
+      console.log(`📱 Config: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}, Type: ${selectedVisual}`);
 
-      // 5. Configuration html2canvas optimisée
-      // Pour le communiqué avec image locale, on doit permettre allowTaint: true
-      const isCommique = selectedVisual === 'communique';
+      // 5. Générer le canvas avec html2canvas
+      console.log('🎨 Génération du canvas...');
       
       const canvas = await html2canvas(element, {
         scale: scale,
-        useCORS: !isCommique, // false pour communiqué (image locale)
-        allowTaint: isCommique, // true pour communiqué (image locale)
-        logging: false,
-        backgroundColor: selectedVisual === 'communique' ? '#ffffff' : null,
+        useCORS: true,
+        allowTaint: true,
+        logging: true,
+        backgroundColor: isCommunique ? '#ffffff' : null,
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight,
-        // Options supplémentaires pour la qualité
         foreignObjectRendering: false,
         imageTimeout: 15000,
-        removeContainer: true
+        removeContainer: true,
+        onclone: (clonedDoc) => {
+          // S'assurer que les images sont visibles dans le clone
+          const clonedImages = clonedDoc.querySelectorAll('img');
+          clonedImages.forEach(img => {
+            if (img.src) {
+              img.style.display = 'block';
+              img.style.visibility = 'visible';
+            }
+          });
+        }
       });
 
       console.log('✅ Canvas généré:', canvas.width, 'x', canvas.height);
 
-      // 6. Créer le nom de fichier
+      // 6. Vérifier que le canvas n'est pas vide
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      let isBlank = true;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] !== 255 || data[i+1] !== 255 || data[i+2] !== 255 || data[i+3] !== 0) {
+          isBlank = false;
+          break;
+        }
+      }
+      
+      if (isBlank) {
+        throw new Error('Le canvas généré est vide. Veuillez réessayer.');
+      }
+
+      // 7. Créer le nom de fichier
       const visualType = getCurrentVisualType();
       const sanitize = (value) =>
         value
@@ -776,7 +795,7 @@ const App = () => {
       const timestamp = new Date().getTime();
       const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}-${timestamp}`;
 
-      // 7. Générer le fichier selon le format
+      // 8. Générer le fichier selon le format
       if (format === 'pdf') {
         console.log('📄 Génération PDF...');
         
@@ -819,7 +838,7 @@ const App = () => {
         }, mimeType, quality);
       }
 
-      // 8. Attendre un peu avant de fermer la modal
+      // 9. Attendre un peu avant de fermer la modal
       await new Promise(resolve => setTimeout(resolve, 1000));
       
     } catch (error) {
@@ -878,11 +897,22 @@ const App = () => {
                 }}
                 crossOrigin="anonymous"
               />
+              {/* OVERLAY AU LIEU DU GRADIENT CSS */}
               <div style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6))'
-              }}></div>
+                background: 'rgba(0,0,0,0)',
+                pointerEvents: 'none'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '60%',
+                  background: 'rgba(0,0,0,0.6)'
+                }}></div>
+              </div>
             </div>
 
             {/* Badges top */}
