@@ -1272,7 +1272,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '9px',       /* 📏 Taille de la description */
+                  fontSize: '7px',       /* 📏 Taille de la description */
                   lineHeight: '1',
                   color: '#1a1a1a',
                   margin: 0,
