@@ -1148,7 +1148,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '45.2%',     /* ⬆️⬇️ Position verticale */
+                top: '40.2%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%',   /* ↔️ Largeur du bandeau */
                 height: '3.5%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
