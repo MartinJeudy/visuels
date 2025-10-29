@@ -1318,7 +1318,7 @@ const App = () => {
             <div style={{
               position: 'absolute',
               inset: 0,
-              padding: '24px 24px 24px 40px',
+              padding: '24px 24px 24px 50px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
