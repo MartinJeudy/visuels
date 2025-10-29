@@ -1122,7 +1122,7 @@ const App = () => {
                 left: '53.5%',    /* ⬅️➡️ Déplacer horizontalement */
                 top: '12.5%',     /* ⬆️⬇️ Déplacer verticalement */
                 width: '41%',     /* ↔️ Largeur de l'image */
-                height: '38%',    /* ↕️ Hauteur de l'image */
+                height: '41%',    /* ↕️ Hauteur de l'image */
                 borderRadius: '16px',
                 overflow: 'hidden',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
@@ -1144,8 +1144,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '45.2%',     /* ⬆️⬇️ Position verticale */
+                left: '11%',     /* ⬅️➡️ Position horizontale */
+                top: '43%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%',   /* ↔️ Largeur du bandeau */
                 height: '4.2%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
@@ -1169,13 +1169,13 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
+                left: '8.5%',     /* ⬅️➡️ Position horizontale */
                 top: '46%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '17px',      /* 📏 Taille du titre */
+                  fontSize: '15px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
