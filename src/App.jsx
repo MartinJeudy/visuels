@@ -1178,7 +1178,7 @@ const App = () => {
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '12px',      /* 📏 Taille du titre */
+                  fontSize: '11px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
