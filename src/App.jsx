@@ -1195,7 +1195,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '58%',       /* ⬆️⬇️ Position verticale */
+                top: '54%',       /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur */
               }}>
                 <p style={{
@@ -1241,7 +1241,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Open Sans', Arial, sans-serif",
-                  fontSize: '7px',     /* 📏 Taille du texte de la ville */
+                  fontSize: '5px',     /* 📏 Taille du texte de la ville */
                   color: '#1a1a1a',
                   margin: '0 0 4px 0',
                   fontWeight: '700',
@@ -1251,7 +1251,7 @@ const App = () => {
                 </p>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '8.5px',     /* 📏 Taille de l'horaire */
+                  fontSize: '6.5px',     /* 📏 Taille de l'horaire */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
