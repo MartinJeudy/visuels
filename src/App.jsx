@@ -1150,14 +1150,14 @@ const App = () => {
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
                 top: '45.2%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%',   /* ↔️ Largeur du bandeau */
-                height: '4.2%',   /* ↕️ Hauteur du bandeau */
+                height: '3.5%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '14px',      /* 📏 Taille du texte de la date */
+                  fontSize: '12px',      /* 📏 Taille du texte de la date */
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
