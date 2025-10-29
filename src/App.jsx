@@ -1178,7 +1178,7 @@ const App = () => {
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '10px',      /* 📏 Taille du titre */
+                  fontSize: '8px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1200,7 +1200,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '6px',      /* 📏 Taille du sous-titre */
+                  fontSize: '5px',      /* 📏 Taille du sous-titre */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
