@@ -1195,12 +1195,12 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '55%',       /* ⬆️⬇️ Position verticale */
+                top: '58%',       /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur */
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '8px',      /* 📏 Taille du sous-titre */
+                  fontSize: '6px',      /* 📏 Taille du sous-titre */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
