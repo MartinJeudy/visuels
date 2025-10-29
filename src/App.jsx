@@ -1178,7 +1178,7 @@ const App = () => {
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '11px',      /* 📏 Taille du titre */
+                  fontSize: '10px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1267,7 +1267,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '47.3%',    /* ⬅️➡️ Position horizontale */
-                top: '66%',       /* ⬆️⬇️ Position verticale */
+                top: '65%',       /* ⬆️⬇️ Position verticale */
                 width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
