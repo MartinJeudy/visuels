@@ -1236,12 +1236,12 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '13%',      /* ⬅️➡️ Position horizontale */
-                top: '55%',       /* ⬆️⬇️ Position verticale */
+                top: '57%',       /* ⬆️⬇️ Position verticale */
                 width: '18%'      /* ↔️ Largeur */
               }}>
                 <p style={{
                   fontFamily: "'Open Sans', Arial, sans-serif",
-                  fontSize: '3px',     /* 📏 Taille du texte de la ville */
+                  fontSize: '4px',     /* 📏 Taille du texte de la ville */
                   color: '#1a1a1a',
                   margin: '0 0 4px 0',
                   fontWeight: '700',
