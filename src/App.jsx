@@ -1217,8 +1217,8 @@ const App = () => {
                 position: 'absolute',
                 left: '28%',      /* ⬅️➡️ Position horizontale */
                 top: '57%',       /* ⬆️⬇️ Position verticale */
-                width: '16%',
-                height: '16%',
+                width: '13%',
+                height: '13%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
