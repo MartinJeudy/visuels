@@ -1216,7 +1216,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '28%',      /* ⬅️➡️ Position horizontale */
-                top: '57%',       /* ⬆️⬇️ Position verticale */
+                top: '54%',       /* ⬆️⬇️ Position verticale */
                 width: '12%',
                 height: '12%',
                 display: 'flex',
