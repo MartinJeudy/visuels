@@ -1195,7 +1195,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '54%',       /* ⬆️⬇️ Position verticale */
+                top: '48%',       /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur */
               }}>
                 <p style={{
@@ -1217,8 +1217,8 @@ const App = () => {
                 position: 'absolute',
                 left: '28%',      /* ⬅️➡️ Position horizontale */
                 top: '51%',       /* ⬆️⬇️ Position verticale */
-                width: '12%',
-                height: '12%',
+                width: '11%',
+                height: '11%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
