@@ -1241,7 +1241,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Open Sans', Arial, sans-serif",
-                  fontSize: '5px',     /* 📏 Taille du texte de la ville */
+                  fontSize: '4px',     /* 📏 Taille du texte de la ville */
                   color: '#1a1a1a',
                   margin: '0 0 4px 0',
                   fontWeight: '700',
@@ -1251,7 +1251,7 @@ const App = () => {
                 </p>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '6.5px',     /* 📏 Taille de l'horaire */
+                  fontSize: '5.5px',     /* 📏 Taille de l'horaire */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
