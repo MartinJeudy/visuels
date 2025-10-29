@@ -715,6 +715,26 @@ const App = () => {
       // 3. Attendre un peu pour s'assurer que tout est rendu
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // 3.5. Attendre que toutes les images soient chargées
+      const images = element.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = () => {
+              console.warn('Image non chargée:', img.src);
+              resolve(); // Continue même si une image échoue
+            };
+            // Timeout de sécurité
+            setTimeout(resolve, 3000);
+          });
+        })
+      );
+
+      // Petit délai supplémentaire pour être sûr
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       // 4. Déterminer le scale optimal selon l'appareil
       const isMobile = window.innerWidth < 768;
       const scale = isMobile ? 2 : 3; // Scale réduit sur mobile
@@ -722,10 +742,13 @@ const App = () => {
       console.log(`📱 Appareil: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}`);
 
       // 5. Configuration html2canvas optimisée
+      // Pour le communiqué avec image locale, on doit permettre allowTaint: true
+      const isCommique = selectedVisual === 'communique';
+      
       const canvas = await html2canvas(element, {
         scale: scale,
-        useCORS: true,
-        allowTaint: false,
+        useCORS: !isCommique, // false pour communiqué (image locale)
+        allowTaint: isCommique, // true pour communiqué (image locale)
         logging: false,
         backgroundColor: selectedVisual === 'communique' ? '#ffffff' : null,
         windowWidth: element.scrollWidth,
@@ -1176,47 +1199,27 @@ const App = () => {
             position: 'relative',
             backgroundColor: '#ffffff'
           }}>
-            {/* Fond blanc simple comme template de base */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#ffffff',
-              zIndex: 1
-            }}>
-              {/* En-tête Hormur */}
-              <div style={{
+            {/* Template de base - zIndex:1 */}
+            <img
+              src="/communique-template.png"
+              alt="Template communiqué"
+              style={{
                 position: 'absolute',
-                top: '4%',
-                left: '8%',
-                right: '8%',
-                height: '8%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '3px solid #fb593d'
-              }}>
-                <div style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: '24px',
-                  fontWeight: '900',
-                  color: '#fb593d',
-                  letterSpacing: '2px'
-                }}>
-                  HORMUR
-                </div>
-                <div style={{
-                  fontFamily: "'Open Sans', sans-serif",
-                  fontSize: '8px',
-                  color: '#666',
-                  textAlign: 'right'
-                }}>
-                  Communiqué de presse
-                </div>
-              </div>
-            </div>
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                zIndex: 1
+              }}
+              onError={(e) => {
+                console.error('❌ Erreur chargement template:', e.target.src);
+                console.log('💡 Vérifiez que le fichier existe dans public/communique-template.png');
+              }}
+              onLoad={() => {
+                console.log('✅ Template communiqué chargé avec succès');
+              }}
+            />
 
             {/* Calque de contenu - zIndex:2 */}
             <div style={{
@@ -1379,34 +1382,6 @@ const App = () => {
                 }}>
                   {eventData.description}
                 </p>
-              </div>
-
-              {/* Pied de page */}
-              <div style={{
-                position: 'absolute',
-                bottom: '4%',
-                left: '8%',
-                right: '8%',
-                borderTop: '2px solid #f0f0f0',
-                paddingTop: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div style={{
-                  fontFamily: "'Open Sans', sans-serif",
-                  fontSize: '6px',
-                  color: '#999'
-                }}>
-                  hormur.com
-                </div>
-                <div style={{
-                  fontFamily: "'Open Sans', sans-serif",
-                  fontSize: '6px',
-                  color: '#999'
-                }}>
-                  Contact: contact@hormur.com
-                </div>
               </div>
             </div>
           </div>
