@@ -1172,13 +1172,13 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '46%',     /* ⬆️⬇️ Position verticale */
+                left: '9%',     /* ⬅️➡️ Position horizontale */
+                top: '47%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '13px',      /* 📏 Taille du titre */
+                  fontSize: '12px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1266,8 +1266,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '48.5%',    /* ⬅️➡️ Position horizontale */
-                top: '62%',       /* ⬆️⬇️ Position verticale */
+                left: '47.5%',    /* ⬅️➡️ Position horizontale */
+                top: '63%',       /* ⬆️⬇️ Position verticale */
                 width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
