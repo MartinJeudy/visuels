@@ -1267,7 +1267,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '47.3%',    /* ⬅️➡️ Position horizontale */
-                top: '68%',       /* ⬆️⬇️ Position verticale */
+                top: '64%',       /* ⬆️⬇️ Position verticale */
                 width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
