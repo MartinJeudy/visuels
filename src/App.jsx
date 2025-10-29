@@ -8,7 +8,7 @@ const hormurColors = [
   { name: 'Orange Hormur', value: '#fb593d', text: '#f7ce64' },
   { name: 'Rouge Vif', value: '#fc4735', text: '#feb7db' },
   { name: 'Rose Bonbon', value: '#fca0ba', text: '#1a1a1a' },
-  { name: 'Rose Saumon', value: '#fd94ac', text: '#1a1a1a' },
+  { name: 'Rose Saumon', value: '#fd94ac', text: '#157fcd' },
   { name: 'Jaune Citron', value: '#f7ce64', text: '#f75b40' },
   { name: 'Vert Pomme', value: '#d7f879', text: '#00b17e' },
   { name: 'Vert Émeraude', value: '#00b179', text: '#d7f879' },
