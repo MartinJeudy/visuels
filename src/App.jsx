@@ -1173,7 +1173,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '45%',     /* ⬆️⬇️ Position verticale */
+                top: '46%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
@@ -1195,12 +1195,12 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '57%',       /* ⬆️⬇️ Position verticale */
+                top: '55%',       /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur */
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '10px',      /* 📏 Taille du sous-titre */
+                  fontSize: '8px',      /* 📏 Taille du sous-titre */
                   fontStyle: 'italic',
                   color: '#666',
                   margin: 0,
@@ -1215,8 +1215,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '30%',      /* ⬅️➡️ Position horizontale */
-                top: '61%',       /* ⬆️⬇️ Position verticale */
+                left: '28%',      /* ⬅️➡️ Position horizontale */
+                top: '57%',       /* ⬆️⬇️ Position verticale */
                 width: '16%',
                 height: '16%',
                 display: 'flex',
@@ -1267,13 +1267,13 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '48.5%',    /* ⬅️➡️ Position horizontale */
-                top: '60%',       /* ⬆️⬇️ Position verticale */
+                top: '62%',       /* ⬆️⬇️ Position verticale */
                 width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
                   fontSize: '9px',       /* 📏 Taille de la description */
-                  lineHeight: '1.55',
+                  lineHeight: '1',
                   color: '#1a1a1a',
                   margin: 0,
                   textAlign: 'justify'
