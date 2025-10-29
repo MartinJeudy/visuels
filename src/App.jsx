@@ -1120,7 +1120,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '53.5%',    /* ⬅️➡️ Déplacer horizontalement */
-                top: '12.5%',     /* ⬆️⬇️ Déplacer verticalement */
+                top: '10%',     /* ⬆️⬇️ Déplacer verticalement */
                 width: '41%',     /* ↔️ Largeur de l'image */
                 paddingBottom: '41%', /* ↕️ Hauteur = largeur (crée un carré parfait) */
                 borderRadius: '16px',
@@ -1147,8 +1147,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '45.2%',     /* ⬆️⬇️ Position verticale */
+                left: '9%',     /* ⬅️➡️ Position horizontale */
+                top: '47.2%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%',   /* ↔️ Largeur du bandeau */
                 height: '4.2%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
@@ -1173,12 +1173,12 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '9.5%',     /* ⬅️➡️ Position horizontale */
-                top: '51.5%',     /* ⬆️⬇️ Position verticale */
+                top: '45%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '17px',      /* 📏 Taille du titre */
+                  fontSize: '15px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1258,27 +1258,6 @@ const App = () => {
                   lineHeight: '1.3'
                 }}>
                   {eventData.time ? `le ${eventData.date} à ${eventData.time}` : `le ${eventData.date}`}
-                </p>
-              </div>
-
-              {/* ════════════════════════════════════════════════════════════
-                  ℹ️ TEXTE INSTITUTIONNEL HORMUR (Colonne droite)
-                  ════════════════════════════════════════════════════════════ */}
-              <div style={{
-                position: 'absolute',
-                left: '53.5%',    /* ⬅️➡️ Position horizontale */
-                top: '54%',       /* ⬆️⬇️ Position verticale */
-                width: '41%'      /* ↔️ Largeur */
-              }}>
-                <p style={{
-                  fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '9px',       /* 📏 Taille du texte institutionnel */
-                  lineHeight: '1.55',
-                  color: '#1a1a1a',
-                  margin: 0,
-                  textAlign: 'justify'
-                }}>
-                  Hormur connecte artistes et hôtes dans la co-création d'évènements artistiques intimistes dans des lieux non conventionnels, accessibles au public via une billetterie en ligne. Lauréate de l'AMI "Solutions de billetterie innovantes" du Ministère de la Culture, la plateforme rassemble depuis 2021 des milliers d'artistes et de lieux pour faire vivre l'art autrement partout en France.
                 </p>
               </div>
 
