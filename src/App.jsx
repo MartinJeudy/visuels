@@ -1157,7 +1157,7 @@ const App = () => {
               }}>
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
-                  fontSize: '12px',      /* 📏 Taille du texte de la date */
+                  fontSize: '14px',      /* 📏 Taille du texte de la date */
                   fontWeight: '700',
                   color: 'white',
                   margin: 0,
@@ -1273,6 +1273,7 @@ const App = () => {
                 <p style={{
                   fontFamily: "'Buenard', Georgia, serif",
                   fontSize: '7px',       /* 📏 Taille de la description */
+                  fontWeight: '700',
                   lineHeight: '1',
                   color: '#1a1a1a',
                   margin: 0,
