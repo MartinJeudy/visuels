@@ -1172,7 +1172,7 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9%',     /* ⬅️➡️ Position horizontale */
+                left: '8.5%',     /* ⬅️➡️ Position horizontale */
                 top: '47%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%'    /* ↔️ Largeur du titre */
               }}>
