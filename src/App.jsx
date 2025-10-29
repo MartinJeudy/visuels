@@ -1120,9 +1120,9 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 left: '53.5%',    /* ⬅️➡️ Déplacer horizontalement */
-                top: '10%',     /* ⬆️⬇️ Déplacer verticalement */
-                width: '41%',     /* ↔️ Largeur de l'image */
-                paddingBottom: '41%', /* ↕️ Hauteur = largeur (crée un carré parfait) */
+                top: '9%',     /* ⬆️⬇️ Déplacer verticalement */
+                width: '45%',     /* ↔️ Largeur de l'image */
+                paddingBottom: '45%', /* ↕️ Hauteur = largeur (crée un carré parfait) */
                 borderRadius: '16px',
                 overflow: 'hidden',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
@@ -1147,8 +1147,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '9%',     /* ⬅️➡️ Position horizontale */
-                top: '47.2%',     /* ⬆️⬇️ Position verticale */
+                left: '9.5%',     /* ⬅️➡️ Position horizontale */
+                top: '45.2%',     /* ⬆️⬇️ Position verticale */
                 width: '36.5%',   /* ↔️ Largeur du bandeau */
                 height: '4.2%',   /* ↕️ Hauteur du bandeau */
                 display: 'flex',
@@ -1178,7 +1178,7 @@ const App = () => {
               }}>
                 <h2 style={{
                   fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
-                  fontSize: '15px',      /* 📏 Taille du titre */
+                  fontSize: '13px',      /* 📏 Taille du titre */
                   fontWeight: '800',
                   color: '#1a1a1a',
                   margin: 0,
@@ -1266,8 +1266,8 @@ const App = () => {
                   ════════════════════════════════════════════════════════════ */}
               <div style={{
                 position: 'absolute',
-                left: '53.5%',    /* ⬅️➡️ Position horizontale */
-                top: '70%',       /* ⬆️⬇️ Position verticale */
+                left: '48.5%',    /* ⬅️➡️ Position horizontale */
+                top: '60%',       /* ⬆️⬇️ Position verticale */
                 width: '41%'      /* ↔️ Largeur */
               }}>
                 <p style={{
