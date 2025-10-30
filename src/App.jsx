@@ -662,190 +662,110 @@ const App = () => {
   // ============================================
   const handleDownload = async (format) => {
   if (isDownloading) return;
-  
   setIsDownloading(true);
 
   try {
     const element = visualRef.current;
-    if (!element) throw new Error('Élément visuel introuvable');
+    if (!element) throw new Error("Aucun visuel à capturer");
 
-    // ============================================
-    // ÉTAPE 1 : FORCER LA VISIBILITÉ
-    // ============================================
-    const isMobile = window.innerWidth < 768;
-    let needsRestore = false;
-    let originalStyles = {};
-    
-    // Forcer l'affichage si masqué (mobile ou autre)
+    // Forcer visibilité (mobile / aperçu masqué)
     const parent = element.parentElement;
-    if (parent && (isMobile && mobileView === 'edit')) {
-      needsRestore = true;
-      originalStyles = {
-        display: parent.style.display,
-        visibility: parent.style.visibility,
-        position: parent.style.position,
-        zIndex: parent.style.zIndex
-      };
-      
-      parent.style.display = 'block';
-      parent.style.visibility = 'visible';
-      parent.style.position = 'relative';
-      parent.style.zIndex = '9999';
-      
-      element.offsetHeight; // Force reflow
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
+    const original = {
+      display: parent.style.display,
+      visibility: parent.style.visibility,
+      position: parent.style.position,
+      zIndex: parent.style.zIndex
+    };
+    parent.style.display = 'block';
+    parent.style.visibility = 'visible';
+    parent.style.position = 'relative';
+    parent.style.zIndex = '9999';
+    await new Promise(r => setTimeout(r, 200));
 
-    // Vérifier dimensions
-    const rect = element.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) {
-      throw new Error('Élément non visible. Passez en mode Aperçu avant de télécharger.');
-    }
-
-    // ============================================
-    // ÉTAPE 2 : ATTENDRE LES POLICES
-    // ============================================
+    // ✅ 1. Attendre polices
     if (document.fonts) {
       await document.fonts.ready;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // ============================================
-    // ÉTAPE 3 : ATTENDRE LES IMAGES
-    // ============================================
-    const images = element.querySelectorAll('img');
+    // ✅ 2. Convertir toutes les <img> en base64 AVANT html2canvas
+    const imgEls = element.querySelectorAll('img');
+
+    const convertToBase64 = (img) =>
+      fetch(img.src, { mode: 'cors' })
+        .then(res => res.blob())
+        .then(blob => new Promise((resolve) => {
+          const r = new FileReader();
+          r.onloadend = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        }))
+        .catch(() => img.src); // fallback
+
     await Promise.all(
-      Array.from(images).map(img => {
-        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-        
-        return new Promise((resolve) => {
-          const timeout = setTimeout(() => resolve(), 15000);
-          img.onload = () => { clearTimeout(timeout); resolve(); };
-          img.onerror = () => { clearTimeout(timeout); resolve(); };
-        });
+      Array.from(imgEls).map(async (img) => {
+        const dataUrl = await convertToBase64(img);
+        img.setAttribute('data-original-src', img.src);
+        img.src = dataUrl;
       })
     );
 
-    // Délai final de stabilisation
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // ✅ 3. Délai de stabilisation
+    await new Promise(r => setTimeout(r, 600));
 
-    // ============================================
-    // ÉTAPE 4 : GÉNÉRER LE CANVAS
-    // ============================================
-    const isCommunique = selectedVisual === 'communique';
-    const scale = 4; // Haute qualité
-    
+    // ✅ 4. Capture HD
+    const scale = 4;
     const canvas = await html2canvas(element, {
-      scale: scale,
+      scale,
       useCORS: true,
       allowTaint: false,
-      foreignObjectRendering: true, // ACTIVÉ comme demandé
-      logging: false,
-      backgroundColor: isCommunique ? '#ffffff' : null,
-      width: rect.width,
-      height: rect.height,
-      windowWidth: rect.width,
-      windowHeight: rect.height,
-      imageTimeout: 20000,
+      foreignObjectRendering: true,
+      backgroundColor: '#ffffff',
       removeContainer: true,
-      onclone: (clonedDoc) => {
-        // Injecter les polices dans le clone
-        const style = clonedDoc.createElement('style');
-        style.textContent = `
-          @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
-          * { 
-            font-family: 'Bebas Neue', Arial, sans-serif !important;
-            -webkit-font-smoothing: antialiased;
-          }
-        `;
-        clonedDoc.head.appendChild(style);
-        
-        // S'assurer que tout est visible
-        clonedDoc.body.style.display = 'block';
-        clonedDoc.body.style.visibility = 'visible';
-      }
+      logging: false,
     });
 
-    // Restaurer l'affichage original
-    if (needsRestore) {
-      Object.assign(parent.style, originalStyles);
-    }
+    // ✅ 5. Restaurer SRC originaux
+    imgEls.forEach(img => {
+      const originalSrc = img.getAttribute('data-original-src');
+      if (originalSrc) img.src = originalSrc;
+    });
+    Object.assign(parent.style, original);
 
-    // ============================================
-    // ÉTAPE 5 : VÉRIFIER QUE LE CANVAS N'EST PAS VIDE
-    // ============================================
-    if (canvas.width === 0 || canvas.height === 0) {
-      throw new Error('Canvas invalide (0x0)');
-    }
+    // Vérifier si canvas vide
+    const ctx = canvas.getContext("2d");
+    const px = ctx.getImageData(10, 10, 1, 1).data;
+    if (px[3] === 0) throw new Error("Rendu vide");
 
-    // Vérifier plusieurs points pour détecter si blanc/noir
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const checkPixel = (x, y) => {
-      const pixel = ctx.getImageData(x, y, 1, 1).data;
-      return { r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] };
-    };
-    
-    const samples = [
-      checkPixel(canvas.width / 4, canvas.height / 4),
-      checkPixel(canvas.width / 2, canvas.height / 2),
-      checkPixel(3 * canvas.width / 4, 3 * canvas.height / 4)
-    ];
-    
-    const allWhite = samples.every(s => s.r === 255 && s.g === 255 && s.b === 255 && s.a === 255);
-    const allBlack = samples.every(s => s.r === 0 && s.g === 0 && s.b === 0);
-    const allTransparent = samples.every(s => s.a === 0);
-    
-    if (allWhite || allBlack || allTransparent) {
-      throw new Error('Canvas vide détecté. Attendez 3 secondes en mode Aperçu puis réessayez.');
-    }
+    // ✅ 6. Export fichier
+    const filename = `hormur-${selectedVisual}-${Date.now()}`;
 
-    // ============================================
-    // ÉTAPE 6 : GÉNÉRER LE FICHIER
-    // ============================================
-    const visualType = getCurrentVisualType();
-    const sanitize = (value) =>
-      value.toString().normalize('NFD').replace(/\p{Diacritic}/gu, '')
-        .replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-')
-        .replace(/^-|-$/g, '').toLowerCase();
-
-    const timestamp = Date.now();
-    const filename = `hormur-${selectedVisual}-${sanitize(eventData.title)}-${timestamp}`;
-
-    if (format === 'pdf') {
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    if (format === "pdf") {
+      const imgData = canvas.toDataURL("image/jpeg", 0.98);
       const pdf = new jsPDF({
-        orientation: visualType.pdf.height >= visualType.pdf.width ? 'portrait' : 'landscape',
-        unit: 'mm',
-        format: [visualType.pdf.width, visualType.pdf.height],
-        compress: true
+        orientation: "portrait",
+        unit: "mm",
+        format: [210, 297],
       });
-      pdf.addImage(imgData, 'JPEG', 0, 0, visualType.pdf.width, visualType.pdf.height);
+      pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
       pdf.save(`${filename}.pdf`);
     } else {
-      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
-      const quality = format === 'jpeg' ? 0.98 : 1.0;
-      
       canvas.toBlob((blob) => {
-        if (!blob) throw new Error('Impossible de créer le blob');
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`;
+        a.download = `${filename}.${format === "jpeg" ? "jpg" : "png"}`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        a.remove();
         URL.revokeObjectURL(url);
-      }, mimeType, quality);
+      }, format === "jpeg" ? "image/jpeg" : "image/png", 1);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-  } catch (error) {
-    console.error('❌ Erreur téléchargement:', error);
-    alert(`Erreur: ${error.message}\n\n💡 Solutions:\n1. Passez en mode "Aperçu"\n2. Attendez 3 secondes\n3. Réessayez\n4. Videz le cache (Ctrl+Shift+R)`);
+  } catch (e) {
+    alert("Erreur lors de la génération. Rechargez la page et réessayez.");
+    console.error("❌ ERREUR EXPORT :", e);
   } finally {
     setIsDownloading(false);
-    setTimeout(() => setShowDownloadModal(false), 500);
+    setShowDownloadModal(false);
   }
 };
   
