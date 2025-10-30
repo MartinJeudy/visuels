@@ -661,203 +661,194 @@ const App = () => {
   // FONCTION DE TÉLÉCHARGEMENT CORRIGÉE
   // ============================================
   const handleDownload = async (format) => {
-    if (isDownloading) return;
+  if (isDownloading) return;
+  
+  setIsDownloading(true);
+
+  try {
+    const element = visualRef.current;
+    if (!element) throw new Error('Élément visuel introuvable');
+
+    // ============================================
+    // ÉTAPE 1 : FORCER LA VISIBILITÉ
+    // ============================================
+    const isMobile = window.innerWidth < 768;
+    let needsRestore = false;
+    let originalStyles = {};
     
-    setIsDownloading(true);
-
-    try {
-      console.log('🎨 Début du téléchargement:', format);
-      
-      const element = visualRef.current;
-      if (!element) {
-        throw new Error('Élément visuel introuvable');
-      }
-
-      // CORRECTION 1: Forcer la visibilité sur mobile
-      const isMobile = window.innerWidth < 768;
-      let needsRestore = false;
-      let savedStyles = {};
-      
-      if (isMobile && mobileView === 'edit') {
-        console.log('📱 Mode mobile - passage en aperçu forcé');
-        needsRestore = true;
-        const parent = element.parentElement;
-        savedStyles = {
-          display: parent.style.display,
-          visibility: parent.style.visibility
-        };
-        parent.style.display = 'block';
-        parent.style.visibility = 'visible';
-        element.offsetHeight; // Force reflow
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      // Vérifier dimensions
-      const rect = element.getBoundingClientRect();
-      console.log('📐 Dimensions:', rect.width, 'x', rect.height);
-      
-      if (rect.width === 0 || rect.height === 0) {
-        throw new Error('Aperçu non visible. Passez en mode "Aperçu" avant de télécharger.');
-      }
-
-      // CORRECTION 2: Attendre les polices avec un délai plus long
-      console.log('⏳ Chargement des polices...');
-      if (document.fonts) {
-        await document.fonts.ready;
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // CORRECTION 3: Attendre les images plus longtemps
-      const images = element.querySelectorAll('img');
-      console.log(`📷 ${images.length} images à charger...`);
-      
-      await Promise.all(
-        Array.from(images).map(img => {
-          if (img.complete && img.naturalHeight !== 0) {
-            console.log('✅ Image OK:', img.src.substring(0, 40));
-            return Promise.resolve();
-          }
-          return new Promise((resolve) => {
-            const timeout = setTimeout(() => {
-              console.warn('⏱️ Timeout image');
-              resolve();
-            }, 10000); // 10 secondes
-            img.onload = () => { clearTimeout(timeout); resolve(); };
-            img.onerror = () => { clearTimeout(timeout); resolve(); };
-          });
-        })
-      );
-
-      // Délai supplémentaire de stabilisation
-      await new Promise(resolve => setTimeout(resolve), 1000));
-
-      // CORRECTION 4: Configuration optimisée html2canvas
-      const isCommunique = selectedVisual === 'communique';
-      const scale = 4; // Qualité élevée
-      
-      console.log('🎨 Génération canvas...');
-
-      const canvas = await html2canvas(element, {
-        scale: scale,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: isCommunique ? '#ffffff' : null,
-        width: rect.width,
-        height: rect.height,
-        windowWidth: rect.width,
-        windowHeight: rect.height,
-        foreignObjectRendering: false,
-        imageTimeout: 20000,
-        removeContainer: true,
-        onclone: (clonedDoc) => {
-          // Injecter les polices dans le clone
-          const style = clonedDoc.createElement('style');
-          style.textContent = `
-            @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
-            * { font-family: 'Bebas Neue', Arial, sans-serif !important; }
-          `;
-          clonedDoc.head.appendChild(style);
-          
-          // S'assurer que tout est visible
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach(el => {
-            const computed = window.getComputedStyle(element.querySelector(`[data-id="${el.dataset?.id}"]`) || element);
-            if (computed.display === 'none') return;
-            el.style.visibility = 'visible';
-          });
-        }
-      });
-
-      // Restaurer l'affichage
-      if (needsRestore) {
-        element.parentElement.style.display = savedStyles.display;
-        element.parentElement.style.visibility = savedStyles.visibility;
-      }
-
-      console.log('✅ Canvas:', canvas.width, 'x', canvas.height);
-
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Canvas invalide (0x0). Réessayez.');
-      }
-
-      // CORRECTION 5: Vérifier que le canvas n'est pas blanc/noir
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      const checkSample = (x, y) => {
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        return { r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] };
+    // Forcer l'affichage si masqué (mobile ou autre)
+    const parent = element.parentElement;
+    if (parent && (isMobile && mobileView === 'edit')) {
+      needsRestore = true;
+      originalStyles = {
+        display: parent.style.display,
+        visibility: parent.style.visibility,
+        position: parent.style.position,
+        zIndex: parent.style.zIndex
       };
       
-      const centerSample = checkSample(canvas.width / 2, canvas.height / 2);
-      console.log('🎨 Échantillon centre:', centerSample);
+      parent.style.display = 'block';
+      parent.style.visibility = 'visible';
+      parent.style.position = 'relative';
+      parent.style.zIndex = '9999';
       
-      // Vérifier plusieurs points
-      const samples = [
-        checkSample(canvas.width / 4, canvas.height / 4),
-        checkSample(canvas.width / 2, canvas.height / 2),
-        checkSample(3 * canvas.width / 4, 3 * canvas.height / 4)
-      ];
-      
-      const allWhite = samples.every(s => s.r === 255 && s.g === 255 && s.b === 255);
-      const allBlack = samples.every(s => s.r === 0 && s.g === 0 && s.b === 0);
-      
-      if (allWhite || allBlack) {
-        console.error('❌ Canvas vide détecté!');
-        throw new Error('Le canvas est vide (tout blanc ou tout noir). Réessayez en mode Aperçu après avoir attendu 2-3 secondes.');
-      }
-
-      // Générer le fichier
-      const visualType = getCurrentVisualType();
-      const sanitize = (value) =>
-        value.toString().normalize('NFD').replace(/\p{Diacritic}/gu, '')
-          .replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-')
-          .replace(/^-|-$/g, '').toLowerCase();
-
-      const timestamp = Date.now();
-      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title)}-${timestamp}`;
-
-      if (format === 'pdf') {
-        console.log('📄 PDF...');
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
-        const pdf = new jsPDF({
-          orientation: visualType.pdf.height >= visualType.pdf.width ? 'portrait' : 'landscape',
-          unit: 'mm',
-          format: [visualType.pdf.width, visualType.pdf.height],
-          compress: true
-        });
-        pdf.addImage(imgData, 'JPEG', 0, 0, visualType.pdf.width, visualType.pdf.height);
-        pdf.save(`${filename}.pdf`);
-        console.log('✅ PDF OK');
-      } else {
-        console.log(`🖼️ ${format}...`);
-        const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
-        const quality = format === 'jpeg' ? 0.98 : 1.0;
-        
-        canvas.toBlob((blob) => {
-          if (!blob) throw new Error('Blob null');
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          console.log(`✅ ${format} OK`);
-        }, mimeType, quality);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-    } catch (error) {
-      console.error('❌ Erreur:', error);
-      alert(`Erreur: ${error.message}\n\n💡 Essayez:\n1. Passez en mode "Aperçu"\n2. Attendez 2-3 secondes\n3. Réessayez le téléchargement`);
-    } finally {
-      setIsDownloading(false);
-      setTimeout(() => setShowDownloadModal(false), 500);
+      element.offsetHeight; // Force reflow
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
-  };
 
+    // Vérifier dimensions
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      throw new Error('Élément non visible. Passez en mode Aperçu avant de télécharger.');
+    }
+
+    // ============================================
+    // ÉTAPE 2 : ATTENDRE LES POLICES
+    // ============================================
+    if (document.fonts) {
+      await document.fonts.ready;
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // ============================================
+    // ÉTAPE 3 : ATTENDRE LES IMAGES
+    // ============================================
+    const images = element.querySelectorAll('img');
+    await Promise.all(
+      Array.from(images).map(img => {
+        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+        
+        return new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(), 15000);
+          img.onload = () => { clearTimeout(timeout); resolve(); };
+          img.onerror = () => { clearTimeout(timeout); resolve(); };
+        });
+      })
+    );
+
+    // Délai final de stabilisation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // ============================================
+    // ÉTAPE 4 : GÉNÉRER LE CANVAS
+    // ============================================
+    const isCommunique = selectedVisual === 'communique';
+    const scale = 4; // Haute qualité
+    
+    const canvas = await html2canvas(element, {
+      scale: scale,
+      useCORS: true,
+      allowTaint: false,
+      foreignObjectRendering: true, // ACTIVÉ comme demandé
+      logging: false,
+      backgroundColor: isCommunique ? '#ffffff' : null,
+      width: rect.width,
+      height: rect.height,
+      windowWidth: rect.width,
+      windowHeight: rect.height,
+      imageTimeout: 20000,
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        // Injecter les polices dans le clone
+        const style = clonedDoc.createElement('style');
+        style.textContent = `
+          @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+          * { 
+            font-family: 'Bebas Neue', Arial, sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+          }
+        `;
+        clonedDoc.head.appendChild(style);
+        
+        // S'assurer que tout est visible
+        clonedDoc.body.style.display = 'block';
+        clonedDoc.body.style.visibility = 'visible';
+      }
+    });
+
+    // Restaurer l'affichage original
+    if (needsRestore) {
+      Object.assign(parent.style, originalStyles);
+    }
+
+    // ============================================
+    // ÉTAPE 5 : VÉRIFIER QUE LE CANVAS N'EST PAS VIDE
+    // ============================================
+    if (canvas.width === 0 || canvas.height === 0) {
+      throw new Error('Canvas invalide (0x0)');
+    }
+
+    // Vérifier plusieurs points pour détecter si blanc/noir
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const checkPixel = (x, y) => {
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      return { r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] };
+    };
+    
+    const samples = [
+      checkPixel(canvas.width / 4, canvas.height / 4),
+      checkPixel(canvas.width / 2, canvas.height / 2),
+      checkPixel(3 * canvas.width / 4, 3 * canvas.height / 4)
+    ];
+    
+    const allWhite = samples.every(s => s.r === 255 && s.g === 255 && s.b === 255 && s.a === 255);
+    const allBlack = samples.every(s => s.r === 0 && s.g === 0 && s.b === 0);
+    const allTransparent = samples.every(s => s.a === 0);
+    
+    if (allWhite || allBlack || allTransparent) {
+      throw new Error('Canvas vide détecté. Attendez 3 secondes en mode Aperçu puis réessayez.');
+    }
+
+    // ============================================
+    // ÉTAPE 6 : GÉNÉRER LE FICHIER
+    // ============================================
+    const visualType = getCurrentVisualType();
+    const sanitize = (value) =>
+      value.toString().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+        .replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-')
+        .replace(/^-|-$/g, '').toLowerCase();
+
+    const timestamp = Date.now();
+    const filename = `hormur-${selectedVisual}-${sanitize(eventData.title)}-${timestamp}`;
+
+    if (format === 'pdf') {
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const pdf = new jsPDF({
+        orientation: visualType.pdf.height >= visualType.pdf.width ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: [visualType.pdf.width, visualType.pdf.height],
+        compress: true
+      });
+      pdf.addImage(imgData, 'JPEG', 0, 0, visualType.pdf.width, visualType.pdf.height);
+      pdf.save(`${filename}.pdf`);
+    } else {
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const quality = format === 'jpeg' ? 0.98 : 1.0;
+      
+      canvas.toBlob((blob) => {
+        if (!blob) throw new Error('Impossible de créer le blob');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, mimeType, quality);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+  } catch (error) {
+    console.error('❌ Erreur téléchargement:', error);
+    alert(`Erreur: ${error.message}\n\n💡 Solutions:\n1. Passez en mode "Aperçu"\n2. Attendez 3 secondes\n3. Réessayez\n4. Videz le cache (Ctrl+Shift+R)`);
+  } finally {
+    setIsDownloading(false);
+    setTimeout(() => setShowDownloadModal(false), 500);
+  }
+};
+  
   // ============================================
   // FONCTION DE RENDU DES VISUELS
   // ============================================
