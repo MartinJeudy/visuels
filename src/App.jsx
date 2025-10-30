@@ -122,52 +122,64 @@ const EventUrlInput = memo(({ value, onChange }) => (
   />
 ));
 
-const DownloadModal = ({ onClose, onDownload, isDownloading }) => (
-  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl max-w-md w-full p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg">Télécharger le visuel</h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={isDownloading}>
-          <X size={24} />
-        </button>
-      </div>
-
-      <p className="text-sm text-gray-600 mb-4">Choisissez le format :</p>
-
-      <div className="space-y-3">
-        <button
-          onClick={() => onDownload('pdf')}
-          disabled={isDownloading}
-          className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isDownloading ? '⏳ Génération...' : '📄 PDF (Impression)'}
-        </button>
-        <button
-          onClick={() => onDownload('jpeg')}
-          disabled={isDownloading}
-          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isDownloading ? '⏳ Génération...' : '🖼️ JPEG (Partage)'}
-        </button>
-        <button
-          onClick={() => onDownload('png')}
-          disabled={isDownloading}
-          className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isDownloading ? '⏳ Génération...' : '🎨 PNG (Web)'}
-        </button>
-      </div>
-
-      {isDownloading && (
-        <div className="mt-4 bg-blue-50 p-3 rounded-lg">
-          <p className="text-xs text-blue-900 text-center">
-            ⏳ Génération en cours, merci de patienter...
-          </p>
+const DownloadModal = ({ onClose, onDownload, isDownloading }) => {
+  const isMobile = window.innerWidth < 768;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-lg">Télécharger le visuel</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={isDownloading}>
+            <X size={24} />
+          </button>
         </div>
-      )}
+
+        {isMobile && (
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4">
+            <p className="text-xs text-blue-900">
+              💡 <strong>Astuce:</strong> Passez en mode <strong>Aperçu</strong> avant de télécharger pour de meilleurs résultats.
+            </p>
+          </div>
+        )}
+
+        <p className="text-sm text-gray-600 mb-4">Choisissez le format :</p>
+
+        <div className="space-y-3">
+          <button
+            onClick={() => onDownload('pdf')}
+            disabled={isDownloading}
+            className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDownloading ? '⏳ Génération...' : '📄 PDF (Impression)'}
+          </button>
+          <button
+            onClick={() => onDownload('jpeg')}
+            disabled={isDownloading}
+            className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDownloading ? '⏳ Génération...' : '🖼️ JPEG (Partage)'}
+          </button>
+          <button
+            onClick={() => onDownload('png')}
+            disabled={isDownloading}
+            className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDownloading ? '⏳ Génération...' : '🎨 PNG (Web)'}
+          </button>
+        </div>
+
+        {isDownloading && (
+          <div className="mt-4 bg-blue-50 p-3 rounded-lg">
+            <p className="text-xs text-blue-900 text-center">
+              ⏳ Génération en cours, merci de patienter...
+            </p>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SendModal = ({ onClose, onConfirmSend, onShowSubscription }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -688,14 +700,46 @@ const App = () => {
         throw new Error('Élément visuel introuvable');
       }
 
-      // 2. Attendre que les polices soient chargées
+      // 2. S'assurer que l'élément est visible et a des dimensions
+      const rect = element.getBoundingClientRect();
+      console.log('📐 Dimensions initiales:', rect.width, 'x', rect.height);
+      
+      if (rect.width === 0 || rect.height === 0) {
+        console.warn('⚠️ Élément sans dimensions, tentative de forçage...');
+        
+        // Forcer la visibilité temporaire si masqué
+        const originalDisplay = element.style.display;
+        const originalVisibility = element.style.visibility;
+        const originalPosition = element.style.position;
+        
+        element.style.display = 'block';
+        element.style.visibility = 'visible';
+        element.style.position = 'relative';
+        
+        // Forcer un reflow
+        element.offsetHeight;
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const newRect = element.getBoundingClientRect();
+        console.log('📐 Nouvelles dimensions:', newRect.width, 'x', newRect.height);
+        
+        if (newRect.width === 0 || newRect.height === 0) {
+          element.style.display = originalDisplay;
+          element.style.visibility = originalVisibility;
+          element.style.position = originalPosition;
+          throw new Error('Impossible d\'obtenir les dimensions de l\'élément. Veuillez passer en mode Aperçu avant de télécharger.');
+        }
+      }
+
+      // 3. Attendre que les polices soient chargées
       console.log('⏳ Attente du chargement des polices...');
       await waitForFonts();
       
       // Attendre encore un peu
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // 3. Attendre que toutes les images soient chargées
+      // 4. Attendre que toutes les images soient chargées
       const images = element.querySelectorAll('img');
       console.log(`📷 Chargement de ${images.length} images...`);
       
@@ -728,14 +772,22 @@ const App = () => {
       // Délai supplémentaire pour stabiliser le rendu
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // 4. Configuration selon le type de visuel
+      // 5. Vérifier à nouveau les dimensions juste avant la capture
+      const finalRect = element.getBoundingClientRect();
+      console.log('📐 Dimensions finales:', finalRect.width, 'x', finalRect.height);
+      
+      if (finalRect.width === 0 || finalRect.height === 0) {
+        throw new Error('Dimensions invalides au moment de la capture. Essayez en mode Aperçu.');
+      }
+
+      // 6. Configuration selon le type de visuel
       const isCommunique = selectedVisual === 'communique';
       const isMobile = window.innerWidth < 768;
       const scale = isMobile ? 2 : 3;
       
       console.log(`📱 Config: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}, Type: ${selectedVisual}`);
 
-      // 5. Générer le canvas avec html2canvas
+      // 7. Générer le canvas avec html2canvas
       console.log('🎨 Génération du canvas...');
       
       const canvas = await html2canvas(element, {
@@ -744,8 +796,10 @@ const App = () => {
         allowTaint: true,
         logging: true,
         backgroundColor: isCommunique ? '#ffffff' : null,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        windowWidth: element.scrollWidth || finalRect.width,
+        windowHeight: element.scrollHeight || finalRect.height,
+        width: finalRect.width,
+        height: finalRect.height,
         foreignObjectRendering: false,
         imageTimeout: 15000,
         removeContainer: true,
@@ -763,7 +817,12 @@ const App = () => {
 
       console.log('✅ Canvas généré:', canvas.width, 'x', canvas.height);
 
-      // 6. Vérifier que le canvas n'est pas vide
+      // 8. Vérifier que le canvas a une taille valide
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Le canvas généré a une taille invalide (0x0). Veuillez réessayer en mode Aperçu.');
+      }
+
+      // 9. Vérifier que le canvas n'est pas vide
       const ctx = canvas.getContext('2d');
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
@@ -780,7 +839,7 @@ const App = () => {
         throw new Error('Le canvas généré est vide. Veuillez réessayer.');
       }
 
-      // 7. Créer le nom de fichier
+      // 10. Créer le nom de fichier
       const visualType = getCurrentVisualType();
       const sanitize = (value) =>
         value
@@ -795,7 +854,7 @@ const App = () => {
       const timestamp = new Date().getTime();
       const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}-${timestamp}`;
 
-      // 8. Générer le fichier selon le format
+      // 11. Générer le fichier selon le format
       if (format === 'pdf') {
         console.log('📄 Génération PDF...');
         
@@ -838,12 +897,20 @@ const App = () => {
         }, mimeType, quality);
       }
 
-      // 9. Attendre un peu avant de fermer la modal
+      // 12. Attendre un peu avant de fermer la modal
       await new Promise(resolve => setTimeout(resolve, 1000));
       
     } catch (error) {
       console.error('❌ Erreur téléchargement:', error);
-      alert(`Erreur lors du téléchargement: ${error.message}\n\nVeuillez réessayer ou essayer un autre format.`);
+      
+      let errorMessage = `Erreur lors du téléchargement: ${error.message}`;
+      
+      // Message plus spécifique selon l'erreur
+      if (error.message.includes('dimensions')) {
+        errorMessage += '\n\n💡 Astuce: Sur mobile, passez en mode "Aperçu" avant de télécharger.';
+      }
+      
+      alert(errorMessage + '\n\nVeuillez réessayer ou essayer un autre format.');
     } finally {
       setIsDownloading(false);
       setTimeout(() => {
