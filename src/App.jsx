@@ -1189,7 +1189,6 @@ const App = () => {
                 top: '42.5%',
                 width: '36.5%',
                 height: '3.5%',
-                backgroundColor: '#fb593d',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
