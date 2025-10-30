@@ -668,7 +668,6 @@ const App = () => {
     const element = visualRef.current;
     if (!element) throw new Error("Aucun visuel à capturer");
 
-    // Forcer visibilité (mobile / aperçu masqué)
     const parent = element.parentElement;
     const original = {
       display: parent.style.display,
@@ -682,12 +681,8 @@ const App = () => {
     parent.style.zIndex = '9999';
     await new Promise(r => setTimeout(r, 200));
 
-    // ✅ 1. Attendre polices
-    if (document.fonts) {
-      await document.fonts.ready;
-    }
+    if (document.fonts) await document.fonts.ready;
 
-    // ✅ 2. Convertir toutes les <img> en base64 AVANT html2canvas
     const imgEls = element.querySelectorAll('img');
 
     const convertToBase64 = (img) =>
@@ -698,7 +693,7 @@ const App = () => {
           r.onloadend = () => resolve(r.result);
           r.readAsDataURL(blob);
         }))
-        .catch(() => img.src); // fallback
+        .catch(() => img.src);
 
     await Promise.all(
       Array.from(imgEls).map(async (img) => {
@@ -708,34 +703,27 @@ const App = () => {
       })
     );
 
-    // ✅ 3. Délai de stabilisation
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
 
-    // ✅ 4. Capture HD
-    const scale = 4;
+    const scale = 3;
+
+    // ✅ LA LIGNE QUI CHANGE TOUT
     const canvas = await html2canvas(element, {
       scale,
       useCORS: true,
       allowTaint: false,
-      foreignObjectRendering: true,
+      foreignObjectRendering: false, // ✅ Désactivé
       backgroundColor: '#ffffff',
       removeContainer: true,
-      logging: false,
+      logging: false
     });
 
-    // ✅ 5. Restaurer SRC originaux
     imgEls.forEach(img => {
       const originalSrc = img.getAttribute('data-original-src');
       if (originalSrc) img.src = originalSrc;
     });
     Object.assign(parent.style, original);
 
-    // Vérifier si canvas vide
-    const ctx = canvas.getContext("2d");
-    const px = ctx.getImageData(10, 10, 1, 1).data;
-    if (px[3] === 0) throw new Error("Rendu vide");
-
-    // ✅ 6. Export fichier
     const filename = `hormur-${selectedVisual}-${Date.now()}`;
 
     if (format === "pdf") {
@@ -743,7 +731,7 @@ const App = () => {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [210, 297],
+        format: [210, 297]
       });
       pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
       pdf.save(`${filename}.pdf`);
@@ -761,7 +749,7 @@ const App = () => {
     }
 
   } catch (e) {
-    alert("Erreur lors de la génération. Rechargez la page et réessayez.");
+    alert("Erreur lors de la génération.");
     console.error("❌ ERREUR EXPORT :", e);
   } finally {
     setIsDownloading(false);
