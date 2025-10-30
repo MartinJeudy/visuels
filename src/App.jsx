@@ -59,19 +59,7 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Utilitaire pour attendre que les polices soient chargées
-const waitForFonts = async () => {
-  try {
-    if (document.fonts) {
-      await document.fonts.ready;
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
-  } catch (error) {
-    console.warn('Erreur chargement polices:', error);
-  }
-};
-
-// Composants mémorisés
+// Composants mémorisés (inchangés)
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
@@ -181,6 +169,7 @@ const DownloadModal = ({ onClose, onDownload, isDownloading }) => {
   );
 };
 
+// Autres modals (inchangés - SendModal, SubscriptionModal)
 const SendModal = ({ onClose, onConfirmSend, onShowSubscription }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -575,7 +564,6 @@ const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
@@ -589,23 +577,6 @@ const App = () => {
 
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
-
-  // Charger les polices au démarrage
-  useEffect(() => {
-    const loadFonts = async () => {
-      try {
-        if (document.fonts) {
-          await document.fonts.ready;
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        setFontsLoaded(true);
-      } catch (error) {
-        console.error('Erreur chargement polices:', error);
-        setFontsLoaded(true);
-      }
-    };
-    loadFonts();
-  }, []);
 
   const handleTitleChange = useCallback((e) => {
     setEventData(prev => ({...prev, title: e.target.value}));
@@ -686,6 +657,9 @@ const App = () => {
     setTempImage(null);
   };
 
+  // ============================================
+  // FONCTION DE TÉLÉCHARGEMENT CORRIGÉE
+  // ============================================
   const handleDownload = async (format) => {
     if (isDownloading) return;
     
@@ -694,196 +668,173 @@ const App = () => {
     try {
       console.log('🎨 Début du téléchargement:', format);
       
-      // 1. Vérifier que l'élément existe
       const element = visualRef.current;
       if (!element) {
         throw new Error('Élément visuel introuvable');
       }
 
-      // 2. S'assurer que l'élément est visible et a des dimensions
-      const rect = element.getBoundingClientRect();
-      console.log('📐 Dimensions initiales:', rect.width, 'x', rect.height);
+      // CORRECTION 1: Forcer la visibilité sur mobile
+      const isMobile = window.innerWidth < 768;
+      let needsRestore = false;
+      let savedStyles = {};
       
-      if (rect.width === 0 || rect.height === 0) {
-        console.warn('⚠️ Élément sans dimensions, tentative de forçage...');
-        
-        // Forcer la visibilité temporaire si masqué
-        const originalDisplay = element.style.display;
-        const originalVisibility = element.style.visibility;
-        const originalPosition = element.style.position;
-        
-        element.style.display = 'block';
-        element.style.visibility = 'visible';
-        element.style.position = 'relative';
-        
-        // Forcer un reflow
-        element.offsetHeight;
-        
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const newRect = element.getBoundingClientRect();
-        console.log('📐 Nouvelles dimensions:', newRect.width, 'x', newRect.height);
-        
-        if (newRect.width === 0 || newRect.height === 0) {
-          element.style.display = originalDisplay;
-          element.style.visibility = originalVisibility;
-          element.style.position = originalPosition;
-          throw new Error('Impossible d\'obtenir les dimensions de l\'élément. Veuillez passer en mode Aperçu avant de télécharger.');
-        }
+      if (isMobile && mobileView === 'edit') {
+        console.log('📱 Mode mobile - passage en aperçu forcé');
+        needsRestore = true;
+        const parent = element.parentElement;
+        savedStyles = {
+          display: parent.style.display,
+          visibility: parent.style.visibility
+        };
+        parent.style.display = 'block';
+        parent.style.visibility = 'visible';
+        element.offsetHeight; // Force reflow
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
 
-      // 3. Attendre que les polices soient chargées
-      console.log('⏳ Attente du chargement des polices...');
-      await waitForFonts();
+      // Vérifier dimensions
+      const rect = element.getBoundingClientRect();
+      console.log('📐 Dimensions:', rect.width, 'x', rect.height);
       
-      // Attendre encore un peu
-      await new Promise(resolve => setTimeout(resolve, 800));
+      if (rect.width === 0 || rect.height === 0) {
+        throw new Error('Aperçu non visible. Passez en mode "Aperçu" avant de télécharger.');
+      }
 
-      // 4. Attendre que toutes les images soient chargées
+      // CORRECTION 2: Attendre les polices avec un délai plus long
+      console.log('⏳ Chargement des polices...');
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // CORRECTION 3: Attendre les images plus longtemps
       const images = element.querySelectorAll('img');
-      console.log(`📷 Chargement de ${images.length} images...`);
+      console.log(`📷 ${images.length} images à charger...`);
       
       await Promise.all(
         Array.from(images).map(img => {
           if (img.complete && img.naturalHeight !== 0) {
-            console.log('✅ Image déjà chargée:', img.src.substring(0, 50));
+            console.log('✅ Image OK:', img.src.substring(0, 40));
             return Promise.resolve();
           }
           return new Promise((resolve) => {
             const timeout = setTimeout(() => {
-              console.warn('⏱️ Timeout image:', img.src.substring(0, 50));
+              console.warn('⏱️ Timeout image');
               resolve();
-            }, 5000);
-            
-            img.onload = () => {
-              clearTimeout(timeout);
-              console.log('✅ Image chargée:', img.src.substring(0, 50));
-              resolve();
-            };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              console.warn('❌ Erreur chargement image:', img.src.substring(0, 50));
-              resolve();
-            };
+            }, 10000); // 10 secondes
+            img.onload = () => { clearTimeout(timeout); resolve(); };
+            img.onerror = () => { clearTimeout(timeout); resolve(); };
           });
         })
       );
 
-      // Délai supplémentaire pour stabiliser le rendu
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Délai supplémentaire de stabilisation
+      await new Promise(resolve => setTimeout(resolve), 1000));
 
-      // 5. Vérifier à nouveau les dimensions juste avant la capture
-      const finalRect = element.getBoundingClientRect();
-      console.log('📐 Dimensions finales:', finalRect.width, 'x', finalRect.height);
-      
-      if (finalRect.width === 0 || finalRect.height === 0) {
-        throw new Error('Dimensions invalides au moment de la capture. Essayez en mode Aperçu.');
-      }
-
-      // 6. Configuration selon le type de visuel
+      // CORRECTION 4: Configuration optimisée html2canvas
       const isCommunique = selectedVisual === 'communique';
-      const isMobile = window.innerWidth < 768;
-      const scale = isMobile ? 2 : 3;
+      const scale = 4; // Qualité élevée
       
-      console.log(`📱 Config: ${isMobile ? 'Mobile' : 'Desktop'}, Scale: ${scale}, Type: ${selectedVisual}`);
+      console.log('🎨 Génération canvas...');
 
-      // 7. Générer le canvas avec html2canvas
-      console.log('🎨 Génération du canvas...');
-      
       const canvas = await html2canvas(element, {
         scale: scale,
         useCORS: true,
         allowTaint: true,
-        logging: true,
+        logging: false,
         backgroundColor: isCommunique ? '#ffffff' : null,
-        windowWidth: element.scrollWidth || finalRect.width,
-        windowHeight: element.scrollHeight || finalRect.height,
-        width: finalRect.width,
-        height: finalRect.height,
+        width: rect.width,
+        height: rect.height,
+        windowWidth: rect.width,
+        windowHeight: rect.height,
         foreignObjectRendering: false,
-        imageTimeout: 15000,
+        imageTimeout: 20000,
         removeContainer: true,
         onclone: (clonedDoc) => {
-          // S'assurer que les images sont visibles dans le clone
-          const clonedImages = clonedDoc.querySelectorAll('img');
-          clonedImages.forEach(img => {
-            if (img.src) {
-              img.style.display = 'block';
-              img.style.visibility = 'visible';
-            }
+          // Injecter les polices dans le clone
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+            * { font-family: 'Bebas Neue', Arial, sans-serif !important; }
+          `;
+          clonedDoc.head.appendChild(style);
+          
+          // S'assurer que tout est visible
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            const computed = window.getComputedStyle(element.querySelector(`[data-id="${el.dataset?.id}"]`) || element);
+            if (computed.display === 'none') return;
+            el.style.visibility = 'visible';
           });
         }
       });
 
-      console.log('✅ Canvas généré:', canvas.width, 'x', canvas.height);
+      // Restaurer l'affichage
+      if (needsRestore) {
+        element.parentElement.style.display = savedStyles.display;
+        element.parentElement.style.visibility = savedStyles.visibility;
+      }
 
-      // 8. Vérifier que le canvas a une taille valide
+      console.log('✅ Canvas:', canvas.width, 'x', canvas.height);
+
       if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Le canvas généré a une taille invalide (0x0). Veuillez réessayer en mode Aperçu.');
+        throw new Error('Canvas invalide (0x0). Réessayez.');
       }
 
-      // 9. Vérifier que le canvas n'est pas vide
-      const ctx = canvas.getContext('2d');
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      let isBlank = true;
+      // CORRECTION 5: Vérifier que le canvas n'est pas blanc/noir
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const checkSample = (x, y) => {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        return { r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] };
+      };
       
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] !== 255 || data[i+1] !== 255 || data[i+2] !== 255 || data[i+3] !== 0) {
-          isBlank = false;
-          break;
-        }
-      }
+      const centerSample = checkSample(canvas.width / 2, canvas.height / 2);
+      console.log('🎨 Échantillon centre:', centerSample);
       
-      if (isBlank) {
-        throw new Error('Le canvas généré est vide. Veuillez réessayer.');
+      // Vérifier plusieurs points
+      const samples = [
+        checkSample(canvas.width / 4, canvas.height / 4),
+        checkSample(canvas.width / 2, canvas.height / 2),
+        checkSample(3 * canvas.width / 4, 3 * canvas.height / 4)
+      ];
+      
+      const allWhite = samples.every(s => s.r === 255 && s.g === 255 && s.b === 255);
+      const allBlack = samples.every(s => s.r === 0 && s.g === 0 && s.b === 0);
+      
+      if (allWhite || allBlack) {
+        console.error('❌ Canvas vide détecté!');
+        throw new Error('Le canvas est vide (tout blanc ou tout noir). Réessayez en mode Aperçu après avoir attendu 2-3 secondes.');
       }
 
-      // 10. Créer le nom de fichier
+      // Générer le fichier
       const visualType = getCurrentVisualType();
       const sanitize = (value) =>
-        value
-          .toString()
-          .normalize('NFD')
-          .replace(/\p{Diacritic}/gu, '')
-          .replace(/[^a-zA-Z0-9-_]+/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '')
-          .toLowerCase();
+        value.toString().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+          .replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-')
+          .replace(/^-|-$/g, '').toLowerCase();
 
-      const timestamp = new Date().getTime();
-      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title || selectedVisual)}-${timestamp}`;
+      const timestamp = Date.now();
+      const filename = `hormur-${selectedVisual}-${sanitize(eventData.title)}-${timestamp}`;
 
-      // 11. Générer le fichier selon le format
       if (format === 'pdf') {
-        console.log('📄 Génération PDF...');
-        
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const pdfWidth = visualType.pdf.width;
-        const pdfHeight = visualType.pdf.height;
-
+        console.log('📄 PDF...');
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
         const pdf = new jsPDF({
-          orientation: pdfHeight >= pdfWidth ? 'portrait' : 'landscape',
+          orientation: visualType.pdf.height >= visualType.pdf.width ? 'portrait' : 'landscape',
           unit: 'mm',
-          format: [pdfWidth, pdfHeight],
+          format: [visualType.pdf.width, visualType.pdf.height],
           compress: true
         });
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.addImage(imgData, 'JPEG', 0, 0, visualType.pdf.width, visualType.pdf.height);
         pdf.save(`${filename}.pdf`);
-        
-        console.log('✅ PDF téléchargé');
+        console.log('✅ PDF OK');
       } else {
-        console.log(`🖼️ Génération ${format.toUpperCase()}...`);
-        
+        console.log(`🖼️ ${format}...`);
         const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
-        const quality = format === 'jpeg' ? 0.95 : 1.0;
-
+        const quality = format === 'jpeg' ? 0.98 : 1.0;
+        
         canvas.toBlob((blob) => {
-          if (!blob) {
-            throw new Error('Impossible de créer le blob');
-          }
-          
+          if (!blob) throw new Error('Blob null');
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -892,33 +843,24 @@ const App = () => {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          
-          console.log(`✅ ${format.toUpperCase()} téléchargé`);
+          console.log(`✅ ${format} OK`);
         }, mimeType, quality);
       }
 
-      // 12. Attendre un peu avant de fermer la modal
       await new Promise(resolve => setTimeout(resolve, 1000));
       
     } catch (error) {
-      console.error('❌ Erreur téléchargement:', error);
-      
-      let errorMessage = `Erreur lors du téléchargement: ${error.message}`;
-      
-      // Message plus spécifique selon l'erreur
-      if (error.message.includes('dimensions')) {
-        errorMessage += '\n\n💡 Astuce: Sur mobile, passez en mode "Aperçu" avant de télécharger.';
-      }
-      
-      alert(errorMessage + '\n\nVeuillez réessayer ou essayer un autre format.');
+      console.error('❌ Erreur:', error);
+      alert(`Erreur: ${error.message}\n\n💡 Essayez:\n1. Passez en mode "Aperçu"\n2. Attendez 2-3 secondes\n3. Réessayez le téléchargement`);
     } finally {
       setIsDownloading(false);
-      setTimeout(() => {
-        setShowDownloadModal(false);
-      }, 500);
+      setTimeout(() => setShowDownloadModal(false), 500);
     }
   };
 
+  // ============================================
+  // FONCTION DE RENDU DES VISUELS
+  // ============================================
   const renderVisual = () => {
     const colorObj = getCurrentColor();
     const textColor = colorObj.text;
@@ -926,6 +868,7 @@ const App = () => {
     const visualType = getCurrentVisualType();
     const aspectRatio = visualType.canvas.width / visualType.canvas.height;
 
+    // CORRECTION 6: Ajouter data-download-target pour identifier l'élément
     const visualStyle = {
       width: '100%',
       aspectRatio: aspectRatio.toFixed(4),
@@ -941,7 +884,7 @@ const App = () => {
       case 'affiche':
       case 'flyer-recto':
         return (
-          <div ref={visualRef} style={visualStyle}>
+          <div ref={visualRef} data-download-target="true" style={visualStyle}>
             {/* Image carrée - 60% hauteur */}
             <div style={{
               position: 'absolute',
@@ -964,22 +907,16 @@ const App = () => {
                 }}
                 crossOrigin="anonymous"
               />
-              {/* OVERLAY AU LIEU DU GRADIENT CSS */}
+              {/* Overlay gradient plus simple */}
               <div style={{
                 position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0)',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '50%',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
                 pointerEvents: 'none'
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: '60%',
-                  background: 'rgba(0,0,0,0.6)'
-                }}></div>
-              </div>
+              }}></div>
             </div>
 
             {/* Badges top */}
@@ -1130,7 +1067,7 @@ const App = () => {
 
       case 'flyer-verso':
         return (
-          <div ref={visualRef} style={visualStyle}>
+          <div ref={visualRef} data-download-target="true" style={visualStyle}>
             <div style={{
               padding: '20px',
               height: '100%',
@@ -1291,7 +1228,7 @@ const App = () => {
 
       case 'communique':
         return (
-          <div ref={visualRef} style={{
+          <div ref={visualRef} data-download-target="true" style={{
             ...visualStyle,
             position: 'relative',
             backgroundColor: '#ffffff'
@@ -1299,7 +1236,7 @@ const App = () => {
             {/* Template de base - zIndex:1 */}
             <img
               src="/communique-template.png"
-              alt="Template communiqué"
+              alt="Template"
               style={{
                 position: 'absolute',
                 top: 0,
@@ -1309,13 +1246,9 @@ const App = () => {
                 objectFit: 'contain',
                 zIndex: 1
               }}
-              onError={(e) => {
-                console.error('❌ Erreur chargement template:', e.target.src);
-                console.log('💡 Vérifiez que le fichier existe dans public/communique-template.png');
-              }}
-              onLoad={() => {
-                console.log('✅ Template communiqué chargé avec succès');
-              }}
+              crossOrigin="anonymous"
+              onError={() => console.error('❌ Template manquant')}
+              onLoad={() => console.log('✅ Template OK')}
             />
 
             {/* Calque de contenu - zIndex:2 */}
@@ -1324,7 +1257,7 @@ const App = () => {
               inset: 0,
               zIndex: 2
             }}>
-              {/* IMAGE DE L'ARTISTE (Format CARRÉ 1:1) */}
+              {/* IMAGE */}
               <div style={{
                 position: 'absolute',
                 left: '46.5%',
@@ -1374,7 +1307,7 @@ const App = () => {
                 </p>
               </div>
 
-              {/* TITRE DE L'ÉVÉNEMENT */}
+              {/* TITRE */}
               <div style={{
                 position: 'absolute',
                 left: '8%',
@@ -1382,7 +1315,7 @@ const App = () => {
                 width: '36.5%'
               }}>
                 <h2 style={{
-                  fontFamily: "'Open Sans', 'Helvetica', Arial, sans-serif",
+                  fontFamily: "'Open Sans', Arial, sans-serif",
                   fontSize: '8px',
                   fontWeight: '800',
                   color: '#1a1a1a',
@@ -1394,7 +1327,7 @@ const App = () => {
                 </h2>
               </div>
 
-              {/* SOUS-TITRE (Appartement de...) */}
+              {/* SOUS-TITRE */}
               <div style={{
                 position: 'absolute',
                 left: '9.5%',
@@ -1432,7 +1365,7 @@ const App = () => {
                 />
               </div>
 
-              {/* ADRESSE + HORAIRE */}
+              {/* ADRESSE */}
               <div style={{
                 position: 'absolute',
                 left: '12.5%',
@@ -1461,7 +1394,7 @@ const App = () => {
                 </p>
               </div>
 
-              {/* DESCRIPTION DE L'ÉVÉNEMENT */}
+              {/* DESCRIPTION */}
               <div style={{
                 position: 'absolute',
                 left: '47.3%',
@@ -1486,7 +1419,7 @@ const App = () => {
 
       case 'post-rs':
         return (
-          <div ref={visualRef} style={visualStyle}>
+          <div ref={visualRef} data-download-target="true" style={visualStyle}>
             <div style={{
               position: 'absolute',
               top: '10%',
