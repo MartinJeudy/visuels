@@ -4,15 +4,66 @@ import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+// ============================================
+// CONFIGURATION DES COULEURS AVEC TEMPLATES PNG
+// ============================================
 const hormurColors = [
-  { name: 'Orange Hormur', value: '#fb593d', text: '#f7ce64' },
-  { name: 'Rouge Vif', value: '#fc4735', text: '#feb7db' },
-  { name: 'Rose Bonbon', value: '#fca0ba', text: '#fc4735' },
-  { name: 'Rose Saumon', value: '#fd94ac', text: '#157fcd' },
-  { name: 'Jaune Citron', value: '#f7ce64', text: '#f75b40' },
-  { name: 'Vert Pomme', value: '#d7f879', text: '#00b17e' },
-  { name: 'Vert Émeraude', value: '#00b179', text: '#d7f879' },
-  { name: 'Bleu Océan', value: '#1380c7', text: '#feb7db' }
+  { 
+    name: 'Orange Hormur', 
+    value: '#fb593d', 
+    text: '#f7ce64',
+    postTemplate: 'PostPRO_CONCERT_4_Orange.png',
+    afficheTemplate: 'Affiche_CONCERT_Orange.png'
+  },
+  { 
+    name: 'Rouge Vif', 
+    value: '#fc4735', 
+    text: '#feb7db',
+    postTemplate: 'PostPRO_CONCERT_8_Rouge.png',
+    afficheTemplate: 'Affiche_CONCERT_RougeR.png'
+  },
+  { 
+    name: 'Rose Bonbon', 
+    value: '#fca0ba', 
+    text: '#fc4735',
+    postTemplate: 'PostPRO_CONCERT_2_Rose.png',
+    afficheTemplate: 'Affiche_CONCERT_Rose.png'
+  },
+  { 
+    name: 'Rose Saumon', 
+    value: '#fd94ac', 
+    text: '#157fcd',
+    postTemplate: 'PostPRO_CONCERT_7_RoseRouge.png',
+    afficheTemplate: 'Affiche_CONCERT_RoseR.png'
+  },
+  { 
+    name: 'Jaune Citron', 
+    value: '#f7ce64', 
+    text: '#f75b40',
+    postTemplate: 'PostPRO_CONCERT_3_Jaune.png',
+    afficheTemplate: 'Affiche_CONCERT_Jaune.png'
+  },
+  { 
+    name: 'Vert Pomme', 
+    value: '#d7f879', 
+    text: '#00b17e',
+    postTemplate: 'PostPRO_CONCERT_6_VertCitron.png',
+    afficheTemplate: 'Affiche_CONCERT_Citron.png'
+  },
+  { 
+    name: 'Vert Émeraude', 
+    value: '#00b179', 
+    text: '#d7f879',
+    postTemplate: 'PostPRO_CONCERT_5_Vert.png',
+    afficheTemplate: 'Affiche_CONCERT_Vert.png'
+  },
+  { 
+    name: 'Bleu Océan', 
+    value: '#1380c7', 
+    text: '#feb7db',
+    postTemplate: 'PostPRO_CONCERT_1_bleu.png',
+    afficheTemplate: 'Affiche_CONCERT_Bleu.png'
+  }
 ];
 
 const visualTypes = [
@@ -169,7 +220,6 @@ const DownloadModal = ({ onClose, onDownload, isDownloading }) => {
   );
 };
 
-// Autres modals (inchangés - SendModal, SubscriptionModal)
 const SendModal = ({ onClose, onConfirmSend, onShowSubscription }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -554,7 +604,7 @@ const App = () => {
   });
 
   const [selectedColor, setSelectedColor] = useState('#fb593d');
-  const [selectedVisual, setSelectedVisual] = useState('communique');
+  const [selectedVisual, setSelectedVisual] = useState('post-rs');
   const [uploadedImage, setUploadedImage] = useState('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop');
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
@@ -657,108 +707,104 @@ const App = () => {
     setTempImage(null);
   };
 
-  // ============================================
-  // FONCTION DE TÉLÉCHARGEMENT CORRIGÉE
-  // ============================================
   const handleDownload = async (format) => {
-  if (isDownloading) return;
-  setIsDownloading(true);
+    if (isDownloading) return;
+    setIsDownloading(true);
 
-  try {
-    const element = visualRef.current;
-    if (!element) throw new Error("Aucun visuel à capturer");
+    try {
+      const element = visualRef.current;
+      if (!element) throw new Error("Aucun visuel à capturer");
 
-    const parent = element.parentElement;
-    const original = {
-      display: parent.style.display,
-      visibility: parent.style.visibility,
-      position: parent.style.position,
-      zIndex: parent.style.zIndex
-    };
-    parent.style.display = 'block';
-    parent.style.visibility = 'visible';
-    parent.style.position = 'relative';
-    parent.style.zIndex = '9999';
-    await new Promise(r => setTimeout(r, 200));
+      const parent = element.parentElement;
+      const original = {
+        display: parent.style.display,
+        visibility: parent.style.visibility,
+        position: parent.style.position,
+        zIndex: parent.style.zIndex
+      };
+      parent.style.display = 'block';
+      parent.style.visibility = 'visible';
+      parent.style.position = 'relative';
+      parent.style.zIndex = '9999';
+      await new Promise(r => setTimeout(r, 200));
 
-    if (document.fonts) await document.fonts.ready;
+      if (document.fonts) await document.fonts.ready;
 
-    const imgEls = element.querySelectorAll('img');
+      const imgEls = element.querySelectorAll('img');
 
-    const convertToBase64 = (img) =>
-      fetch(img.src, { mode: 'cors' })
-        .then(res => res.blob())
-        .then(blob => new Promise((resolve) => {
-          const r = new FileReader();
-          r.onloadend = () => resolve(r.result);
-          r.readAsDataURL(blob);
-        }))
-        .catch(() => img.src);
+      const convertToBase64 = (img) =>
+        fetch(img.src, { mode: 'cors' })
+          .then(res => res.blob())
+          .then(blob => new Promise((resolve) => {
+            const r = new FileReader();
+            r.onloadend = () => resolve(r.result);
+            r.readAsDataURL(blob);
+          }))
+          .catch(() => img.src);
 
-    await Promise.all(
-      Array.from(imgEls).map(async (img) => {
-        const dataUrl = await convertToBase64(img);
-        img.setAttribute('data-original-src', img.src);
-        img.src = dataUrl;
-      })
-    );
+      await Promise.all(
+        Array.from(imgEls).map(async (img) => {
+          const dataUrl = await convertToBase64(img);
+          img.setAttribute('data-original-src', img.src);
+          img.src = dataUrl;
+        })
+      );
 
-    await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 400));
 
-    const scale = 3;
+      const scale = 3;
 
-    // ✅ LA LIGNE QUI CHANGE TOUT
-    const canvas = await html2canvas(element, {
-      scale,
-      useCORS: true,
-      allowTaint: false,
-      foreignObjectRendering: false, // ✅ Désactivé
-      backgroundColor: '#ffffff',
-      removeContainer: true,
-      logging: false
-    });
-
-    imgEls.forEach(img => {
-      const originalSrc = img.getAttribute('data-original-src');
-      if (originalSrc) img.src = originalSrc;
-    });
-    Object.assign(parent.style, original);
-
-    const filename = `hormur-${selectedVisual}-${Date.now()}`;
-
-    if (format === "pdf") {
-      const imgData = canvas.toDataURL("image/jpeg", 0.98);
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [210, 297]
+      const canvas = await html2canvas(element, {
+        scale,
+        useCORS: true,
+        allowTaint: false,
+        foreignObjectRendering: false,
+        backgroundColor: '#ffffff',
+        removeContainer: true,
+        logging: false
       });
-      pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
-      pdf.save(`${filename}.pdf`);
-    } else {
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${filename}.${format === "jpeg" ? "jpg" : "png"}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }, format === "jpeg" ? "image/jpeg" : "image/png", 1);
-    }
 
-  } catch (e) {
-    alert("Erreur lors de la génération.");
-    console.error("❌ ERREUR EXPORT :", e);
-  } finally {
-    setIsDownloading(false);
-    setShowDownloadModal(false);
-  }
-};
-  
+      imgEls.forEach(img => {
+        const originalSrc = img.getAttribute('data-original-src');
+        if (originalSrc) img.src = originalSrc;
+      });
+      Object.assign(parent.style, original);
+
+      const filename = `hormur-${selectedVisual}-${Date.now()}`;
+
+      if (format === "pdf") {
+        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: [210, 297]
+        });
+        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+        pdf.save(`${filename}.pdf`);
+      } else {
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${filename}.${format === "jpeg" ? "jpg" : "png"}`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        }, format === "jpeg" ? "image/jpeg" : "image/png", 1);
+      }
+
+    } catch (e) {
+      alert("Erreur lors de la génération.");
+      console.error("❌ ERREUR EXPORT :", e);
+    } finally {
+      setIsDownloading(false);
+      setShowDownloadModal(false);
+    }
+  };
+
   // ============================================
-  // FONCTION DE RENDU DES VISUELS
+  // FONCTION DE RENDU DES VISUELS AVEC TEMPLATES PNG
   // ============================================
   const renderVisual = () => {
     const colorObj = getCurrentColor();
@@ -767,14 +813,13 @@ const App = () => {
     const visualType = getCurrentVisualType();
     const aspectRatio = visualType.canvas.width / visualType.canvas.height;
 
-    // CORRECTION 6: Ajouter data-download-target pour identifier l'élément
     const visualStyle = {
       width: '100%',
       aspectRatio: aspectRatio.toFixed(4),
-      backgroundColor: selectedVisual === 'communique' ? '#ffffff' : bgColor,
+      backgroundColor: selectedVisual === 'communique' ? '#ffffff' : '#ffffff',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: "'Bebas Neue', 'Arial Narrow', 'Impact', sans-serif",
+      fontFamily: "'Acumin Pro ExtraCondensed', 'Arial Narrow', 'Impact', sans-serif",
       display: 'flex',
       flexDirection: 'column'
     };
@@ -784,13 +829,25 @@ const App = () => {
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* Image carrée - 60% hauteur */}
+            {/* ============================================
+                CALQUE 1 (z-index: 1) : IMAGE DE L'ÉVÉNEMENT
+                Cette image doit être en arrière-plan, centrée dans l'encart carré
+                ============================================ */}
             <div style={{
               position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '60%',
+              /* 📍 POSITION DE L'IMAGE - Pour déplacer l'image :
+                 - Augmenter 'top' = descendre l'image (ex: 10% → 12%)
+                 - Diminuer 'top' = monter l'image (ex: 10% → 8%)
+                 - Augmenter 'left' = déplacer vers la droite
+                 - Diminuer 'left' = déplacer vers la gauche */
+              top: '10%',
+              left: '10%',
+              /* 📏 TAILLE DE L'IMAGE
+                 - width et height définissent la zone carrée de l'image
+                 - 80% signifie que l'image occupe 80% de la largeur totale */
+              width: '80%',
+              height: '80%',
+              zIndex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -806,24 +863,52 @@ const App = () => {
                 }}
                 crossOrigin="anonymous"
               />
-              {/* Overlay gradient plus simple */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '50%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-                pointerEvents: 'none'
-              }}></div>
             </div>
 
-            {/* Badges top */}
-            <div style={{ position: 'absolute', top: '16px', left: '16px', right: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+            {/* ============================================
+                CALQUE 2 (z-index: 2) : TEMPLATE PNG
+                Le template s'affiche par-dessus l'image
+                ============================================ */}
+            <img
+              src={`/${colorObj.afficheTemplate}`}
+              alt="Template"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                zIndex: 2,
+                pointerEvents: 'none'
+              }}
+              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error('❌ Template PNG manquant:', colorObj.afficheTemplate);
+                e.target.style.display = 'none';
+              }}
+            />
+
+            {/* ============================================
+                CALQUE 3 (z-index: 3) : CONTENU TEXTE ET QR CODE
+                Tous les éléments textuels sont par-dessus le template
+                ============================================ */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 3
+            }}>
+              {/* 📍 BADGE "CHEZ L'HABITANT"
+                  Pour déplacer ce badge :
+                  - Augmenter 'top' = descendre (ex: 3% → 5%)
+                  - Augmenter 'left' = déplacer vers la droite (ex: 3% → 5%) */}
               {eventData.chezHabitant && (
                 <div style={{
+                  position: 'absolute',
+                  top: '3%',
+                  left: '3%',
                   backgroundColor: 'rgba(255,255,255,0.95)',
-                  padding: '8px 16px',
+                  padding: selectedVisual === 'affiche' ? '8px 16px' : '6px 12px',
                   borderRadius: '20px',
                   fontSize: selectedVisual === 'affiche' ? '11px' : '9px',
                   fontWeight: '900',
@@ -834,15 +919,22 @@ const App = () => {
                   🏠 Chez l'habitant
                 </div>
               )}
+
+              {/* 📍 BADGE DÉPARTEMENT
+                  Pour déplacer ce badge :
+                  - Augmenter 'top' = descendre
+                  - Diminuer 'right' = déplacer vers la gauche (ex: 3% → 5%) */}
               <div style={{
+                position: 'absolute',
+                top: '3%',
+                right: '3%',
                 width: selectedVisual === 'affiche' ? '56px' : '48px',
                 height: selectedVisual === 'affiche' ? '56px' : '48px',
                 borderRadius: '50%',
-                backgroundColor: 'white',
+                backgroundColor: textColor,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginLeft: 'auto',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
               }}>
                 <span style={{
@@ -853,21 +945,18 @@ const App = () => {
                   {eventData.department}
                 </span>
               </div>
-            </div>
 
-            {/* Contenu bas - 40% */}
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '40%',
-              padding: selectedVisual === 'affiche' ? '24px' : '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              <div>
+              {/* 📍 TITRE DE L'ÉVÉNEMENT
+                  Pour déplacer le titre :
+                  - Augmenter 'bottom' = monter le titre (ex: 25% → 27%)
+                  - Augmenter 'left' = déplacer vers la droite */}
+              <div style={{
+                position: 'absolute',
+                bottom: '25%',
+                left: '5%',
+                right: '5%',
+                textAlign: 'center'
+              }}>
                 <h1 style={{
                   fontSize: selectedVisual === 'affiche' ? '36px' : '28px',
                   fontWeight: '900',
@@ -876,40 +965,61 @@ const App = () => {
                   margin: 0,
                   lineHeight: '1',
                   letterSpacing: '-0.5px',
-                  marginBottom: '12px'
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
                 }}>
                   {eventData.title}
                 </h1>
-
-                <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
-                  <p style={{
-                    fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    color: textColor,
-                    margin: 0
-                  }}>
-                    {eventData.date}
-                  </p>
-                  <p style={{
-                    fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
-                    fontWeight: '600',
-                    textTransform: 'uppercase',
-                    color: textColor,
-                    margin: 0
-                  }}>
-                    {eventData.city}
-                  </p>
-                </div>
               </div>
 
+              {/* 📍 DATE ET VILLE
+                  Pour déplacer ces infos :
+                  - Augmenter 'bottom' = monter (ex: 18% → 20%)
+                  - Modifier 'left' pour déplacer horizontalement */}
               <div style={{
+                position: 'absolute',
+                bottom: '18%',
+                left: '5%',
+                right: '5%',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '16px'
+              }}>
+                <p style={{
+                  fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  color: textColor,
+                  margin: 0,
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                }}>
+                  {eventData.date}
+                </p>
+                <p style={{
+                  fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  color: textColor,
+                  margin: 0,
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                }}>
+                  {eventData.city}
+                </p>
+              </div>
+
+              {/* 📍 BAS DU VISUEL : ORGANISATEURS + QR CODE + LOGO HORMUR
+                  Pour déplacer cette section :
+                  - Augmenter 'bottom' = monter toute la section
+                  - Modifier 'left'/'right' pour les marges horizontales */}
+              <div style={{
+                position: 'absolute',
+                bottom: '5%',
+                left: '5%',
+                right: '5%',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                paddingTop: '12px',
-                borderTop: `2px solid ${textColor}40`
+                alignItems: 'flex-end'
               }}>
+                {/* Organisateurs + Convivialité */}
                 <div style={{ flex: 1 }}>
                   <p style={{
                     fontSize: selectedVisual === 'affiche' ? '13px' : '11px',
@@ -917,7 +1027,7 @@ const App = () => {
                     textTransform: 'uppercase',
                     color: textColor,
                     margin: 0,
-                    opacity: 0.9
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
                   }}>
                     {eventData.organizerNames}
                   </p>
@@ -928,33 +1038,41 @@ const App = () => {
                       textTransform: 'uppercase',
                       color: textColor,
                       margin: '4px 0 0 0',
-                      opacity: 0.8
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
                     }}>
                       {eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
                     </p>
                   )}
                 </div>
 
+                {/* QR Code + Logo Hormur */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* 📍 QR CODE
+                      Le QR code est de la même couleur que le texte (textColor)
+                      Pour ajuster la taille : modifier 'size' */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                   }}>
                     <QRCodeSVG
                       value={eventData.eventUrl}
                       size={selectedVisual === 'affiche' ? 56 : 48}
                       level="M"
                       includeMargin={false}
+                      fgColor={textColor}
                     />
                   </div>
+                  
+                  {/* Logo HORMUR */}
                   <div style={{
                     fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
                     fontWeight: '900',
                     textTransform: 'uppercase',
                     color: textColor,
                     letterSpacing: '1px',
-                    opacity: 0.8
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
                   }}>
                     HORMUR
                   </div>
@@ -973,7 +1091,8 @@ const App = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              color: textColor
+              color: textColor,
+              backgroundColor: bgColor
             }}>
               <div style={{ flex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: '16px' }}>
@@ -1098,6 +1217,7 @@ const App = () => {
                       size={40}
                       level="M"
                       includeMargin={false}
+                      fgColor={bgColor}
                     />
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -1132,7 +1252,6 @@ const App = () => {
             position: 'relative',
             backgroundColor: '#ffffff'
           }}>
-            {/* Template de base - zIndex:1 */}
             <img
               src="/communique-template.png"
               alt="Template"
@@ -1147,16 +1266,13 @@ const App = () => {
               }}
               crossOrigin="anonymous"
               onError={() => console.error('❌ Template manquant')}
-              onLoad={() => console.log('✅ Template OK')}
             />
 
-            {/* Calque de contenu - zIndex:2 */}
             <div style={{
               position: 'absolute',
               inset: 0,
               zIndex: 2
             }}>
-              {/* IMAGE */}
               <div style={{
                 position: 'absolute',
                 left: '46.5%',
@@ -1182,7 +1298,6 @@ const App = () => {
                 />
               </div>
 
-              {/* BANDEAU DATE */}
               <div style={{
                 position: 'absolute',
                 left: '9.5%',
@@ -1205,7 +1320,6 @@ const App = () => {
                 </p>
               </div>
 
-              {/* TITRE */}
               <div style={{
                 position: 'absolute',
                 left: '8%',
@@ -1225,7 +1339,6 @@ const App = () => {
                 </h2>
               </div>
 
-              {/* SOUS-TITRE */}
               <div style={{
                 position: 'absolute',
                 left: '9.5%',
@@ -1244,7 +1357,6 @@ const App = () => {
                 </p>
               </div>
 
-              {/* QR CODE */}
               <div style={{
                 position: 'absolute',
                 left: '28%',
@@ -1263,7 +1375,6 @@ const App = () => {
                 />
               </div>
 
-              {/* ADRESSE */}
               <div style={{
                 position: 'absolute',
                 left: '12.5%',
@@ -1292,7 +1403,6 @@ const App = () => {
                 </p>
               </div>
 
-              {/* DESCRIPTION */}
               <div style={{
                 position: 'absolute',
                 left: '47.3%',
@@ -1318,13 +1428,23 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
+            {/* ============================================
+                CALQUE 1 (z-index: 1) : IMAGE DE L'ÉVÉNEMENT
+                ============================================ */}
             <div style={{
               position: 'absolute',
+              /* 📍 POSITION DE L'IMAGE POUR POST RS
+                 Pour déplacer l'image :
+                 - Augmenter 'top' = descendre (ex: 10% → 12%)
+                 - Modifier 'left' pour déplacer horizontalement */
               top: '10%',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              left: '10%',
               width: '80%',
-              paddingBottom: '80%',
+              height: '80%',
+              zIndex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               overflow: 'hidden',
               borderRadius: '12px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
@@ -1333,9 +1453,6 @@ const App = () => {
                 src={uploadedImage}
                 alt="Event"
                 style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover'
@@ -1344,21 +1461,50 @@ const App = () => {
               />
             </div>
 
+            {/* ============================================
+                CALQUE 2 (z-index: 2) : TEMPLATE PNG
+                ============================================ */}
+            <img
+              src={`/${colorObj.postTemplate}`}
+              alt="Template"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                zIndex: 2,
+                pointerEvents: 'none'
+              }}
+              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error('❌ Template PNG manquant:', colorObj.postTemplate);
+                e.target.style.display = 'none';
+              }}
+            />
+
+            {/* ============================================
+                CALQUE 3 (z-index: 3) : CONTENU TEXTE
+                ============================================ */}
             <div style={{
               position: 'absolute',
               inset: 0,
-              padding: '24px 24px 24px 55px',
+              padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               color: textColor,
-              zIndex: 10
+              zIndex: 3
             }}>
+              {/* Header avec badge et département */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'start'
               }}>
+                {/* 📍 BADGE ORGANISATEURS (Post RS)
+                    Pour déplacer : modifier les marges dans le parent ci-dessus */}
                 {eventData.chezHabitant && (
                   <div style={{
                     backgroundColor: 'rgba(255,255,255,0.95)',
@@ -1378,11 +1524,13 @@ const App = () => {
                     </p>
                   </div>
                 )}
+                
+                {/* 📍 BADGE DÉPARTEMENT (Post RS) */}
                 <div style={{
                   width: '52px',
                   height: '52px',
                   borderRadius: '50%',
-                  backgroundColor: 'white',
+                  backgroundColor: textColor,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1399,7 +1547,11 @@ const App = () => {
                 </div>
               </div>
 
+              {/* Footer avec infos de l'événement */}
               <div>
+                {/* 📍 TITRE (Post RS)
+                    Ces éléments sont en bas du visuel
+                    Pour les déplacer : modifier le padding du div parent ci-dessus */}
                 <h2 style={{
                   fontSize: '36px',
                   fontWeight: '900',
@@ -1411,6 +1563,7 @@ const App = () => {
                 }}>
                   {eventData.title}
                 </h2>
+                
                 <p style={{
                   fontSize: '18px',
                   fontWeight: '700',
@@ -1420,6 +1573,7 @@ const App = () => {
                 }}>
                   {eventData.date}
                 </p>
+                
                 <p style={{
                   fontSize: '15px',
                   fontWeight: '600',
@@ -1430,6 +1584,7 @@ const App = () => {
                   {eventData.city}
                 </p>
 
+                {/* 📍 QR CODE + LOGO (Post RS) */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1448,6 +1603,7 @@ const App = () => {
                       size={48}
                       level="M"
                       includeMargin={false}
+                      fgColor={textColor}
                     />
                   </div>
                   <div style={{
