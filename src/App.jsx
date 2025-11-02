@@ -845,8 +845,8 @@ const App = () => {
               /* 📏 TAILLE DE L'IMAGE
                  - width et height définissent la zone carrée de l'image
                  - 80% signifie que l'image occupe 80% de la largeur totale */
-              width: '80%',
-              height: '80%',
+              width: '90%',
+              height: '90%',
               zIndex: 1,
               display: 'flex',
               alignItems: 'center',
