@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
-import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check } from 'lucide-react';
+import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -110,7 +110,7 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Composants mémorisés (inchangés)
+// Composants mémorisés
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
@@ -377,7 +377,14 @@ const EditPanel = memo(({
   onImageUpload,
   hormurColors,
   selectedColor,
-  setSelectedColor
+  setSelectedColor,
+  imagePositionX,
+  imagePositionY,
+  imageZoom,
+  onImagePositionXChange,
+  onImagePositionYChange,
+  onImageZoomChange,
+  onResetImagePosition
 }) => (
   <div className="space-y-4">
     {/* Type de visuel */}
@@ -524,7 +531,7 @@ const EditPanel = memo(({
         <ImagePlus size={18} className="text-orange-500" />
         Image {selectedVisual !== 'communique' && '(format carré recommandé)'}
       </h2>
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div
           className={`relative h-40 rounded-lg overflow-hidden border-2 border-dashed transition-colors ${
             dragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
@@ -534,13 +541,34 @@ const EditPanel = memo(({
           onDragOver={onDrag}
           onDrop={onDrop}
         >
-          <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover" />
+          <div style={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f3f4f6'
+          }}>
+            <img 
+              src={uploadedImage} 
+              alt="Preview" 
+              style={{
+                minWidth: '100%',
+                minHeight: '100%',
+                objectFit: 'cover',
+                objectPosition: `${imagePositionX}% ${imagePositionY}%`,
+                transform: `scale(${imageZoom / 100})`
+              }}
+            />
+          </div>
           {dragActive && (
             <div className="absolute inset-0 bg-orange-100 bg-opacity-90 flex items-center justify-center">
               <p className="text-orange-700 font-semibold">Déposer l'image ici</p>
             </div>
           )}
         </div>
+        
         <input
           ref={fileInputRef}
           type="file"
@@ -548,14 +576,74 @@ const EditPanel = memo(({
           onChange={onImageUpload}
           className="hidden"
         />
+        
         <button
           onClick={() => fileInputRef.current?.click()}
           className="w-full px-3 py-2 text-sm border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors text-gray-700 font-medium"
         >
           Choisir une image ou glisser-déposer
         </button>
+
+        {/* Contrôles de positionnement */}
+        <div className="bg-gray-50 rounded-lg p-3 space-y-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-gray-700 flex items-center gap-1">
+              <Move size={14} className="text-orange-500" />
+              Position & Zoom
+            </h3>
+            <button
+              onClick={onResetImagePosition}
+              className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+            >
+              Réinitialiser
+            </button>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">
+              ↔️ Horizontal : {imagePositionX}%
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={imagePositionX}
+              onChange={onImagePositionXChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">
+              ↕️ Vertical : {imagePositionY}%
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={imagePositionY}
+              onChange={onImagePositionYChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block flex items-center gap-1">
+              <ZoomIn size={12} /> Zoom : {imageZoom}%
+            </label>
+            <input
+              type="range"
+              min="50"
+              max="200"
+              value={imageZoom}
+              onChange={onImageZoomChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+            />
+          </div>
+        </div>
+
         {selectedVisual !== 'communique' && (
-          <p className="text-xs text-gray-500 text-center">💡 Utilisez une image carrée pour un meilleur rendu</p>
+          <p className="text-xs text-gray-500 text-center">💡 Ajustez la position et le zoom pour un cadrage parfait</p>
         )}
       </div>
     </div>
@@ -614,6 +702,11 @@ const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  
+  // Nouveaux états pour le positionnement de l'image
+  const [imagePositionX, setImagePositionX] = useState(50); // 0-100 (50 = centré)
+  const [imagePositionY, setImagePositionY] = useState(50); // 0-100 (50 = centré)
+  const [imageZoom, setImageZoom] = useState(100); // 50-200 (100 = taille normale)
 
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
@@ -654,6 +747,24 @@ const App = () => {
 
   const handleConvivialiteChange = useCallback((value) => {
     setEventData(prev => ({ ...prev, convivialite: value }));
+  }, []);
+
+  const handleImagePositionXChange = useCallback((e) => {
+    setImagePositionX(Number(e.target.value));
+  }, []);
+
+  const handleImagePositionYChange = useCallback((e) => {
+    setImagePositionY(Number(e.target.value));
+  }, []);
+
+  const handleImageZoomChange = useCallback((e) => {
+    setImageZoom(Number(e.target.value));
+  }, []);
+
+  const handleResetImagePosition = useCallback(() => {
+    setImagePositionX(50);
+    setImagePositionY(50);
+    setImageZoom(100);
   }, []);
 
   const getCurrentColor = () => {
@@ -705,6 +816,10 @@ const App = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
+    // Réinitialiser la position lors du changement d'image
+    setImagePositionX(50);
+    setImagePositionY(50);
+    setImageZoom(100);
   };
 
   const handleDownload = async (format) => {
@@ -824,27 +939,26 @@ const App = () => {
       flexDirection: 'column'
     };
 
+    // Style d'image avec positionnement et zoom
+    const imageStyle = {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: `${imagePositionX}% ${imagePositionY}%`,
+      transform: `scale(${imageZoom / 100})`,
+      transformOrigin: 'center'
+    };
+
     switch(selectedVisual) {
       case 'affiche':
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* ============================================
-                CALQUE 1 (z-index: 1) : IMAGE DE L'ÉVÉNEMENT
-                Cette image doit être en arrière-plan, centrée dans l'encart carré
-                ============================================ */}
+            {/* CALQUE 1 : IMAGE */}
             <div style={{
               position: 'absolute',
-              /* 📍 POSITION DE L'IMAGE - Pour déplacer l'image :
-                 - Augmenter 'top' = descendre l'image (ex: 10% → 12%)
-                 - Diminuer 'top' = monter l'image (ex: 10% → 8%)
-                 - Augmenter 'left' = déplacer vers la droite
-                 - Diminuer 'left' = déplacer vers la gauche */
               top: '10%',
               left: '10%',
-              /* 📏 TAILLE DE L'IMAGE
-                 - width et height définissent la zone carrée de l'image
-                 - 80% signifie que l'image occupe 80% de la largeur totale */
               width: '90%',
               height: '90%',
               zIndex: 1,
@@ -856,19 +970,12 @@ const App = () => {
               <img
                 src={uploadedImage}
                 alt="Event"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
+                style={imageStyle}
                 crossOrigin="anonymous"
               />
             </div>
 
-            {/* ============================================
-                CALQUE 2 (z-index: 2) : TEMPLATE PNG
-                Le template s'affiche par-dessus l'image
-                ============================================ */}
+            {/* CALQUE 2 : TEMPLATE PNG */}
             <img
               src={`/${colorObj.afficheTemplate}`}
               alt="Template"
@@ -889,19 +996,12 @@ const App = () => {
               }}
             />
 
-            {/* ============================================
-                CALQUE 3 (z-index: 3) : CONTENU TEXTE ET QR CODE
-                Tous les éléments textuels sont par-dessus le template
-                ============================================ */}
+            {/* CALQUE 3 : CONTENU TEXTE */}
             <div style={{
               position: 'absolute',
               inset: 0,
               zIndex: 3
             }}>
-              {/* 📍 BADGE "CHEZ L'HABITANT"
-                  Pour déplacer ce badge :
-                  - Augmenter 'top' = descendre (ex: 3% → 5%)
-                  - Augmenter 'left' = déplacer vers la droite (ex: 3% → 5%) */}
               {eventData.chezHabitant && (
                 <div style={{
                   position: 'absolute',
@@ -920,10 +1020,6 @@ const App = () => {
                 </div>
               )}
 
-              {/* 📍 BADGE DÉPARTEMENT
-                  Pour déplacer ce badge :
-                  - Augmenter 'top' = descendre
-                  - Diminuer 'right' = déplacer vers la gauche (ex: 3% → 5%) */}
               <div style={{
                 position: 'absolute',
                 top: '3%',
@@ -946,10 +1042,6 @@ const App = () => {
                 </span>
               </div>
 
-              {/* 📍 TITRE DE L'ÉVÉNEMENT
-                  Pour déplacer le titre :
-                  - Augmenter 'bottom' = monter le titre (ex: 25% → 27%)
-                  - Augmenter 'left' = déplacer vers la droite */}
               <div style={{
                 position: 'absolute',
                 bottom: '25%',
@@ -971,10 +1063,6 @@ const App = () => {
                 </h1>
               </div>
 
-              {/* 📍 DATE ET VILLE
-                  Pour déplacer ces infos :
-                  - Augmenter 'bottom' = monter (ex: 18% → 20%)
-                  - Modifier 'left' pour déplacer horizontalement */}
               <div style={{
                 position: 'absolute',
                 bottom: '18%',
@@ -1006,10 +1094,6 @@ const App = () => {
                 </p>
               </div>
 
-              {/* 📍 BAS DU VISUEL : ORGANISATEURS + QR CODE + LOGO HORMUR
-                  Pour déplacer cette section :
-                  - Augmenter 'bottom' = monter toute la section
-                  - Modifier 'left'/'right' pour les marges horizontales */}
               <div style={{
                 position: 'absolute',
                 bottom: '5%',
@@ -1019,7 +1103,6 @@ const App = () => {
                 justifyContent: 'space-between',
                 alignItems: 'flex-end'
               }}>
-                {/* Organisateurs + Convivialité */}
                 <div style={{ flex: 1 }}>
                   <p style={{
                     fontSize: selectedVisual === 'affiche' ? '13px' : '11px',
@@ -1045,11 +1128,7 @@ const App = () => {
                   )}
                 </div>
 
-                {/* QR Code + Logo Hormur */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {/* 📍 QR CODE
-                      Le QR code est de la même couleur que le texte (textColor)
-                      Pour ajuster la taille : modifier 'size' */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
@@ -1065,7 +1144,6 @@ const App = () => {
                     />
                   </div>
                   
-                  {/* Logo HORMUR */}
                   <div style={{
                     fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
                     fontWeight: '900',
@@ -1290,9 +1368,7 @@ const App = () => {
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
+                    ...imageStyle
                   }}
                   crossOrigin="anonymous"
                 />
@@ -1428,15 +1504,9 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* ============================================
-                CALQUE 1 (z-index: 1) : IMAGE DE L'ÉVÉNEMENT
-                ============================================ */}
+            {/* CALQUE 1 : IMAGE */}
             <div style={{
               position: 'absolute',
-              /* 📍 POSITION DE L'IMAGE POUR POST RS
-                 Pour déplacer l'image :
-                 - Augmenter 'top' = descendre (ex: 10% → 12%)
-                 - Modifier 'left' pour déplacer horizontalement */
               top: '10%',
               left: '10%',
               width: '80%',
@@ -1452,18 +1522,12 @@ const App = () => {
               <img
                 src={uploadedImage}
                 alt="Event"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
+                style={imageStyle}
                 crossOrigin="anonymous"
               />
             </div>
 
-            {/* ============================================
-                CALQUE 2 (z-index: 2) : TEMPLATE PNG
-                ============================================ */}
+            {/* CALQUE 2 : TEMPLATE PNG */}
             <img
               src={`/${colorObj.postTemplate}`}
               alt="Template"
@@ -1484,9 +1548,7 @@ const App = () => {
               }}
             />
 
-            {/* ============================================
-                CALQUE 3 (z-index: 3) : CONTENU TEXTE
-                ============================================ */}
+            {/* CALQUE 3 : CONTENU TEXTE */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -1497,14 +1559,11 @@ const App = () => {
               color: textColor,
               zIndex: 3
             }}>
-              {/* Header avec badge et département */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'start'
               }}>
-                {/* 📍 BADGE ORGANISATEURS (Post RS)
-                    Pour déplacer : modifier les marges dans le parent ci-dessus */}
                 {eventData.chezHabitant && (
                   <div style={{
                     backgroundColor: 'rgba(255,255,255,0.95)',
@@ -1525,7 +1584,6 @@ const App = () => {
                   </div>
                 )}
                 
-                {/* 📍 BADGE DÉPARTEMENT (Post RS) */}
                 <div style={{
                   width: '52px',
                   height: '52px',
@@ -1547,11 +1605,7 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Footer avec infos de l'événement */}
               <div>
-                {/* 📍 TITRE (Post RS)
-                    Ces éléments sont en bas du visuel
-                    Pour les déplacer : modifier le padding du div parent ci-dessus */}
                 <h2 style={{
                   fontSize: '36px',
                   fontWeight: '900',
@@ -1584,7 +1638,6 @@ const App = () => {
                   {eventData.city}
                 </p>
 
-                {/* 📍 QR CODE + LOGO (Post RS) */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1661,7 +1714,7 @@ const App = () => {
             <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4" style={{ maxHeight: '60vh' }}>
               <img src={tempImage} alt="Preview" className="w-full h-auto object-contain" />
             </div>
-            <p className="text-xs text-gray-600 mb-4">💡 {selectedVisual === 'communique' ? 'Image verticale recommandée' : 'Pour un meilleur rendu, utilisez une image carrée'}</p>
+            <p className="text-xs text-gray-600 mb-4">💡 {selectedVisual === 'communique' ? 'Image verticale recommandée' : 'Vous pourrez ajuster la position et le zoom après validation'}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowImageCrop(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
                 Annuler
@@ -1718,6 +1771,13 @@ const App = () => {
               hormurColors={hormurColors}
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}
+              imagePositionX={imagePositionX}
+              imagePositionY={imagePositionY}
+              imageZoom={imageZoom}
+              onImagePositionXChange={handleImagePositionXChange}
+              onImagePositionYChange={handleImagePositionYChange}
+              onImageZoomChange={handleImageZoomChange}
+              onResetImagePosition={handleResetImagePosition}
             />
           </div>
 
