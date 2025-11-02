@@ -545,20 +545,23 @@ const EditPanel = memo(({
             width: '100%',
             height: '100%',
             overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'relative',
             backgroundColor: '#f3f4f6'
           }}>
             <img 
               src={uploadedImage} 
               alt="Preview" 
               style={{
-                minWidth: '100%',
-                minHeight: '100%',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: '100%',
+                height: '100%',
                 objectFit: 'cover',
-                objectPosition: `${imagePositionX}% ${imagePositionY}%`,
-                transform: `scale(${imageZoom / 100})`
+                transform: `translate(calc(-50% + ${(imagePositionX - 50)}%), calc(-50% + ${(imagePositionY - 50)}%)) scale(${imageZoom / 100})`,
+                transformOrigin: 'center',
+                minWidth: '100%',
+                minHeight: '100%'
               }}
             />
           </div>
@@ -633,7 +636,7 @@ const EditPanel = memo(({
             </label>
             <input
               type="range"
-              min="50"
+              min="80"
               max="200"
               value={imageZoom}
               onChange={onImageZoomChange}
@@ -706,7 +709,7 @@ const App = () => {
   // Nouveaux états pour le positionnement de l'image
   const [imagePositionX, setImagePositionX] = useState(50); // 0-100 (50 = centré)
   const [imagePositionY, setImagePositionY] = useState(50); // 0-100 (50 = centré)
-  const [imageZoom, setImageZoom] = useState(100); // 50-200 (100 = taille normale)
+  const [imageZoom, setImageZoom] = useState(100); // 80-200 (100 = taille normale)
 
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
@@ -939,14 +942,24 @@ const App = () => {
       flexDirection: 'column'
     };
 
-    // Style d'image avec positionnement et zoom
+    // Nouvelle approche pour le positionnement d'image
+    // Convertir les sliders (0-100) en pourcentages de déplacement (-50% à +50%)
+    const translateX = (imagePositionX - 50); // -50 à +50
+    const translateY = (imagePositionY - 50); // -50 à +50
+    const scale = imageZoom / 100; // 0.8 à 2.0
+
+    // Style d'image robuste sans espaces blancs
     const imageStyle = {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
       width: '100%',
       height: '100%',
       objectFit: 'cover',
-      objectPosition: `${imagePositionX}% ${imagePositionY}%`,
-      transform: `scale(${imageZoom / 100})`,
-      transformOrigin: 'center'
+      transform: `translate(calc(-50% + ${translateX}%), calc(-50% + ${translateY}%)) scale(${scale})`,
+      transformOrigin: 'center',
+      minWidth: '100%',
+      minHeight: '100%'
     };
 
     switch(selectedVisual) {
@@ -962,9 +975,6 @@ const App = () => {
               width: '90%',
               height: '90%',
               zIndex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               overflow: 'hidden'
             }}>
               <img
@@ -1364,12 +1374,7 @@ const App = () => {
                 <img
                   src={uploadedImage}
                   alt="Event"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    ...imageStyle
-                  }}
+                  style={imageStyle}
                   crossOrigin="anonymous"
                 />
               </div>
@@ -1512,9 +1517,6 @@ const App = () => {
               width: '80%',
               height: '80%',
               zIndex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               overflow: 'hidden',
               borderRadius: '12px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
