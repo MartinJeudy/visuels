@@ -999,10 +999,10 @@ const App = () => {
             {/* ✅ CALQUE 1 : IMAGE alignée exactement sur la zone visible du template */}
             <div style={{
               position: 'absolute',
-              top: '14%',    // Ajustable si besoin +1 / -1
-              left: '7%',
-              width: '86%',
-              height: '70%',
+              top: '13.5%',    // Ajustable si besoin +1 / -1
+              left: '6%',
+              width: '88%',
+              height: '71%',
               zIndex: 1,
               overflow: 'hidden'
             }}>
