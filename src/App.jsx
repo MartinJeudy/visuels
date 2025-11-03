@@ -636,7 +636,7 @@ const EditPanel = memo(({
             </label>
             <input
               type="range"
-              min="80"
+              min="60"
               max="200"
               value={imageZoom}
               onChange={onImageZoomChange}
@@ -706,11 +706,11 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  // ✅ MODIFICATION : Zoom par défaut réduit à 90% au lieu de 100%
+  // ✅ MODIFICATION : Zoom par défaut réduit à 80% pour mieux gérer les images horizontales
   const [imageSettings, setImageSettings] = useState({
-    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 90 },
-    communique: { positionX: 50, positionY: 50, zoom: 90 },
-    postRS: { positionX: 50, positionY: 50, zoom: 90 }
+    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 80 },
+    communique: { positionX: 50, positionY: 50, zoom: 80 },
+    postRS: { positionX: 50, positionY: 50, zoom: 80 }
   });
 
   // Helper pour obtenir le groupe de réglages selon le visuel sélectionné
@@ -798,9 +798,9 @@ const App = () => {
     updateCurrentSettings({ zoom: Number(e.target.value) });
   }, [selectedVisual]);
 
-  // ✅ MODIFICATION : Réinitialisation avec zoom à 90%
+  // ✅ MODIFICATION : Réinitialisation avec zoom à 80%
   const handleResetImagePosition = useCallback(() => {
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 90 });
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 80 });
   }, [selectedVisual]);
 
   const getCurrentColor = () => {
@@ -848,13 +848,13 @@ const App = () => {
     }
   };
 
-  // ✅ MODIFICATION : Confirmation avec zoom à 90%
+  // ✅ MODIFICATION : Confirmation avec zoom à 80%
   const confirmImageCrop = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
-    // Réinitialiser avec un zoom à 90% pour voir l'image complète
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 90 });
+    // Réinitialiser avec un zoom à 80% pour voir l'image complète
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 80 });
   };
 
   const handleDownload = async (format) => {
