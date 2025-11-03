@@ -636,8 +636,8 @@ const EditPanel = memo(({
             </label>
             <input
               type="range"
-              min={selectedVisual === 'affiche' || selectedVisual === 'flyer-recto' ? 120 : 60}
-              max={selectedVisual === 'affiche' || selectedVisual === 'flyer-recto' ? 300 : 200}
+              min="60"
+              max="200"
               value={imageZoom}
               onChange={onImageZoomChange}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
