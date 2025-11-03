@@ -1083,7 +1083,7 @@ const App = () => {
 
               <div style={{
                 position: 'absolute',
-                bottom: '25%',
+                bottom: '60%',
                 left: '5%',
                 right: '5%',
                 textAlign: 'center'
