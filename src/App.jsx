@@ -706,14 +706,14 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  // ✅ NOUVEAUX ÉTATS : Position et zoom indépendants pour chaque type de visuel
+  // ✅ MODIFICATION : Zoom par défaut réduit à 90% au lieu de 100%
   const [imageSettings, setImageSettings] = useState({
-    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
-    communique: { positionX: 50, positionY: 50, zoom: 100 },
-    postRS: { positionX: 50, positionY: 50, zoom: 100 }
+    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 90 },
+    communique: { positionX: 50, positionY: 50, zoom: 90 },
+    postRS: { positionX: 50, positionY: 50, zoom: 90 }
   });
 
-  // ✅ Helper pour obtenir le groupe de réglages selon le visuel sélectionné
+  // Helper pour obtenir le groupe de réglages selon le visuel sélectionné
   const getSettingsKey = (visualId) => {
     if (visualId === 'affiche' || visualId === 'flyer-recto' || visualId === 'flyer-verso') {
       return 'afficheFlyerRecto';
@@ -722,16 +722,16 @@ const App = () => {
     } else if (visualId === 'post-rs') {
       return 'postRS';
     }
-    return 'afficheFlyerRecto'; // fallback
+    return 'afficheFlyerRecto';
   };
 
-  // ✅ Obtenir les réglages actuels selon le visuel sélectionné
+  // Obtenir les réglages actuels selon le visuel sélectionné
   const getCurrentSettings = () => {
     const key = getSettingsKey(selectedVisual);
     return imageSettings[key];
   };
 
-  // ✅ Mettre à jour les réglages pour le visuel actuel
+  // Mettre à jour les réglages pour le visuel actuel
   const updateCurrentSettings = (updates) => {
     const key = getSettingsKey(selectedVisual);
     setImageSettings(prev => ({
@@ -786,7 +786,6 @@ const App = () => {
     setEventData(prev => ({ ...prev, convivialite: value }));
   }, []);
 
-  // ✅ Handlers de position et zoom modifiés pour utiliser les réglages indépendants
   const handleImagePositionXChange = useCallback((e) => {
     updateCurrentSettings({ positionX: Number(e.target.value) });
   }, [selectedVisual]);
@@ -799,8 +798,9 @@ const App = () => {
     updateCurrentSettings({ zoom: Number(e.target.value) });
   }, [selectedVisual]);
 
+  // ✅ MODIFICATION : Réinitialisation avec zoom à 90%
   const handleResetImagePosition = useCallback(() => {
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 90 });
   }, [selectedVisual]);
 
   const getCurrentColor = () => {
@@ -848,12 +848,13 @@ const App = () => {
     }
   };
 
+  // ✅ MODIFICATION : Confirmation avec zoom à 90%
   const confirmImageCrop = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
-    // ✅ Réinitialiser seulement la position du visuel actuel lors du changement d'image
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
+    // Réinitialiser avec un zoom à 90% pour voir l'image complète
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 90 });
   };
 
   const handleDownload = async (format) => {
@@ -973,7 +974,6 @@ const App = () => {
       flexDirection: 'column'
     };
 
-    // ✅ Utiliser les réglages du visuel actuel
     const translateX = (currentSettings.positionX - 50);
     const translateY = (currentSettings.positionY - 50);
     const scale = currentSettings.zoom / 100;
