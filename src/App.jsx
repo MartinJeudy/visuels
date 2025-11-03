@@ -7,48 +7,14 @@ import jsPDF from 'jspdf';
 // ============================================
 // CONFIGURATION DES COULEURS AVEC TEMPLATES PNG
 // ============================================
+// Ordre réorganisé pour éviter les couleurs similaires côte à côte
 const hormurColors = [
   { 
-    name: 'Orange Hormur', 
-    value: '#fb593d', 
-    text: '#f7ce64',
-    postTemplate: 'PostPRO_CONCERT_4_Orange.png',
-    afficheTemplate: 'Affiche_CONCERT_Orange.png'
-  },
-  { 
-    name: 'Rouge Vif', 
-    value: '#fc4735', 
+    name: 'Bleu Océan', 
+    value: '#1380c7', 
     text: '#feb7db',
-    postTemplate: 'PostPRO_CONCERT_8_Rouge.png',
-    afficheTemplate: 'Affiche_CONCERT_RougeR.png'
-  },
-  { 
-    name: 'Rose Bonbon', 
-    value: '#fca0ba', 
-    text: '#fc4735',
-    postTemplate: 'PostPRO_CONCERT_2_Rose.png',
-    afficheTemplate: 'Affiche_CONCERT_Rose.png'
-  },
-  { 
-    name: 'Rose Saumon', 
-    value: '#fd94ac', 
-    text: '#157fcd',
-    postTemplate: 'PostPRO_CONCERT_7_RoseRouge.png',
-    afficheTemplate: 'Affiche_CONCERT_RoseR.png'
-  },
-  { 
-    name: 'Jaune Citron', 
-    value: '#f7ce64', 
-    text: '#f75b40',
-    postTemplate: 'PostPRO_CONCERT_3_Jaune.png',
-    afficheTemplate: 'Affiche_CONCERT_Jaune.png'
-  },
-  { 
-    name: 'Vert Pomme', 
-    value: '#d7f879', 
-    text: '#00b17e',
-    postTemplate: 'PostPRO_CONCERT_6_VertCitron.png',
-    afficheTemplate: 'Affiche_CONCERT_Citron.png'
+    postTemplate: 'PostPRO_CONCERT_1_bleu.png',
+    afficheTemplate: 'Affiche_CONCERT_Bleu.png'
   },
   { 
     name: 'Vert Émeraude', 
@@ -58,11 +24,46 @@ const hormurColors = [
     afficheTemplate: 'Affiche_CONCERT_Vert.png'
   },
   { 
-    name: 'Bleu Océan', 
-    value: '#1380c7', 
+    name: 'Vert Pomme', 
+    value: '#d7f879', 
+    text: '#00b17e',
+    postTemplate: 'PostPRO_CONCERT_6_VertCitron.png',
+    afficheTemplate: 'Affiche_CONCERT_Citron.png'
+  },
+  { 
+    name: 'Jaune Citron', 
+    value: '#f7ce64', 
+    text: '#f75b40',
+    postTemplate: 'PostPRO_CONCERT_3_Jaune.png',
+    afficheTemplate: 'Affiche_CONCERT_Jaune.png'
+  },
+  { 
+    name: 'Orange Hormur', 
+    value: '#fb593d', 
+    text: '#f7ce64',
+    postTemplate: 'PostPRO_CONCERT_4_Orange.png',
+    afficheTemplate: 'Affiche_CONCERT_Orange.png'
+  },
+  { 
+    name: 'Rose Saumon', 
+    value: '#fd94ac', 
+    text: '#157fcd',
+    postTemplate: 'PostPRO_CONCERT_7_RoseRouge.png',
+    afficheTemplate: 'Affiche_CONCERT_RoseR.png'
+  },
+  { 
+    name: 'Rose Bonbon', 
+    value: '#fca0ba', 
+    text: '#fc4735',
+    postTemplate: 'PostPRO_CONCERT_2_Rose.png',
+    afficheTemplate: 'Affiche_CONCERT_Rose.png'
+  },
+  { 
+    name: 'Rouge Vif', 
+    value: '#fc4735', 
     text: '#feb7db',
-    postTemplate: 'PostPRO_CONCERT_1_bleu.png',
-    afficheTemplate: 'Affiche_CONCERT_Bleu.png'
+    postTemplate: 'PostPRO_CONCERT_8_Rouge.png',
+    afficheTemplate: 'Affiche_CONCERT_RougeR.png'
   }
 ];
 
@@ -694,8 +695,8 @@ const App = () => {
     chezHabitant: true
   });
 
-  const [selectedColor, setSelectedColor] = useState('#fb593d');
-  const [selectedVisual, setSelectedVisual] = useState('post-rs');
+  const [selectedColor, setSelectedColor] = useState('#1380c7'); // Première couleur (Bleu)
+  const [selectedVisual, setSelectedVisual] = useState('affiche'); // Par défaut : Affiche
   const [uploadedImage, setUploadedImage] = useState('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop');
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
@@ -706,23 +707,25 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  // ✅ MODIFICATION : Zoom par défaut réduit à 80% pour mieux gérer les images horizontales
+  // ✅ MODIFICATION : Réglages séparés pour chaque type de visuel + Zoom par défaut à 100%
   const [imageSettings, setImageSettings] = useState({
-    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 80 },
-    communique: { positionX: 50, positionY: 50, zoom: 80 },
-    postRS: { positionX: 50, positionY: 50, zoom: 80 }
+    affiche: { positionX: 50, positionY: 50, zoom: 100 },
+    flyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
+    flyerVerso: { positionX: 50, positionY: 50, zoom: 100 },
+    communique: { positionX: 50, positionY: 50, zoom: 100 },
+    postRS: { positionX: 50, positionY: 50, zoom: 100 }
   });
 
-  // Helper pour obtenir le groupe de réglages selon le visuel sélectionné
+  // Helper pour obtenir la clé de réglages selon le visuel sélectionné
   const getSettingsKey = (visualId) => {
-    if (visualId === 'affiche' || visualId === 'flyer-recto' || visualId === 'flyer-verso') {
-      return 'afficheFlyerRecto';
-    } else if (visualId === 'communique') {
-      return 'communique';
-    } else if (visualId === 'post-rs') {
-      return 'postRS';
-    }
-    return 'afficheFlyerRecto';
+    const mapping = {
+      'affiche': 'affiche',
+      'flyer-recto': 'flyerRecto',
+      'flyer-verso': 'flyerVerso',
+      'communique': 'communique',
+      'post-rs': 'postRS'
+    };
+    return mapping[visualId] || 'affiche';
   };
 
   // Obtenir les réglages actuels selon le visuel sélectionné
@@ -798,9 +801,9 @@ const App = () => {
     updateCurrentSettings({ zoom: Number(e.target.value) });
   }, [selectedVisual]);
 
-  // ✅ MODIFICATION : Réinitialisation avec zoom à 80%
+  // ✅ MODIFICATION : Réinitialisation avec zoom à 100%
   const handleResetImagePosition = useCallback(() => {
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 80 });
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   }, [selectedVisual]);
 
   const getCurrentColor = () => {
@@ -848,13 +851,13 @@ const App = () => {
     }
   };
 
-  // ✅ MODIFICATION : Confirmation avec zoom à 80%
+  // ✅ MODIFICATION : Confirmation avec zoom à 100%
   const confirmImageCrop = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
-    // Réinitialiser avec un zoom à 80% pour voir l'image complète
-    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 80 });
+    // Réinitialiser avec un zoom à 100%
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   };
 
   const handleDownload = async (format) => {
@@ -996,13 +999,13 @@ const App = () => {
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* CALQUE 1 : IMAGE */}
+            {/* ✅ CALQUE 1 : IMAGE alignée exactement sur la zone visible du template */}
             <div style={{
               position: 'absolute',
-              top: '0',
-              left: '0',
-              width: '100%',
-              height: '100%',
+              top: '13.5%',
+              left: '6%',
+              width: '88%',
+              height: '71%',
               zIndex: 1,
               overflow: 'hidden'
             }}>
@@ -1083,10 +1086,10 @@ const App = () => {
 
               <div style={{
                 position: 'absolute',
-                bottom: '25%',
-                left: '5%',
-                right: '5%',
-                textAlign: 'center'
+                bottom: '83.5%',
+                left: '7%',
+                right: '3%',
+                textAlign: 'left'
               }}>
                 <h1 style={{
                   fontSize: selectedVisual === 'affiche' ? '36px' : '28px',
@@ -1168,18 +1171,20 @@ const App = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* ✅ QR CODE avec fond blanc et bordure de la couleur du texte */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    border: `2px solid ${textColor}`
                   }}>
                     <QRCodeSVG
                       value={eventData.eventUrl}
-                      size={selectedVisual === 'affiche' ? 56 : 48}
+                      size={selectedVisual === 'affiche' ? 52 : 44}
                       level="M"
                       includeMargin={false}
-                      fgColor={textColor}
+                      fgColor="#000000"
                     />
                   </div>
                   
@@ -1324,17 +1329,19 @@ const App = () => {
                   justifyContent: 'space-between',
                   alignItems: 'flex-end'
                 }}>
+                  {/* ✅ QR CODE avec fond blanc et bordure */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '5px',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    border: `2px solid ${textColor}`
                   }}>
                     <QRCodeSVG
                       value={eventData.eventUrl}
-                      size={40}
+                      size={36}
                       level="M"
                       includeMargin={false}
-                      fgColor={bgColor}
+                      fgColor="#000000"
                     />
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -1676,18 +1683,20 @@ const App = () => {
                   paddingTop: '12px',
                   borderTop: `2px solid ${textColor}60`
                 }}>
+                  {/* ✅ QR CODE avec fond blanc et bordure */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    border: `2px solid ${textColor}`
                   }}>
                     <QRCodeSVG
                       value={eventData.eventUrl}
-                      size={48}
+                      size={44}
                       level="M"
                       includeMargin={false}
-                      fgColor={textColor}
+                      fgColor="#000000"
                     />
                   </div>
                   <div style={{
