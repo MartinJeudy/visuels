@@ -1000,8 +1000,8 @@ const App = () => {
             <div style={{
               position: 'absolute',
               top: '15%',    // Ajustable si besoin +1 / -1
-              left: '11%',
-              width: '78%',
+              left: '9%',
+              width: '82%',
               height: '67%',
               zIndex: 1,
               overflow: 'hidden'
