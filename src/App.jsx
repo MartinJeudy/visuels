@@ -1086,7 +1086,7 @@ const App = () => {
                 bottom: '83%',
                 left: '7%',
                 right: '3%',
-                textAlign: 'center'
+                textAlign: 'left'
               }}>
                 <h1 style={{
                   fontSize: selectedVisual === 'affiche' ? '36px' : '28px',
