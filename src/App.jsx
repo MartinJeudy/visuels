@@ -706,10 +706,44 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  // Nouveaux états pour le positionnement de l'image
-  const [imagePositionX, setImagePositionX] = useState(50); // 0-100 (50 = centré)
-  const [imagePositionY, setImagePositionY] = useState(50); // 0-100 (50 = centré)
-  const [imageZoom, setImageZoom] = useState(100); // 80-200 (100 = taille normale)
+  // ✅ NOUVEAUX ÉTATS : Position et zoom indépendants pour chaque type de visuel
+  const [imageSettings, setImageSettings] = useState({
+    afficheFlyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
+    communique: { positionX: 50, positionY: 50, zoom: 100 },
+    postRS: { positionX: 50, positionY: 50, zoom: 100 }
+  });
+
+  // ✅ Helper pour obtenir le groupe de réglages selon le visuel sélectionné
+  const getSettingsKey = (visualId) => {
+    if (visualId === 'affiche' || visualId === 'flyer-recto' || visualId === 'flyer-verso') {
+      return 'afficheFlyerRecto';
+    } else if (visualId === 'communique') {
+      return 'communique';
+    } else if (visualId === 'post-rs') {
+      return 'postRS';
+    }
+    return 'afficheFlyerRecto'; // fallback
+  };
+
+  // ✅ Obtenir les réglages actuels selon le visuel sélectionné
+  const getCurrentSettings = () => {
+    const key = getSettingsKey(selectedVisual);
+    return imageSettings[key];
+  };
+
+  // ✅ Mettre à jour les réglages pour le visuel actuel
+  const updateCurrentSettings = (updates) => {
+    const key = getSettingsKey(selectedVisual);
+    setImageSettings(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        ...updates
+      }
+    }));
+  };
+
+  const currentSettings = getCurrentSettings();
 
   const handleSendConfirm = useCallback(() => {
     alert('✅ Envoi réussi !\n\nLes visuels ont été envoyés aux organisateurs par email.');
@@ -752,23 +786,22 @@ const App = () => {
     setEventData(prev => ({ ...prev, convivialite: value }));
   }, []);
 
+  // ✅ Handlers de position et zoom modifiés pour utiliser les réglages indépendants
   const handleImagePositionXChange = useCallback((e) => {
-    setImagePositionX(Number(e.target.value));
-  }, []);
+    updateCurrentSettings({ positionX: Number(e.target.value) });
+  }, [selectedVisual]);
 
   const handleImagePositionYChange = useCallback((e) => {
-    setImagePositionY(Number(e.target.value));
-  }, []);
+    updateCurrentSettings({ positionY: Number(e.target.value) });
+  }, [selectedVisual]);
 
   const handleImageZoomChange = useCallback((e) => {
-    setImageZoom(Number(e.target.value));
-  }, []);
+    updateCurrentSettings({ zoom: Number(e.target.value) });
+  }, [selectedVisual]);
 
   const handleResetImagePosition = useCallback(() => {
-    setImagePositionX(50);
-    setImagePositionY(50);
-    setImageZoom(100);
-  }, []);
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
+  }, [selectedVisual]);
 
   const getCurrentColor = () => {
     return hormurColors.find(c => c.value === selectedColor) || hormurColors[0];
@@ -819,10 +852,8 @@ const App = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
-    // Réinitialiser la position lors du changement d'image
-    setImagePositionX(50);
-    setImagePositionY(50);
-    setImageZoom(100);
+    // ✅ Réinitialiser seulement la position du visuel actuel lors du changement d'image
+    updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   };
 
   const handleDownload = async (format) => {
@@ -942,13 +973,11 @@ const App = () => {
       flexDirection: 'column'
     };
 
-    // Nouvelle approche pour le positionnement d'image
-    // Convertir les sliders (0-100) en pourcentages de déplacement (-50% à +50%)
-    const translateX = (imagePositionX - 50); // -50 à +50
-    const translateY = (imagePositionY - 50); // -50 à +50
-    const scale = imageZoom / 100; // 0.8 à 2.0
+    // ✅ Utiliser les réglages du visuel actuel
+    const translateX = (currentSettings.positionX - 50);
+    const translateY = (currentSettings.positionY - 50);
+    const scale = currentSettings.zoom / 100;
 
-    // Style d'image robuste sans espaces blancs
     const imageStyle = {
       position: 'absolute',
       top: '50%',
@@ -1773,9 +1802,9 @@ const App = () => {
               hormurColors={hormurColors}
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}
-              imagePositionX={imagePositionX}
-              imagePositionY={imagePositionY}
-              imageZoom={imageZoom}
+              imagePositionX={currentSettings.positionX}
+              imagePositionY={currentSettings.positionY}
+              imageZoom={currentSettings.zoom}
               onImagePositionXChange={handleImagePositionXChange}
               onImagePositionYChange={handleImagePositionYChange}
               onImageZoomChange={handleImageZoomChange}
