@@ -1083,9 +1083,9 @@ const App = () => {
 
               <div style={{
                 position: 'absolute',
-                bottom: '85%',
-                left: '6%',
-                right: '4%',
+                bottom: '83%',
+                left: '7%',
+                right: '3%',
                 textAlign: 'center'
               }}>
                 <h1 style={{
