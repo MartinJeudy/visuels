@@ -996,13 +996,13 @@ const App = () => {
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* CALQUE 1 : IMAGE */}
+            {/* ✅ CALQUE 1 : IMAGE alignée exactement sur la zone visible du template */}
             <div style={{
               position: 'absolute',
-              top: '0',
-              left: '0',
-              width: '100%',
-              height: '100%',
+              top: '15%',    // Ajustable si besoin +1 / -1
+              left: '11%',
+              width: '78%',
+              height: '67%',
               zIndex: 1,
               overflow: 'hidden'
             }}>
