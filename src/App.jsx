@@ -1512,10 +1512,10 @@ const App = () => {
             {/* CALQUE 1 : IMAGE */}
             <div style={{
               position: 'absolute',
-              top: '10%',
-              left: '10%',
-              width: '80%',
-              height: '80%',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '100%',
               zIndex: 1,
               overflow: 'hidden',
               borderRadius: '12px',
