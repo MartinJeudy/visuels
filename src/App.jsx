@@ -1108,7 +1108,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 bottom: '18%',
-                left: '1%',
+                left: '3%',
                 right: '5%',
                 display: 'flex',
                 justifyContent: 'flex-start',
@@ -1649,7 +1649,7 @@ const App = () => {
                   fontWeight: '900',
                   textTransform: 'uppercase',
                   lineHeight: '0.95',
-                  margin: '0 0 12px 0',
+                  margin: '-25px 0 12px 0',
                   letterSpacing: '-1px',
                   textShadow: '0 2px 8px rgba(0,0,0,0.3)'
                 }}>
