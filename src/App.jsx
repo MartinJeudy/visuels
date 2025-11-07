@@ -1108,7 +1108,7 @@ const App = () => {
               <div style={{
                 position: 'absolute',
                 bottom: '18%',
-                left: '5%',
+                left: '1%',
                 right: '5%',
                 display: 'flex',
                 justifyContent: 'center',
