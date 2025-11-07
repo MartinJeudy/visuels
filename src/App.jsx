@@ -1047,7 +1047,7 @@ const App = () => {
               {eventData.chezHabitant && (
                 <div style={{
                   position: 'absolute',
-                  top: '13%',
+                  top: '83%',
                   left: '3%',
                   backgroundColor: 'rgba(255,255,255,0.95)',
                   padding: selectedVisual === 'affiche' ? '8px 16px' : '6px 12px',
