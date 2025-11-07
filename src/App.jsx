@@ -1111,7 +1111,7 @@ const App = () => {
                 left: '1%',
                 right: '5%',
                 display: 'flex',
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
                 gap: '16px'
               }}>
                 <p style={{
