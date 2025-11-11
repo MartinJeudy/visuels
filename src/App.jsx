@@ -1520,7 +1520,7 @@ const App = () => {
                   textTransform: 'uppercase',
                   color: textColor,
                   margin: 0,
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.4)'
                 }}>
                   {eventData.date}
                 </p>
