@@ -734,8 +734,8 @@ const App = () => {
     chezHabitant: true
   });
 
-  const [selectedColor, setSelectedColor] = useState('#1380c7'); // Première couleur (Bleu)
-  const [selectedVisual, setSelectedVisual] = useState('affiche'); // Par défaut : Affiche
+  const [selectedColor, setSelectedColor] = useState('#1380c7');
+  const [selectedVisual, setSelectedVisual] = useState('affiche');
   const [uploadedImage, setUploadedImage] = useState('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop');
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
@@ -1403,7 +1403,7 @@ const App = () => {
                   </p>
                 </div>
                 <img
-                  src="/mnt/user-data/uploads/Logo_couleurpng_Plan_de_travail_1_copie__2_.png"
+                  src="/logo-hormur-couleur.png"
                   alt="Hormur"
                   style={{
                     height: '32px',
@@ -1597,7 +1597,7 @@ const App = () => {
                   </div>
                   
                   <img
-                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    src="/logo-hormur-blanc.png"
                     alt="Hormur"
                     style={{
                       height: selectedVisual === 'affiche' ? '28px' : '24px',
@@ -1752,7 +1752,7 @@ const App = () => {
                     />
                   </div>
                   <img
-                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    src="/logo-hormur-blanc.png"
                     alt="Hormur"
                     style={{
                       height: '20px',
@@ -2067,7 +2067,7 @@ const App = () => {
                   </span>
                   
                   <img
-                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    src="/logo-hormur-blanc.png"
                     alt="Hormur"
                     style={{
                       height: '28px',
