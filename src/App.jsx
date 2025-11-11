@@ -1088,29 +1088,31 @@ const App = () => {
             </div>
           </div>
 
-          {/* Badge Premium "Chez l'habitant" - Style label de qualité */}
+          {/* Badge Tampon "Chez l'habitant" */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
               top: '3%',
               right: '3%',
-              background: 'linear-gradient(135deg, #FB593D 0%, #FC4735 100%)',
-              padding: isAffiche ? '10px 18px' : '8px 14px',
-              borderRadius: '25px',
-              border: '3px solid #000000',
-              fontSize: isAffiche ? '12px' : '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: isAffiche ? '12px 20px' : '10px 16px',
+              border: '4px solid #DC2626',
+              fontSize: isAffiche ? '11px' : '9px',
               fontWeight: '900',
               textTransform: 'uppercase',
-              color: '#ffffff',
-              letterSpacing: '1px',
+              color: '#DC2626',
+              letterSpacing: '1.5px',
               zIndex: 4,
-              boxShadow: '0 6px 20px rgba(251, 89, 61, 0.4), 0 2px 8px rgba(0,0,0,0.2)',
+              transform: 'rotate(-8deg)',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '6px'
+              gap: '2px',
+              lineHeight: '1'
             }}>
-              <span style={{ fontSize: isAffiche ? '16px' : '14px' }}>🏠</span>
-              <span>Chez l'habitant</span>
+              <span style={{ fontSize: isAffiche ? '18px' : '16px', lineHeight: '1' }}>🏠</span>
+              <span style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>CHEZ L'HABITANT</span>
             </div>
           )}
 
@@ -1194,35 +1196,38 @@ const App = () => {
                 {eventData.organizerNames}
               </p>
               
-              {/* Badge Convivialité - Style distinctif */}
+              {/* Badge Tampon Convivialité */}
               {eventData.convivialite !== 'none' && (
                 <div style={{
                   display: 'inline-block',
                   marginTop: '8px',
-                  background: eventData.convivialite === 'repas' 
-                    ? 'linear-gradient(135deg, #00B179 0%, #00A06B 100%)'
-                    : 'linear-gradient(135deg, #F7CE64 0%, #F0B944 100%)',
-                  padding: isAffiche ? '6px 14px' : '5px 11px',
-                  borderRadius: '20px',
-                  border: '2px solid #000000',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  padding: isAffiche ? '8px 14px' : '6px 11px',
+                  border: eventData.convivialite === 'repas' 
+                    ? '3px solid #059669'
+                    : '3px solid #D97706',
+                  transform: 'rotate(4deg)',
+                  boxShadow: eventData.convivialite === 'repas'
+                    ? '0 3px 10px rgba(5, 150, 105, 0.2)'
+                    : '0 3px 10px rgba(217, 119, 6, 0.2)'
                 }}>
                   <p style={{
-                    fontSize: isAffiche ? '10px' : '8px',
+                    fontSize: isAffiche ? '9px' : '7px',
                     fontWeight: '900',
                     textTransform: 'uppercase',
-                    color: '#ffffff',
+                    color: eventData.convivialite === 'repas' ? '#059669' : '#D97706',
                     margin: 0,
-                    letterSpacing: '0.5px',
+                    letterSpacing: '1px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    lineHeight: '1'
                   }}>
                     <span style={{ fontSize: isAffiche ? '12px' : '10px' }}>
                       {eventData.convivialite === 'repas' ? '🍽️' : '🥂'}
                     </span>
-                    {eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
+                    {eventData.convivialite === 'repas' ? 'REPAS PARTAGÉ' : 'APÉRO PARTICIPATIF'}
                   </p>
                 </div>
               )}
@@ -1339,29 +1344,32 @@ const App = () => {
             </div>
           </div>
 
-          {/* Badge Premium "Chez l'habitant" avec nom organisateur */}
+          {/* Badge Tampon "Chez l'habitant" avec organisateur */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
               top: '3%',
               left: '3%',
-              background: 'linear-gradient(135deg, #FB593D 0%, #FC4735 100%)',
-              padding: '8px 16px',
-              borderRadius: '25px',
-              border: '3px solid #000000',
-              fontSize: '11px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: '10px 18px',
+              border: '4px solid #DC2626',
+              fontSize: '10px',
               fontWeight: '900',
               textTransform: 'uppercase',
-              color: '#ffffff',
-              letterSpacing: '0.8px',
+              color: '#DC2626',
+              letterSpacing: '1.2px',
               zIndex: 4,
-              boxShadow: '0 6px 20px rgba(251, 89, 61, 0.4), 0 2px 8px rgba(0,0,0,0.2)',
+              transform: 'rotate(-8deg)',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '6px'
+              gap: '3px',
+              lineHeight: '1'
             }}>
-              <span style={{ fontSize: '14px' }}>🏠</span>
-              <span>{eventData.organizerNames}</span>
+              <span style={{ fontSize: '16px', lineHeight: '1' }}>🏠</span>
+              <span style={{ fontFamily: 'Impact, "Arial Black", sans-serif', fontSize: '8px' }}>CHEZ</span>
+              <span style={{ fontFamily: 'Impact, "Arial Black", sans-serif', fontSize: '11px', marginTop: '-2px' }}>{eventData.organizerNames}</span>
             </div>
           )}
 
@@ -1537,28 +1545,30 @@ const App = () => {
               inset: 0,
               zIndex: 3
             }}>
-              {/* Badge Premium "Chez l'habitant" - Couleur */}
+              {/* Badge Tampon "Chez l'habitant" - Couleur */}
               {eventData.chezHabitant && (
                 <div style={{
                   position: 'absolute',
                   top: '3%',
                   right: '3%',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
-                  padding: selectedVisual === 'affiche' ? '10px 18px' : '8px 14px',
-                  borderRadius: '25px',
-                  border: `3px solid ${textColor}`,
-                  fontSize: selectedVisual === 'affiche' ? '12px' : '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  padding: selectedVisual === 'affiche' ? '12px 20px' : '10px 16px',
+                  border: '4px solid #DC2626',
+                  fontSize: selectedVisual === 'affiche' ? '11px' : '9px',
                   fontWeight: '900',
                   textTransform: 'uppercase',
-                  color: bgColor,
-                  letterSpacing: '1px',
-                  boxShadow: `0 6px 20px ${bgColor}60, 0 2px 8px rgba(0,0,0,0.2)`,
+                  color: '#DC2626',
+                  letterSpacing: '1.5px',
+                  transform: 'rotate(-8deg)',
+                  boxShadow: '0 6px 16px rgba(220, 38, 38, 0.3), 0 2px 8px rgba(0,0,0,0.2)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '2px',
+                  lineHeight: '1'
                 }}>
-                  <span style={{ fontSize: selectedVisual === 'affiche' ? '16px' : '14px' }}>🏠</span>
-                  <span>Chez l'habitant</span>
+                  <span style={{ fontSize: selectedVisual === 'affiche' ? '18px' : '16px', lineHeight: '1' }}>🏠</span>
+                  <span style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>CHEZ L'HABITANT</span>
                 </div>
               )}
 
@@ -1644,34 +1654,36 @@ const App = () => {
                     {eventData.organizerNames}
                   </p>
                   
-                  {/* Badge Convivialité - Style premium avec couleur */}
+                  {/* Badge Tampon Convivialité - Couleur */}
                   {eventData.convivialite !== 'none' && (
                     <div style={{
                       display: 'inline-block',
                       marginTop: '8px',
-                      background: eventData.convivialite === 'repas'
-                        ? 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)'
-                        : 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
-                      padding: selectedVisual === 'affiche' ? '6px 14px' : '5px 11px',
-                      borderRadius: '20px',
-                      border: `2px solid ${textColor}`,
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      padding: selectedVisual === 'affiche' ? '8px 14px' : '6px 11px',
+                      border: eventData.convivialite === 'repas' 
+                        ? '3px solid #059669'
+                        : '3px solid #D97706',
+                      transform: 'rotate(4deg)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                     }}>
                       <p style={{
-                        fontSize: selectedVisual === 'affiche' ? '10px' : '8px',
+                        fontSize: selectedVisual === 'affiche' ? '9px' : '7px',
                         fontWeight: '900',
                         textTransform: 'uppercase',
-                        color: bgColor,
+                        color: eventData.convivialite === 'repas' ? '#059669' : '#D97706',
                         margin: 0,
-                        letterSpacing: '0.5px',
+                        letterSpacing: '1px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '4px',
+                        fontFamily: 'Impact, "Arial Black", sans-serif',
+                        lineHeight: '1'
                       }}>
                         <span style={{ fontSize: selectedVisual === 'affiche' ? '12px' : '10px' }}>
                           {eventData.convivialite === 'repas' ? '🍽️' : '🥂'}
                         </span>
-                        {eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
+                        {eventData.convivialite === 'repas' ? 'REPAS PARTAGÉ' : 'APÉRO PARTICIPATIF'}
                       </p>
                     </div>
                   )}
@@ -1770,61 +1782,68 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Badge Premium "Chez l'habitant" - Verso */}
+                {/* Badge Tampon "Chez l'habitant" - Verso */}
                 {eventData.chezHabitant && (
                   <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                     <div style={{
                       display: 'inline-block',
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       padding: '8px 16px',
-                      borderRadius: '25px',
-                      border: `2px solid ${textColor}`,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                    }}>
-                      <p style={{
-                        fontSize: '10px',
-                        fontWeight: '900',
-                        textTransform: 'uppercase',
-                        color: bgColor,
-                        margin: 0,
-                        letterSpacing: '0.8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}>
-                        <span style={{ fontSize: '12px' }}>🏠</span>
-                        <span>Chez l'habitant</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Badge Convivialité - Verso */}
-                {eventData.convivialite !== 'none' && (
-                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                    <div style={{
-                      display: 'inline-block',
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
-                      padding: '6px 14px',
-                      borderRadius: '20px',
-                      border: `2px solid ${textColor}`,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      border: '3px solid #DC2626',
+                      transform: 'rotate(-6deg)',
+                      boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)'
                     }}>
                       <p style={{
                         fontSize: '9px',
                         fontWeight: '900',
                         textTransform: 'uppercase',
-                        color: bgColor,
+                        color: '#DC2626',
                         margin: 0,
-                        letterSpacing: '0.5px',
+                        letterSpacing: '1.2px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '2px',
+                        fontFamily: 'Impact, "Arial Black", sans-serif',
+                        lineHeight: '1'
+                      }}>
+                        <span style={{ fontSize: '14px' }}>🏠</span>
+                        <span>CHEZ L'HABITANT</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Badge Tampon Convivialité - Verso */}
+                {eventData.convivialite !== 'none' && (
+                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <div style={{
+                      display: 'inline-block',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      padding: '6px 14px',
+                      border: eventData.convivialite === 'repas'
+                        ? '3px solid #059669'
+                        : '3px solid #D97706',
+                      transform: 'rotate(5deg)',
+                      boxShadow: '0 3px 10px rgba(0,0,0,0.15)'
+                    }}>
+                      <p style={{
+                        fontSize: '8px',
+                        fontWeight: '900',
+                        textTransform: 'uppercase',
+                        color: eventData.convivialite === 'repas' ? '#059669' : '#D97706',
+                        margin: 0,
+                        letterSpacing: '1px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '4px',
+                        fontFamily: 'Impact, "Arial Black", sans-serif',
+                        lineHeight: '1'
                       }}>
                         <span style={{ fontSize: '11px' }}>
                           {eventData.convivialite === 'repas' ? '🍽️' : '🥂'}
                         </span>
-                        {eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
+                        {eventData.convivialite === 'repas' ? 'REPAS PARTAGÉ' : 'APÉRO PARTICIPATIF'}
                       </p>
                     </div>
                   </div>
@@ -2135,28 +2154,33 @@ const App = () => {
                 justifyContent: 'space-between',
                 alignItems: 'start'
               }}>
-                {/* Badge Premium "Chez l'habitant" avec nom - Post RS */}
+                {/* Badge Tampon "Chez l'habitant" - Post RS */}
                 {eventData.chezHabitant && (
                   <div style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
-                    padding: '8px 16px',
-                    borderRadius: '25px',
-                    border: `3px solid ${textColor}`,
-                    boxShadow: `0 6px 20px ${bgColor}60, 0 2px 8px rgba(0,0,0,0.2)`,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    padding: '10px 18px',
+                    border: '4px solid #DC2626',
+                    transform: 'rotate(-8deg)',
+                    boxShadow: '0 6px 16px rgba(220, 38, 38, 0.3), 0 2px 8px rgba(0,0,0,0.2)',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '3px'
                   }}>
-                    <span style={{ fontSize: '14px' }}>🏠</span>
+                    <span style={{ fontSize: '16px', lineHeight: '1' }}>🏠</span>
                     <p style={{
-                      fontSize: '11px',
+                      fontSize: '9px',
                       fontWeight: '900',
                       textTransform: 'uppercase',
-                      color: bgColor,
+                      color: '#DC2626',
                       margin: 0,
-                      letterSpacing: '0.8px'
+                      letterSpacing: '1.2px',
+                      fontFamily: 'Impact, "Arial Black", sans-serif',
+                      lineHeight: '1',
+                      textAlign: 'center'
                     }}>
-                      {eventData.organizerNames}
+                      <span style={{ fontSize: '7px', display: 'block' }}>CHEZ</span>
+                      <span style={{ fontSize: '11px', display: 'block', marginTop: '2px' }}>{eventData.organizerNames}</span>
                     </p>
                   </div>
                 )}
@@ -2212,13 +2236,15 @@ const App = () => {
                       ({eventData.department})
                     </span>
 
-                    {/* Badge Convivialité - Post RS */}
+                    {/* Badge Tampon Convivialité - Post RS */}
                     {eventData.convivialite !== 'none' && (
                       <div style={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
                         padding: '6px 12px',
-                        borderRadius: '20px',
-                        border: `2px solid ${textColor}`,
+                        border: eventData.convivialite === 'repas'
+                          ? '3px solid #059669'
+                          : '3px solid #D97706',
+                        transform: 'rotate(5deg)',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                         display: 'flex',
                         alignItems: 'center',
@@ -2228,13 +2254,15 @@ const App = () => {
                           {eventData.convivialite === 'repas' ? '🍽️' : '🥂'}
                         </span>
                         <span style={{
-                          fontSize: '9px',
+                          fontSize: '8px',
                           fontWeight: '900',
                           textTransform: 'uppercase',
-                          color: bgColor,
-                          letterSpacing: '0.5px'
+                          color: eventData.convivialite === 'repas' ? '#059669' : '#D97706',
+                          letterSpacing: '1px',
+                          fontFamily: 'Impact, "Arial Black", sans-serif',
+                          lineHeight: '1'
                         }}>
-                          {eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
+                          {eventData.convivialite === 'repas' ? 'REPAS PARTAGÉ' : 'APÉRO PARTICIPATIF'}
                         </span>
                       </div>
                     )}
