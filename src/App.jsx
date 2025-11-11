@@ -69,7 +69,8 @@ const hormurColors = [
     name: 'Noir & Blanc', 
     value: '#ffffff', 
     text: '#000000',
-    isBlackAndWhite: true
+    isBlackAndWhite: true,
+    displayName: 'Noir & Blanc'
   }
 ];
 
@@ -494,7 +495,7 @@ const EditPanel = memo(({
           <p className="text-xs text-gray-500 mt-1">Ex: "Sophie & Martin" ou "Sophie"</p>
         </div>
 
-        {selectedVisual !== 'post-rs' && !isBlackAndWhite && (
+        {selectedVisual !== 'post-rs' && (
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -698,7 +699,7 @@ const EditPanel = memo(({
             <button
               key={color.value}
               onClick={() => setSelectedColor(color.value)}
-              className={`aspect-square rounded-lg transition-all flex items-center justify-center ${
+              className={`aspect-square rounded-lg transition-all flex items-center justify-center text-xs font-bold ${
                 selectedColor === color.value
                   ? 'ring-4 ring-gray-900 ring-offset-2 scale-105'
                   : 'hover:scale-105'
@@ -707,7 +708,7 @@ const EditPanel = memo(({
               title={color.name}
             >
               {color.isBlackAndWhite && (
-                <span className="text-xs font-bold text-black">N&B</span>
+                <span className="text-black px-1">Noir & Blanc</span>
               )}
             </button>
           ))}
@@ -1083,21 +1084,26 @@ const App = () => {
             </div>
           </div>
 
-          {/* Département en format (XX) */}
-          <div style={{
-            position: 'absolute',
-            top: '3%',
-            right: '3%',
-            zIndex: 3
-          }}>
-            <span style={{
-              fontSize: isAffiche ? '24px' : '20px',
+          {/* Chez l'habitant */}
+          {eventData.chezHabitant && (
+            <div style={{
+              position: 'absolute',
+              top: '83%',
+              left: '3%',
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              padding: isAffiche ? '8px 16px' : '6px 12px',
+              borderRadius: '20px',
+              border: '2px solid #000000',
+              fontSize: isAffiche ? '11px' : '9px',
               fontWeight: '900',
-              color: '#000000'
+              textTransform: 'uppercase',
+              color: '#000000',
+              letterSpacing: '0.5px',
+              zIndex: 3
             }}>
-              ({eventData.department})
-            </span>
-          </div>
+              🏠 Chez l'habitant
+            </div>
+          )}
 
           {/* Titre */}
           <div style={{
@@ -1164,6 +1170,15 @@ const App = () => {
             zIndex: 3
           }}>
             <div style={{ flex: 1 }}>
+              {/* Département en bas à gauche */}
+              <p style={{
+                fontSize: isAffiche ? '18px' : '16px',
+                fontWeight: '900',
+                color: '#000000',
+                margin: '0 0 4px 0'
+              }}>
+                ({eventData.department})
+              </p>
               <p style={{
                 fontSize: isAffiche ? '13px' : '11px',
                 fontWeight: '900',
@@ -1284,6 +1299,27 @@ const App = () => {
             </div>
           </div>
 
+          {/* Chez l'habitant */}
+          {eventData.chezHabitant && (
+            <div style={{
+              position: 'absolute',
+              top: '3%',
+              left: '3%',
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              border: '2px solid #000000',
+              fontSize: '10px',
+              fontWeight: '900',
+              textTransform: 'uppercase',
+              color: '#000000',
+              letterSpacing: '0.5px',
+              zIndex: 3
+            }}>
+              🏠 {eventData.organizerNames}
+            </div>
+          )}
+
           {/* Contenu texte */}
           <div style={{
             position: 'absolute',
@@ -1300,13 +1336,7 @@ const App = () => {
               justifyContent: 'flex-end',
               alignItems: 'start'
             }}>
-              <span style={{
-                fontSize: '28px',
-                fontWeight: '900',
-                color: '#000000'
-              }}>
-                ({eventData.department})
-              </span>
+              {/* Espace réservé pour chez l'habitant si présent */}
             </div>
 
             <div>
@@ -1350,6 +1380,15 @@ const App = () => {
                 borderTop: `2px solid #000000`
               }}>
                 <div style={{ textAlign: 'left' }}>
+                  {/* Département en bas à gauche */}
+                  <p style={{
+                    fontSize: '20px',
+                    fontWeight: '900',
+                    color: '#000000',
+                    margin: '0 0 8px 0'
+                  }}>
+                    ({eventData.department})
+                  </p>
                   <p style={{
                     fontSize: '11px',
                     fontWeight: '700',
@@ -1472,28 +1511,6 @@ const App = () => {
 
               <div style={{
                 position: 'absolute',
-                top: '3%',
-                right: '3%',
-                width: selectedVisual === 'affiche' ? '56px' : '48px',
-                height: selectedVisual === 'affiche' ? '56px' : '48px',
-                borderRadius: '50%',
-                backgroundColor: textColor,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}>
-                <span style={{
-                  fontSize: selectedVisual === 'affiche' ? '22px' : '18px',
-                  fontWeight: '900',
-                  color: bgColor
-                }}>
-                  {eventData.department}
-                </span>
-              </div>
-
-              <div style={{
-                position: 'absolute',
                 bottom: '83.5%',
                 left: '7%',
                 right: '3%',
@@ -1554,6 +1571,16 @@ const App = () => {
                 alignItems: 'flex-end'
               }}>
                 <div style={{ flex: 1 }}>
+                  {/* Département en bas à gauche au format (XX) */}
+                  <p style={{
+                    fontSize: selectedVisual === 'affiche' ? '18px' : '16px',
+                    fontWeight: '900',
+                    color: textColor,
+                    margin: '0 0 4px 0',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                  }}>
+                    ({eventData.department})
+                  </p>
                   <p style={{
                     fontSize: selectedVisual === 'affiche' ? '13px' : '11px',
                     fontWeight: '900',
@@ -2029,26 +2056,6 @@ const App = () => {
                     </p>
                   </div>
                 )}
-                
-                <div style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '50%',
-                  backgroundColor: textColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginLeft: 'auto',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                }}>
-                  <span style={{
-                    fontSize: '22px',
-                    fontWeight: '900',
-                    color: bgColor
-                  }}>
-                    {eventData.department}
-                  </span>
-                </div>
               </div>
 
               <div>
@@ -2091,22 +2098,35 @@ const App = () => {
                   paddingTop: '12px',
                   borderTop: `2px solid ${textColor}60`
                 }}>
-                  {/* ✅ QR CODE avec fond blanc et bordure */}
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '6px',
-                    borderRadius: '6px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    border: `2px solid ${textColor}`
-                  }}>
-                    <QRCodeSVG
-                      value={eventData.eventUrl}
-                      size={44}
-                      level="M"
-                      includeMargin={false}
-                      fgColor="#000000"
-                    />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Département au format (XX) en bas à gauche */}
+                    <span style={{
+                      fontSize: '20px',
+                      fontWeight: '900',
+                      color: textColor,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    }}>
+                      ({eventData.department})
+                    </span>
+                    
+                    {/* ✅ QR CODE avec fond blanc et bordure */}
+                    <div style={{
+                      backgroundColor: 'white',
+                      padding: '6px',
+                      borderRadius: '6px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      border: `2px solid ${textColor}`
+                    }}>
+                      <QRCodeSVG
+                        value={eventData.eventUrl}
+                        size={44}
+                        level="M"
+                        includeMargin={false}
+                        fgColor="#000000"
+                      />
+                    </div>
                   </div>
+                  
                   <div style={{
                     fontSize: '18px',
                     fontWeight: '900',
