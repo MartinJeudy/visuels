@@ -746,7 +746,6 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  // ✅ MODIFICATION : Réglages séparés pour chaque type de visuel + Zoom par défaut à 100%
   const [imageSettings, setImageSettings] = useState({
     affiche: { positionX: 50, positionY: 50, zoom: 100 },
     flyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
@@ -755,7 +754,6 @@ const App = () => {
     postRS: { positionX: 50, positionY: 50, zoom: 100 }
   });
 
-  // Helper pour obtenir la clé de réglages selon le visuel sélectionné
   const getSettingsKey = (visualId) => {
     const mapping = {
       'affiche': 'affiche',
@@ -767,13 +765,11 @@ const App = () => {
     return mapping[visualId] || 'affiche';
   };
 
-  // Obtenir les réglages actuels selon le visuel sélectionné
   const getCurrentSettings = () => {
     const key = getSettingsKey(selectedVisual);
     return imageSettings[key];
   };
 
-  // Mettre à jour les réglages pour le visuel actuel
   const updateCurrentSettings = (updates) => {
     const key = getSettingsKey(selectedVisual);
     setImageSettings(prev => ({
@@ -844,7 +840,6 @@ const App = () => {
     updateCurrentSettings({ zoom: Number(e.target.value) });
   }, [selectedVisual]);
 
-  // ✅ MODIFICATION : Réinitialisation avec zoom à 100%
   const handleResetImagePosition = useCallback(() => {
     updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   }, [selectedVisual]);
@@ -899,12 +894,10 @@ const App = () => {
     }
   };
 
-  // ✅ MODIFICATION : Confirmation avec zoom à 100%
   const confirmImageCrop = () => {
     setUploadedImage(tempImage);
     setShowImageCrop(false);
     setTempImage(null);
-    // Réinitialiser avec un zoom à 100%
     updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   };
 
@@ -1004,9 +997,6 @@ const App = () => {
     }
   };
 
-  // ============================================
-  // FONCTION DE RENDU DES VISUELS AVEC TEMPLATES PNG OU NOIR & BLANC
-  // ============================================
   const renderVisual = () => {
     const colorObj = getCurrentColor();
     const textColor = colorObj.text;
@@ -1048,7 +1038,6 @@ const App = () => {
       const isAffiche = selectedVisual === 'affiche';
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
-          {/* Zone du nom d'artiste avec fond blanc et bordure noire */}
           <div style={{
             position: 'absolute',
             top: '13.5%',
@@ -1084,7 +1073,6 @@ const App = () => {
             </div>
           </div>
 
-          {/* Chez l'habitant */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
@@ -1105,7 +1093,6 @@ const App = () => {
             </div>
           )}
 
-          {/* Titre */}
           <div style={{
             position: 'absolute',
             bottom: '83.5%',
@@ -1127,7 +1114,6 @@ const App = () => {
             </h1>
           </div>
 
-          {/* Date et ville */}
           <div style={{
             position: 'absolute',
             bottom: '18%',
@@ -1158,7 +1144,6 @@ const App = () => {
             </p>
           </div>
 
-          {/* Organisateurs et informations en bas */}
           <div style={{
             position: 'absolute',
             bottom: '5%',
@@ -1170,7 +1155,6 @@ const App = () => {
             zIndex: 3
           }}>
             <div style={{ flex: 1 }}>
-              {/* Département en bas à gauche */}
               <p style={{
                 fontSize: isAffiche ? '18px' : '16px',
                 fontWeight: '900',
@@ -1238,7 +1222,6 @@ const App = () => {
               </p>
             </div>
 
-            {/* QR Code avec bordure noire */}
             <div style={{
               backgroundColor: 'white',
               padding: '4px',
@@ -1263,7 +1246,6 @@ const App = () => {
     if (isNB && selectedVisual === 'post-rs') {
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
-          {/* Zone du nom d'artiste */}
           <div style={{
             position: 'absolute',
             top: '0',
@@ -1299,7 +1281,6 @@ const App = () => {
             </div>
           </div>
 
-          {/* Chez l'habitant */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
@@ -1320,7 +1301,6 @@ const App = () => {
             </div>
           )}
 
-          {/* Contenu texte */}
           <div style={{
             position: 'absolute',
             inset: 0,
@@ -1336,7 +1316,6 @@ const App = () => {
               justifyContent: 'flex-end',
               alignItems: 'start'
             }}>
-              {/* Espace réservé pour chez l'habitant si présent */}
             </div>
 
             <div>
@@ -1380,7 +1359,6 @@ const App = () => {
                 borderTop: `2px solid #000000`
               }}>
                 <div style={{ textAlign: 'left' }}>
-                  {/* Département en bas à gauche */}
                   <p style={{
                     fontSize: '20px',
                     fontWeight: '900',
@@ -1424,15 +1402,15 @@ const App = () => {
                     Hormur.com
                   </p>
                 </div>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: '900',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                  color: '#000000'
-                }}>
-                  HORMUR
-                </div>
+                <img
+                  src="/mnt/user-data/uploads/Logo_couleurpng_Plan_de_travail_1_copie__2_.png"
+                  alt="Hormur"
+                  style={{
+                    height: '32px',
+                    width: 'auto'
+                  }}
+                  crossOrigin="anonymous"
+                />
               </div>
             </div>
           </div>
@@ -1440,13 +1418,12 @@ const App = () => {
       );
     }
 
-    // VISUELS COULEUR - CODE EXISTANT
+    // VISUELS COULEUR
     switch(selectedVisual) {
       case 'affiche':
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* ✅ CALQUE 1 : IMAGE alignée exactement sur la zone visible du template */}
             <div style={{
               position: 'absolute',
               top: '13.5%',
@@ -1464,7 +1441,6 @@ const App = () => {
               />
             </div>
 
-            {/* CALQUE 2 : TEMPLATE PNG */}
             <img
               src={`/${colorObj.afficheTemplate}`}
               alt="Template"
@@ -1485,7 +1461,6 @@ const App = () => {
               }}
             />
 
-            {/* CALQUE 3 : CONTENU TEXTE */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -1571,7 +1546,6 @@ const App = () => {
                 alignItems: 'flex-end'
               }}>
                 <div style={{ flex: 1 }}>
-                  {/* Département en bas à gauche au format (XX) */}
                   <p style={{
                     fontSize: selectedVisual === 'affiche' ? '18px' : '16px',
                     fontWeight: '900',
@@ -1606,7 +1580,6 @@ const App = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {/* ✅ QR CODE avec fond blanc et bordure de la couleur du texte */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '6px',
@@ -1623,16 +1596,16 @@ const App = () => {
                     />
                   </div>
                   
-                  <div style={{
-                    fontSize: selectedVisual === 'affiche' ? '16px' : '14px',
-                    fontWeight: '900',
-                    textTransform: 'uppercase',
-                    color: textColor,
-                    letterSpacing: '1px',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
-                  }}>
-                    HORMUR
-                  </div>
+                  <img
+                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    alt="Hormur"
+                    style={{
+                      height: selectedVisual === 'affiche' ? '28px' : '24px',
+                      width: 'auto',
+                      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))'
+                    }}
+                    crossOrigin="anonymous"
+                  />
                 </div>
               </div>
             </div>
@@ -1764,7 +1737,6 @@ const App = () => {
                   justifyContent: 'space-between',
                   alignItems: 'flex-end'
                 }}>
-                  {/* ✅ QR CODE avec fond blanc et bordure */}
                   <div style={{
                     backgroundColor: 'white',
                     padding: '5px',
@@ -1779,25 +1751,15 @@ const App = () => {
                       fgColor="#000000"
                     />
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{
-                      fontSize: '12px',
-                      fontWeight: '900',
-                      textTransform: 'uppercase',
-                      margin: '0 0 2px 0',
-                      letterSpacing: '1px',
-                      opacity: 0.8
-                    }}>
-                      HORMUR
-                    </p>
-                    <p style={{
-                      fontSize: '8px',
-                      margin: 0,
-                      opacity: 0.7
-                    }}>
-                      hormur.com
-                    </p>
-                  </div>
+                  <img
+                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    alt="Hormur"
+                    style={{
+                      height: '20px',
+                      width: 'auto'
+                    }}
+                    crossOrigin="anonymous"
+                  />
                 </div>
               </div>
             </div>
@@ -1980,7 +1942,6 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* CALQUE 1 : IMAGE */}
             <div style={{
               position: 'absolute',
               top: '0',
@@ -2000,7 +1961,6 @@ const App = () => {
               />
             </div>
 
-            {/* CALQUE 2 : TEMPLATE PNG */}
             <img
               src={`/${colorObj.postTemplate}`}
               alt="Template"
@@ -2021,7 +1981,6 @@ const App = () => {
               }}
             />
 
-            {/* CALQUE 3 : CONTENU TEXTE */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -2098,45 +2057,25 @@ const App = () => {
                   paddingTop: '12px',
                   borderTop: `2px solid ${textColor}60`
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {/* Département au format (XX) en bas à gauche */}
-                    <span style={{
-                      fontSize: '20px',
-                      fontWeight: '900',
-                      color: textColor,
-                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                    }}>
-                      ({eventData.department})
-                    </span>
-                    
-                    {/* ✅ QR CODE avec fond blanc et bordure */}
-                    <div style={{
-                      backgroundColor: 'white',
-                      padding: '6px',
-                      borderRadius: '6px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                      border: `2px solid ${textColor}`
-                    }}>
-                      <QRCodeSVG
-                        value={eventData.eventUrl}
-                        size={44}
-                        level="M"
-                        includeMargin={false}
-                        fgColor="#000000"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div style={{
-                    fontSize: '18px',
+                  <span style={{
+                    fontSize: '20px',
                     fontWeight: '900',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    opacity: 0.95,
+                    color: textColor,
                     textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                   }}>
-                    HORMUR
-                  </div>
+                    ({eventData.department})
+                  </span>
+                  
+                  <img
+                    src="/mnt/user-data/uploads/2021-11-08_Logo_hormur_blanc_horizontal__2_.png"
+                    alt="Hormur"
+                    style={{
+                      height: '28px',
+                      width: 'auto',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                    }}
+                    crossOrigin="anonymous"
+                  />
                 </div>
               </div>
             </div>
@@ -2150,7 +2089,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 touch-manipulation">
-      {/* Header */}
       <div className="bg-white border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -2169,7 +2107,6 @@ const App = () => {
         </div>
       </div>
 
-      {/* Modals */}
       {showImageCrop && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8">
@@ -2215,7 +2152,6 @@ const App = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24 lg:pb-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          {/* Panel d'édition */}
           <div className={`${mobileView === 'preview' ? 'hidden lg:block' : ''}`}>
             <EditPanel
               visualTypes={visualTypes}
@@ -2251,7 +2187,6 @@ const App = () => {
             />
           </div>
 
-          {/* Aperçu */}
           <div className={`lg:sticky lg:top-24 h-fit ${mobileView === 'edit' ? 'hidden lg:block' : ''}`}>
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <div className="flex justify-between items-center mb-3">
@@ -2291,7 +2226,6 @@ const App = () => {
         </div>
       </div>
 
-      {/* Mobile Toggle */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t shadow-2xl">
         <div className="flex">
           <button
