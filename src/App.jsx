@@ -1038,6 +1038,21 @@ const App = () => {
       const isAffiche = selectedVisual === 'affiche';
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
+          {/* Logo en haut à gauche */}
+          <img
+            src="/logo-hormur-couleur.png"
+            alt="Hormur"
+            style={{
+              position: 'absolute',
+              top: '3%',
+              left: '3%',
+              height: isAffiche ? '24px' : '20px',
+              width: 'auto',
+              zIndex: 3
+            }}
+            crossOrigin="anonymous"
+          />
+
           <div style={{
             position: 'absolute',
             top: '13.5%',
@@ -1246,6 +1261,21 @@ const App = () => {
     if (isNB && selectedVisual === 'post-rs') {
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
+          {/* Logo en haut à droite */}
+          <img
+            src="/logo-hormur-couleur.png"
+            alt="Hormur"
+            style={{
+              position: 'absolute',
+              top: '3%',
+              right: '3%',
+              height: '28px',
+              width: 'auto',
+              zIndex: 3
+            }}
+            crossOrigin="anonymous"
+          />
+
           <div style={{
             position: 'absolute',
             top: '0',
@@ -1309,7 +1339,7 @@ const App = () => {
             flexDirection: 'column',
             justifyContent: 'space-between',
             color: '#000000',
-            zIndex: 3
+            zIndex: 2
           }}>
             <div style={{
               display: 'flex',
@@ -1402,15 +1432,6 @@ const App = () => {
                     Hormur.com
                   </p>
                 </div>
-                <img
-                  src="/logo-hormur-couleur.png"
-                  alt="Hormur"
-                  style={{
-                    height: '32px',
-                    width: 'auto'
-                  }}
-                  crossOrigin="anonymous"
-                />
               </div>
             </div>
           </div>
@@ -1424,6 +1445,22 @@ const App = () => {
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
+            {/* Logo en haut à gauche */}
+            <img
+              src="/logo-hormur-blanc.png"
+              alt="Hormur"
+              style={{
+                position: 'absolute',
+                top: '3%',
+                left: '3%',
+                height: selectedVisual === 'affiche' ? '24px' : '20px',
+                width: 'auto',
+                zIndex: 3,
+                filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))'
+              }}
+              crossOrigin="anonymous"
+            />
+
             <div style={{
               position: 'absolute',
               top: '13.5%',
@@ -1579,32 +1616,19 @@ const App = () => {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '6px',
-                    borderRadius: '6px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    border: `2px solid ${textColor}`
-                  }}>
-                    <QRCodeSVG
-                      value={eventData.eventUrl}
-                      size={selectedVisual === 'affiche' ? 52 : 44}
-                      level="M"
-                      includeMargin={false}
-                      fgColor="#000000"
-                    />
-                  </div>
-                  
-                  <img
-                    src="/logo-hormur-blanc.png"
-                    alt="Hormur"
-                    style={{
-                      height: selectedVisual === 'affiche' ? '28px' : '24px',
-                      width: 'auto',
-                      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))'
-                    }}
-                    crossOrigin="anonymous"
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '6px',
+                  borderRadius: '6px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  border: `2px solid ${textColor}`
+                }}>
+                  <QRCodeSVG
+                    value={eventData.eventUrl}
+                    size={selectedVisual === 'affiche' ? 52 : 44}
+                    level="M"
+                    includeMargin={false}
+                    fgColor="#000000"
                   />
                 </div>
               </div>
@@ -1942,6 +1966,22 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
+            {/* Logo en haut à droite */}
+            <img
+              src="/logo-hormur-blanc.png"
+              alt="Hormur"
+              style={{
+                position: 'absolute',
+                top: '3%',
+                right: '3%',
+                height: '28px',
+                width: 'auto',
+                zIndex: 3,
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+              }}
+              crossOrigin="anonymous"
+            />
+
             <div style={{
               position: 'absolute',
               top: '0',
@@ -2053,7 +2093,7 @@ const App = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
+                  justifyContent: 'flex-start',
                   paddingTop: '12px',
                   borderTop: `2px solid ${textColor}60`
                 }}>
@@ -2065,17 +2105,6 @@ const App = () => {
                   }}>
                     ({eventData.department})
                   </span>
-                  
-                  <img
-                    src="/logo-hormur-blanc.png"
-                    alt="Hormur"
-                    style={{
-                      height: '28px',
-                      width: 'auto',
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-                    }}
-                    crossOrigin="anonymous"
-                  />
                 </div>
               </div>
             </div>
