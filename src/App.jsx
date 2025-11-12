@@ -718,8 +718,39 @@ const EditPanel = memo(({
   </div>
 ));
 
+// Fonction pour parser les paramètres URL
+const parseURLParams = () => {
+  const params = new URLSearchParams(window.location.search);
+  const urlData = {};
+
+  // Récupération des paramètres
+  const eventName = params.get('eventName');
+  const eventDescription = params.get('eventDescription');
+  const eventDate = params.get('eventDate');
+  const eventURL = params.get('eventURL');
+  const eventImage = params.get('eventImage');
+  const eventCity = params.get('eventCity');
+  const eventDepartment = params.get('eventDepartment');
+  const eventTime = params.get('eventTime');
+  const artistName = params.get('artistName');
+  const organizerNames = params.get('organizerNames');
+
+  if (eventName) urlData.title = eventName;
+  if (eventDescription) urlData.description = eventDescription;
+  if (eventDate) urlData.date = eventDate;
+  if (eventURL) urlData.eventUrl = eventURL;
+  if (eventCity) urlData.city = eventCity;
+  if (eventDepartment) urlData.department = eventDepartment;
+  if (eventTime) urlData.time = eventTime;
+  if (artistName) urlData.artistName = artistName;
+  if (organizerNames) urlData.organizerNames = organizerNames;
+
+  return { urlData, eventImage };
+};
+
 const App = () => {
-  const [eventData, setEventData] = useState({
+  // Valeurs par défaut
+  const defaultEventData = {
     title: "Trio de contrebasses",
     artistName: "La Valse des Hippos",
     date: "16 NOV 2025",
@@ -732,7 +763,9 @@ const App = () => {
     personalMessage: "Hâte de vous accueillir pour cette soirée unique !",
     convivialite: "repas",
     chezHabitant: true
-  });
+  };
+
+  const [eventData, setEventData] = useState(defaultEventData);
 
   const [selectedColor, setSelectedColor] = useState('#1380c7');
   const [selectedVisual, setSelectedVisual] = useState('affiche');
@@ -795,6 +828,44 @@ const App = () => {
 
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
+
+  // Charger les données depuis l'URL au démarrage
+  useEffect(() => {
+    const { urlData, eventImage } = parseURLParams();
+
+    // Si des paramètres URL sont présents, on les utilise
+    if (Object.keys(urlData).length > 0) {
+      setEventData(prev => ({
+        ...prev,
+        ...urlData
+      }));
+    }
+
+    // Si une image est fournie dans l'URL
+    if (eventImage) {
+      setUploadedImage(eventImage);
+    }
+  }, []); // Ne s'exécute qu'au montage du composant
+
+  // Mettre à jour l'URL quand les données changent (optionnel)
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (eventData.title) params.set('eventName', eventData.title);
+    if (eventData.description) params.set('eventDescription', eventData.description);
+    if (eventData.date) params.set('eventDate', eventData.date);
+    if (eventData.eventUrl) params.set('eventURL', eventData.eventUrl);
+    if (eventData.city) params.set('eventCity', eventData.city);
+    if (eventData.department) params.set('eventDepartment', eventData.department);
+    if (eventData.time) params.set('eventTime', eventData.time);
+    if (eventData.artistName) params.set('artistName', eventData.artistName);
+    if (eventData.organizerNames) params.set('organizerNames', eventData.organizerNames);
+    if (uploadedImage) params.set('eventImage', uploadedImage);
+
+    // Mettre à jour l'URL sans recharger la page
+    const newURL = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newURL);
+  }, [eventData, uploadedImage]);
 
   const handleTitleChange = useCallback((e) => {
     setEventData(prev => ({...prev, title: e.target.value}));
