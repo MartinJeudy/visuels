@@ -828,6 +828,7 @@ const App = () => {
 
   const fileInputRef = useRef(null);
   const visualRef = useRef(null);
+  const isInitialLoad = useRef(true);
 
   // Charger les données depuis l'URL au démarrage
   useEffect(() => {
@@ -845,10 +846,18 @@ const App = () => {
     if (eventImage) {
       setUploadedImage(eventImage);
     }
+
+    // Marquer que le chargement initial est terminé
+    setTimeout(() => {
+      isInitialLoad.current = false;
+    }, 100);
   }, []); // Ne s'exécute qu'au montage du composant
 
-  // Mettre à jour l'URL quand les données changent (optionnel)
+  // Mettre à jour l'URL quand les données changent (seulement après le chargement initial)
   useEffect(() => {
+    // Ne pas mettre à jour l'URL pendant le chargement initial
+    if (isInitialLoad.current) return;
+
     const params = new URLSearchParams();
 
     if (eventData.title) params.set('eventName', eventData.title);
