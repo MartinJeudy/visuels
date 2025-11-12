@@ -1,4 +1,3 @@
-
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
 import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -8,7 +7,6 @@ import jsPDF from 'jspdf';
 // ============================================
 // CONFIGURATION DES COULEURS AVEC TEMPLATES PNG
 // ============================================
-// Ordre réorganisé pour éviter les couleurs similaires côte à côte
 const hormurColors = [
   { 
     name: 'Bleu Océan', 
@@ -119,7 +117,7 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Composants mémorisés
+// Composants mémorisés (inchangés)
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
@@ -720,24 +718,115 @@ const EditPanel = memo(({
 ));
 
 const App = () => {
-  const [eventData, setEventData] = useState({
-    title: "Trio de contrebasses",
-    artistName: "La Valse des Hippos",
-    date: "16 NOV 2025",
-    time: "17h",
-    city: "JOUÉ-LÈS-TOURS",
-    department: "37",
-    organizerNames: "Sophie & Martin",
-    eventUrl: "https://hormur.com/event/01994344-f113-7096-a7-6f6e28d480",
-    description: "Découvrez un concert intimiste dans un cadre chaleureux et convivial.",
-    personalMessage: "Hâte de vous accueillir pour cette soirée unique !",
-    convivialite: "repas",
-    chezHabitant: true
+  // ============================================
+  // FONCTION POUR EXTRAIRE LES PARAMÈTRES D'URL
+  // ============================================
+  const getUrlParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      eventName: params.get('eventName') || '',
+      eventDescription: params.get('eventDescription') || '',
+      eventDate: params.get('eventDate') || '',
+      eventURL: params.get('eventURL') || '',
+      eventImage: params.get('eventImage') || ''
+    };
+  };
+
+  // ============================================
+  // FONCTION POUR FORMATER LA DATE
+  // ============================================
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    // Format attendu: 02/11 ou similaire
+    const parts = dateStr.split('/');
+    if (parts.length === 2) {
+      const [day, month] = parts;
+      const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
+      const monthIndex = parseInt(month) - 1;
+      return `${day} ${months[monthIndex] || month} 2025`;
+    }
+    return dateStr;
+  };
+
+  // ============================================
+  // FONCTION POUR EXTRAIRE LA VILLE DE L'URL
+  // ============================================
+  const extractCityFromURL = (url) => {
+    // Par défaut, retourner une ville générique
+    return "VOTRE VILLE";
+  };
+
+  // ============================================
+  // ÉTAT INITIAL À PARTIR DE L'URL OU LOCALSTORAGE
+  // ============================================
+  const [eventData, setEventData] = useState(() => {
+    const urlParams = getUrlParams();
+    const savedData = localStorage.getItem('hormur_event_data');
+    
+    // Si des données URL existent, les utiliser en priorité
+    if (urlParams.eventName || urlParams.eventURL) {
+      const initialData = {
+        title: urlParams.eventName || "Trio de contrebasses",
+        artistName: "La Valse des Hippos",
+        date: formatDate(urlParams.eventDate) || "16 NOV 2025",
+        time: "17h",
+        city: extractCityFromURL(urlParams.eventURL) || "JOUÉ-LÈS-TOURS",
+        department: "37",
+        organizerNames: "Sophie & Martin",
+        eventUrl: urlParams.eventURL || "https://hormur.com/event/01994344-f113-7096-a7-6f6e28d480",
+        description: urlParams.eventDescription || "Découvrez un concert intimiste dans un cadre chaleureux et convivial.",
+        personalMessage: "Hâte de vous accueillir pour cette soirée unique !",
+        convivialite: "repas",
+        chezHabitant: true
+      };
+      // Sauvegarder immédiatement dans localStorage
+      localStorage.setItem('hormur_event_data', JSON.stringify(initialData));
+      return initialData;
+    }
+    
+    // Sinon, charger depuis localStorage
+    if (savedData) {
+      return JSON.parse(savedData);
+    }
+    
+    // Données par défaut
+    return {
+      title: "Trio de contrebasses",
+      artistName: "La Valse des Hippos",
+      date: "16 NOV 2025",
+      time: "17h",
+      city: "JOUÉ-LÈS-TOURS",
+      department: "37",
+      organizerNames: "Sophie & Martin",
+      eventUrl: "https://hormur.com/event/01994344-f113-7096-a7-6f6e28d480",
+      description: "Découvrez un concert intimiste dans un cadre chaleureux et convivial.",
+      personalMessage: "Hâte de vous accueillir pour cette soirée unique !",
+      convivialite: "repas",
+      chezHabitant: true
+    };
   });
 
-  const [selectedColor, setSelectedColor] = useState('#1380c7');
-  const [selectedVisual, setSelectedVisual] = useState('affiche');
-  const [uploadedImage, setUploadedImage] = useState('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop');
+  const [selectedColor, setSelectedColor] = useState(() => {
+    return localStorage.getItem('hormur_selected_color') || '#1380c7';
+  });
+
+  const [selectedVisual, setSelectedVisual] = useState(() => {
+    return localStorage.getItem('hormur_selected_visual') || 'affiche';
+  });
+
+  const [uploadedImage, setUploadedImage] = useState(() => {
+    const urlParams = getUrlParams();
+    const savedImage = localStorage.getItem('hormur_uploaded_image');
+    
+    // Utiliser l'image de l'URL si disponible
+    if (urlParams.eventImage) {
+      localStorage.setItem('hormur_uploaded_image', urlParams.eventImage);
+      return urlParams.eventImage;
+    }
+    
+    return savedImage || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop';
+  });
+
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
   const [mobileView, setMobileView] = useState('edit');
@@ -747,13 +836,39 @@ const App = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
-  const [imageSettings, setImageSettings] = useState({
-    affiche: { positionX: 50, positionY: 50, zoom: 100 },
-    flyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
-    flyerVerso: { positionX: 50, positionY: 50, zoom: 100 },
-    communique: { positionX: 50, positionY: 50, zoom: 100 },
-    postRS: { positionX: 50, positionY: 50, zoom: 100 }
+  const [imageSettings, setImageSettings] = useState(() => {
+    const saved = localStorage.getItem('hormur_image_settings');
+    return saved ? JSON.parse(saved) : {
+      affiche: { positionX: 50, positionY: 50, zoom: 100 },
+      flyerRecto: { positionX: 50, positionY: 50, zoom: 100 },
+      flyerVerso: { positionX: 50, positionY: 50, zoom: 100 },
+      communique: { positionX: 50, positionY: 50, zoom: 100 },
+      postRS: { positionX: 50, positionY: 50, zoom: 100 }
+    };
   });
+
+  // ============================================
+  // SAUVEGARDER AUTOMATIQUEMENT LES MODIFICATIONS
+  // ============================================
+  useEffect(() => {
+    localStorage.setItem('hormur_event_data', JSON.stringify(eventData));
+  }, [eventData]);
+
+  useEffect(() => {
+    localStorage.setItem('hormur_selected_color', selectedColor);
+  }, [selectedColor]);
+
+  useEffect(() => {
+    localStorage.setItem('hormur_selected_visual', selectedVisual);
+  }, [selectedVisual]);
+
+  useEffect(() => {
+    localStorage.setItem('hormur_uploaded_image', uploadedImage);
+  }, [uploadedImage]);
+
+  useEffect(() => {
+    localStorage.setItem('hormur_image_settings', JSON.stringify(imageSettings));
+  }, [imageSettings]);
 
   const getSettingsKey = (visualId) => {
     const mapping = {
@@ -1039,7 +1154,6 @@ const App = () => {
       const isAffiche = selectedVisual === 'affiche';
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
-          {/* Logo en haut à gauche */}
           <img
             src="/logo-hormur-couleur.png"
             alt="Hormur"
@@ -1089,7 +1203,6 @@ const App = () => {
             </div>
           </div>
 
-          {/* "Chez l'habitant" - Version sobre */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
@@ -1194,7 +1307,6 @@ const App = () => {
                 {eventData.organizerNames}
               </p>
               
-              {/* Convivialité - Version sobre */}
               {eventData.convivialite !== 'none' && (
                 <p style={{
                   fontSize: isAffiche ? '11px' : '9px',
@@ -1276,7 +1388,6 @@ const App = () => {
     if (isNB && selectedVisual === 'post-rs') {
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
-          {/* Logo en haut à droite */}
           <img
             src="/logo-hormur-couleur.png"
             alt="Hormur"
@@ -1326,7 +1437,6 @@ const App = () => {
             </div>
           </div>
 
-          {/* "Chez l'habitant" - Version sobre Post RS */}
           {eventData.chezHabitant && (
             <div style={{
               position: 'absolute',
@@ -1459,13 +1569,13 @@ const App = () => {
       );
     }
 
-    // VISUELS COULEUR
+    // VISUELS COULEUR avec image - Suite du code (affiche, flyer-recto, etc.)
+    // Je continue avec les autres cas de visuels...
     switch(selectedVisual) {
       case 'affiche':
       case 'flyer-recto':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* Logo en haut à gauche */}
             <img
               src="/logo-hormur-blanc.png"
               alt="Hormur"
@@ -1523,7 +1633,6 @@ const App = () => {
               inset: 0,
               zIndex: 3
             }}>
-              {/* "Chez l'habitant" - Version sobre couleur */}
               {eventData.chezHabitant && (
                 <div style={{
                   position: 'absolute',
@@ -1630,7 +1739,6 @@ const App = () => {
                     {eventData.organizerNames}
                   </p>
                   
-                  {/* Convivialité - Version sobre couleur */}
                   {eventData.convivialite !== 'none' && (
                     <p style={{
                       fontSize: selectedVisual === 'affiche' ? '11px' : '9px',
@@ -1745,7 +1853,6 @@ const App = () => {
                   </div>
                 )}
 
-                {/* "Chez l'habitant" - Version sobre verso */}
                 {eventData.chezHabitant && (
                   <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                     <p style={{
@@ -1766,7 +1873,6 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Convivialité - Version sobre verso */}
                 {eventData.convivialite !== 'none' && (
                   <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                     <p style={{
@@ -2024,7 +2130,6 @@ const App = () => {
       case 'post-rs':
         return (
           <div ref={visualRef} data-download-target="true" style={visualStyle}>
-            {/* Logo en haut à droite */}
             <img
               src="/logo-hormur-blanc.png"
               alt="Hormur"
@@ -2094,7 +2199,6 @@ const App = () => {
                 justifyContent: 'space-between',
                 alignItems: 'start'
               }}>
-                {/* "Chez l'habitant" - Version sobre Post RS */}
                 {eventData.chezHabitant && (
                   <p style={{
                     fontSize: '12px',
@@ -2164,7 +2268,6 @@ const App = () => {
                       ({eventData.department})
                     </span>
 
-                    {/* Convivialité - Version sobre Post RS */}
                     {eventData.convivialite !== 'none' && (
                       <p style={{
                         fontSize: '11px',
@@ -2366,3 +2469,4 @@ const App = () => {
 };
 
 export default App;
+```
