@@ -583,9 +583,13 @@ const EditPanel = memo(({
               position: 'relative',
               backgroundColor: '#f3f4f6'
             }}>
-              <img 
-                src={uploadedImage} 
-                alt="Preview" 
+              <img
+                src={uploadedImage}
+                alt="Preview"
+                crossOrigin="anonymous"
+                onError={(e) => {
+                  console.error('❌ Erreur affichage image preview:', e);
+                }}
                 style={{
                   position: 'absolute',
                   top: '50%',
@@ -844,7 +848,33 @@ const App = () => {
 
     // Si une image est fournie dans l'URL
     if (eventImage) {
-      setUploadedImage(eventImage);
+      console.log('🖼️ Chargement image depuis URL:', eventImage);
+
+      // Tenter de convertir l'image en base64 pour éviter les problèmes CORS
+      const convertToBase64 = async (url) => {
+        try {
+          const response = await fetch(url, { mode: 'cors' });
+          const blob = await response.blob();
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.warn('⚠️ Impossible de convertir en base64, utilisation URL directe');
+          return url;
+        }
+      };
+
+      convertToBase64(eventImage).then(base64OrUrl => {
+        console.log('✅ Image chargée:', base64OrUrl.substring(0, 50) + '...');
+        setUploadedImage(base64OrUrl);
+      }).catch(() => {
+        // Si la conversion échoue, utiliser l'URL directement
+        console.log('⚠️ Fallback: utilisation URL directe');
+        setUploadedImage(eventImage);
+      });
     }
 
     // Marquer que le chargement initial est terminé
