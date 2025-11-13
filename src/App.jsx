@@ -581,11 +581,9 @@ const EditPanel = memo(({
                   left: '50%',
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
+                  objectFit: 'contain',
                   transform: `translate(calc(-50% + ${(imagePositionX - 50)}%), calc(-50% + ${(imagePositionY - 50)}%)) scale(${imageZoom / 100})`,
-                  transformOrigin: 'center',
-                  minWidth: '100%',
-                  minHeight: '100%'
+                  transformOrigin: 'center'
                 }}
               />
             </div>
@@ -1141,11 +1139,9 @@ const App = () => {
       left: '50%',
       width: '100%',
       height: '100%',
-      objectFit: 'cover',
+      objectFit: 'contain',
       transform: `translate(calc(-50% + ${translateX}%), calc(-50% + ${translateY}%)) scale(${scale})`,
-      transformOrigin: 'center',
-      minWidth: '100%',
-      minHeight: '100%'
+      transformOrigin: 'center'
     };
 
     if (isNB && (selectedVisual === 'affiche' || selectedVisual === 'flyer-recto')) {
