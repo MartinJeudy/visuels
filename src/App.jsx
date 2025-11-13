@@ -4,9 +4,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-// ============================================
-// CONFIGURATION DES COULEURS AVEC TEMPLATES PNG
-// ============================================
 const hormurColors = [
   { 
     name: 'Bleu Océan', 
@@ -117,7 +114,6 @@ const convivialiteOptions = [
   { value: 'apero', label: 'Apéro participatif' }
 ];
 
-// Composants mémorisés (inchangés)
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
@@ -297,7 +293,6 @@ const SubscriptionModal = ({ onClose }) => (
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Gratuit */}
         <div className="border-2 border-gray-200 rounded-xl p-6">
           <div className="text-center mb-4">
             <h4 className="font-bold text-xl mb-2">Gratuit</h4>
@@ -327,7 +322,6 @@ const SubscriptionModal = ({ onClose }) => (
           </button>
         </div>
 
-        {/* Premium */}
         <div className="border-4 border-orange-500 rounded-xl p-6 relative">
           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold">
             RECOMMANDÉ
@@ -407,7 +401,6 @@ const EditPanel = memo(({
   isBlackAndWhite
 }) => (
   <div className="space-y-4">
-    {/* Type de visuel */}
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h2 className="font-bold text-base mb-3 flex items-center gap-2">
         <FileText size={18} className="text-orange-500" />
@@ -431,7 +424,6 @@ const EditPanel = memo(({
       </div>
     </div>
 
-    {/* Contenu */}
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h2 className="font-bold text-base mb-3 flex items-center gap-2">
         <Type size={18} className="text-orange-500" />
@@ -476,7 +468,6 @@ const EditPanel = memo(({
       </div>
     </div>
 
-    {/* Organisateurs */}
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h2 className="font-bold text-base mb-3 flex items-center gap-2">
         <Home size={18} className="text-orange-500" />
@@ -558,7 +549,6 @@ const EditPanel = memo(({
       </div>
     </div>
 
-    {/* Image */}
     {!isBlackAndWhite && (
       <div className="bg-white rounded-xl p-4 shadow-sm">
         <h2 className="font-bold text-base mb-3 flex items-center gap-2">
@@ -621,7 +611,6 @@ const EditPanel = memo(({
             Choisir une image ou glisser-déposer
           </button>
 
-          {/* Contrôles de positionnement */}
           <div className="bg-gray-50 rounded-lg p-3 space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold text-gray-700 flex items-center gap-1">
@@ -686,7 +675,6 @@ const EditPanel = memo(({
       </div>
     )}
 
-    {/* Couleur */}
     {selectedVisual !== 'communique' && (
       <div className="bg-white rounded-xl p-4 shadow-sm">
         <h2 className="font-bold text-base mb-3 flex items-center gap-2">
@@ -718,9 +706,6 @@ const EditPanel = memo(({
 ));
 
 const App = () => {
-  // ============================================
-  // FONCTION POUR EXTRAIRE LES PARAMÈTRES D'URL
-  // ============================================
   const getUrlParams = () => {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -732,12 +717,8 @@ const App = () => {
     };
   };
 
-  // ============================================
-  // FONCTION POUR FORMATER LA DATE
-  // ============================================
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    // Format attendu: 02/11 ou similaire
     const parts = dateStr.split('/');
     if (parts.length === 2) {
       const [day, month] = parts;
@@ -748,22 +729,14 @@ const App = () => {
     return dateStr;
   };
 
-  // ============================================
-  // FONCTION POUR EXTRAIRE LA VILLE DE L'URL
-  // ============================================
   const extractCityFromURL = (url) => {
-    // Par défaut, retourner une ville générique
     return "VOTRE VILLE";
   };
 
-  // ============================================
-  // ÉTAT INITIAL À PARTIR DE L'URL OU LOCALSTORAGE
-  // ============================================
   const [eventData, setEventData] = useState(() => {
     const urlParams = getUrlParams();
     const savedData = localStorage.getItem('hormur_event_data');
     
-    // Si des données URL existent, les utiliser en priorité
     if (urlParams.eventName || urlParams.eventURL) {
       const initialData = {
         title: urlParams.eventName || "Trio de contrebasses",
@@ -779,17 +752,14 @@ const App = () => {
         convivialite: "repas",
         chezHabitant: true
       };
-      // Sauvegarder immédiatement dans localStorage
       localStorage.setItem('hormur_event_data', JSON.stringify(initialData));
       return initialData;
     }
     
-    // Sinon, charger depuis localStorage
     if (savedData) {
       return JSON.parse(savedData);
     }
     
-    // Données par défaut
     return {
       title: "Trio de contrebasses",
       artistName: "La Valse des Hippos",
@@ -815,17 +785,49 @@ const App = () => {
   });
 
   const [uploadedImage, setUploadedImage] = useState(() => {
-    const urlParams = getUrlParams();
     const savedImage = localStorage.getItem('hormur_uploaded_image');
-    
-    // Utiliser l'image de l'URL si disponible
-    if (urlParams.eventImage) {
-      localStorage.setItem('hormur_uploaded_image', urlParams.eventImage);
-      return urlParams.eventImage;
-    }
-    
     return savedImage || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop';
   });
+
+  useEffect(() => {
+    const urlParams = getUrlParams();
+    const imageUrl = urlParams.eventImage;
+    
+    if (!imageUrl || uploadedImage.startsWith('data:')) return;
+    
+    const convertImageToBase64 = async (url) => {
+      try {
+        console.log('🔄 Conversion de l\'image en base64...');
+        const response = await fetch(url, { mode: 'cors' });
+        const blob = await response.blob();
+        
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            console.log('✅ Image convertie en base64');
+            resolve(reader.result);
+          };
+          reader.onerror = () => {
+            console.error('❌ Erreur FileReader');
+            resolve(null);
+          };
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error('❌ Erreur conversion image:', error);
+        return null;
+      }
+    };
+
+    convertImageToBase64(imageUrl).then(base64Image => {
+      if (base64Image) {
+        setUploadedImage(base64Image);
+        localStorage.setItem('hormur_uploaded_image', base64Image);
+      } else {
+        setUploadedImage(imageUrl);
+      }
+    });
+  }, []);
 
   const [showImageCrop, setShowImageCrop] = useState(false);
   const [tempImage, setTempImage] = useState(null);
@@ -847,9 +849,6 @@ const App = () => {
     };
   });
 
-  // ============================================
-  // SAUVEGARDER AUTOMATIQUEMENT LES MODIFICATIONS
-  // ============================================
   useEffect(() => {
     localStorage.setItem('hormur_event_data', JSON.stringify(eventData));
   }, [eventData]);
@@ -1149,7 +1148,6 @@ const App = () => {
       minHeight: '100%'
     };
 
-    // VISUEL NOIR & BLANC - AFFICHE OU FLYER RECTO
     if (isNB && (selectedVisual === 'affiche' || selectedVisual === 'flyer-recto')) {
       const isAffiche = selectedVisual === 'affiche';
       return (
@@ -1165,7 +1163,6 @@ const App = () => {
               width: 'auto',
               zIndex: 3
             }}
-            crossOrigin="anonymous"
           />
 
           <div style={{
@@ -1384,7 +1381,6 @@ const App = () => {
       );
     }
 
-    // VISUEL NOIR & BLANC - POST RS
     if (isNB && selectedVisual === 'post-rs') {
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
@@ -1399,7 +1395,6 @@ const App = () => {
               width: 'auto',
               zIndex: 3
             }}
-            crossOrigin="anonymous"
           />
 
           <div style={{
@@ -1569,8 +1564,6 @@ const App = () => {
       );
     }
 
-    // VISUELS COULEUR avec image - Suite du code (affiche, flyer-recto, etc.)
-    // Je continue avec les autres cas de visuels...
     switch(selectedVisual) {
       case 'affiche':
       case 'flyer-recto':
@@ -1588,7 +1581,6 @@ const App = () => {
                 zIndex: 3,
                 filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))'
               }}
-              crossOrigin="anonymous"
             />
 
             <div style={{
@@ -1604,7 +1596,6 @@ const App = () => {
                 src={uploadedImage}
                 alt="Event"
                 style={imageStyle}
-                crossOrigin="anonymous"
               />
             </div>
 
@@ -1621,7 +1612,6 @@ const App = () => {
                 zIndex: 2,
                 pointerEvents: 'none'
               }}
-              crossOrigin="anonymous"
               onError={(e) => {
                 console.error('❌ Template PNG manquant:', colorObj.afficheTemplate);
                 e.target.style.display = 'none';
@@ -1946,7 +1936,6 @@ const App = () => {
                       height: '20px',
                       width: 'auto'
                     }}
-                    crossOrigin="anonymous"
                   />
                 </div>
               </div>
@@ -1973,7 +1962,6 @@ const App = () => {
                 objectFit: 'contain',
                 zIndex: 1
               }}
-              crossOrigin="anonymous"
               onError={() => console.error('❌ Template manquant')}
             />
 
@@ -1996,7 +1984,6 @@ const App = () => {
                   src={uploadedImage}
                   alt="Event"
                   style={imageStyle}
-                  crossOrigin="anonymous"
                 />
               </div>
 
@@ -2142,7 +2129,6 @@ const App = () => {
                 zIndex: 3,
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
               }}
-              crossOrigin="anonymous"
             />
 
             <div style={{
@@ -2160,7 +2146,6 @@ const App = () => {
                 src={uploadedImage}
                 alt="Event"
                 style={imageStyle}
-                crossOrigin="anonymous"
               />
             </div>
 
@@ -2177,7 +2162,6 @@ const App = () => {
                 zIndex: 2,
                 pointerEvents: 'none'
               }}
-              crossOrigin="anonymous"
               onError={(e) => {
                 console.error('❌ Template PNG manquant:', colorObj.postTemplate);
                 e.target.style.display = 'none';
