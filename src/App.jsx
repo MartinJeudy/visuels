@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
-import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn } from 'lucide-react';
+import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn, Settings } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -44,15 +44,15 @@ const hormurColors = [
     name: 'Rose Saumon', 
     value: '#fd94ac', 
     text: '#157fcd',
-    postTemplate: 'PostPRO_CONCERT_7_RoseRouge.png',
-    afficheTemplate: 'Affiche_CONCERT_RoseR.png'
+    postTemplate: 'PostPRO_CONCERT_2_Rose.png',
+    afficheTemplate: 'Affiche_CONCERT_Rose.png'
   },
   { 
     name: 'Rose Bonbon', 
     value: '#fca0ba', 
     text: '#fc4735',
-    postTemplate: 'PostPRO_CONCERT_2_Rose.png',
-    afficheTemplate: 'Affiche_CONCERT_Rose.png'
+    postTemplate: 'PostPRO_CONCERT_7_RoseRouge.png',
+    afficheTemplate: 'Affiche_CONCERT_RoseR.png'
   },
   { 
     name: 'Rouge Vif', 
@@ -729,6 +729,11 @@ const App = () => {
 
   const extractCityFromURL = (url) => {
     return "VOTRE VILLE";
+  };
+
+  const getAdminUrl = (eventUrl) => {
+    if (!eventUrl) return '';
+    return eventUrl.endsWith('/') ? `${eventUrl}admin` : `${eventUrl}/admin`;
   };
 
   const [eventData, setEventData] = useState(() => {
@@ -2289,12 +2294,25 @@ const App = () => {
               <span className="hidden sm:inline text-sm">Retour</span>
             </button>
             <h1 className="text-base sm:text-lg font-bold text-gray-900">Mes visuels</h1>
-            <button
-              onClick={() => setShowSubscriptionModal(true)}
-              className="text-orange-600 hover:text-orange-700"
-            >
-              <CreditCard size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              {eventData.eventUrl && (
+                <a
+                  href={getAdminUrl(eventData.eventUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  title="Gérer les réservations"
+                >
+                  <Settings size={20} />
+                </a>
+              )}
+              <button
+                onClick={() => setShowSubscriptionModal(true)}
+                className="text-orange-600 hover:text-orange-700"
+              >
+                <CreditCard size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
