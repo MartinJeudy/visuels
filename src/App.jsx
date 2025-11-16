@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
-import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn } from 'lucide-react';
+import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn, Upload } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -117,7 +117,7 @@ const convivialiteOptions = [
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
-    maxLength={40}
+    maxLength={70}
     value={value}
     onChange={onChange}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -173,6 +173,18 @@ const EventUrlInput = memo(({ value, onChange }) => (
     className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
     placeholder="https://hormur.com/event/..."
   />
+));
+
+const LogoUploadInput = memo(({ label, value, onChange, onRemove }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    {value ? (
+      <div className="flex items-center gap-2">
+        <img src={value} alt="Logo" className="h-12 w-auto object-contain bg-white p-1 border rounded" />
+        <button onClick={onRemove} className="text-red-600 hover:text-red-700 text-xs">Supprimer</button>
+      </div>
+    ) : null}
+  </div>
 ));
 
 const DownloadModal = ({ onClose, onDownload, isDownloading }) => {
@@ -398,7 +410,16 @@ const EditPanel = memo(({
   onImagePositionYChange,
   onImageZoomChange,
   onResetImagePosition,
-  isBlackAndWhite
+  isBlackAndWhite,
+  hostLogo,
+  artistLogo,
+  onHostLogoUpload,
+  onArtistLogoUpload,
+  onHostLogoRemove,
+  onArtistLogoRemove,
+  hostLogoInputRef,
+  artistLogoInputRef,
+  isMobileView
 }) => (
   <div className="space-y-4">
     <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -432,13 +453,13 @@ const EditPanel = memo(({
       <div className="space-y-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Titre <span className="text-gray-400">(max 40 car.)</span>
+            Titre <span className="text-gray-400">(max 70 car.)</span>
           </label>
           <TitleInput
             value={eventData.title}
             onChange={onTitleChange}
           />
-          <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/40</div>
+          <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/70</div>
         </div>
 
         {isBlackAndWhite && (
@@ -546,17 +567,37 @@ const EditPanel = memo(({
           />
           <p className="text-xs text-gray-500 mt-1">Pour le QR code</p>
         </div>
+
+        <div className="bg-blue-50 p-3 rounded-lg">
+          <p className="text-xs font-bold text-blue-900 mb-2">🎨 Logos personnalisés (Premium)</p>
+          <p className="text-xs text-blue-800 mb-3">Ajoutez vos logos d'hôte et d'artiste sur tous les visuels</p>
+
+          <input ref={hostLogoInputRef} type="file" accept="image/*" onChange={onHostLogoUpload} className="hidden" />
+          <input ref={artistLogoInputRef} type="file" accept="image/*" onChange={onArtistLogoUpload} className="hidden" />
+
+          <div className="space-y-2">
+            <button onClick={() => hostLogoInputRef.current?.click()} className="w-full px-3 py-2 text-xs bg-white border border-blue-300 rounded-lg hover:bg-blue-50">
+              {hostLogo ? '✓ Logo Hôte ajouté' : '+ Ajouter logo Hôte'}
+            </button>
+            {hostLogo && <LogoUploadInput label="" value={hostLogo} onRemove={onHostLogoRemove} />}
+
+            <button onClick={() => artistLogoInputRef.current?.click()} className="w-full px-3 py-2 text-xs bg-white border border-blue-300 rounded-lg hover:bg-blue-50">
+              {artistLogo ? '✓ Logo Artiste ajouté' : '+ Ajouter logo Artiste'}
+            </button>
+            {artistLogo && <LogoUploadInput label="" value={artistLogo} onRemove={onArtistLogoRemove} />}
+          </div>
+        </div>
       </div>
     </div>
 
-    {!isBlackAndWhite && (
-      <div className="bg-white rounded-xl p-4 shadow-sm">
+    <div className="bg-white rounded-xl p-4 shadow-sm">
         <h2 className="font-bold text-base mb-3 flex items-center gap-2">
           <ImagePlus size={18} className="text-orange-500" />
-          Image {selectedVisual !== 'communique' && '(format carré recommandé)'}
+          Image {selectedVisual !== 'communique' && '(format carré)'}
         </h2>
         <div className="space-y-3">
-          <div
+          {!isMobileView && (
+            <div
             className={`relative h-40 rounded-lg overflow-hidden border-2 border-dashed transition-colors ${
               dragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
             }`}
@@ -572,9 +613,9 @@ const EditPanel = memo(({
               position: 'relative',
               backgroundColor: '#f3f4f6'
             }}>
-              <img 
-                src={uploadedImage} 
-                alt="Preview" 
+              <img
+                src={uploadedImage}
+                alt="Preview"
                 style={{
                   position: 'absolute',
                   top: '50%',
@@ -593,7 +634,8 @@ const EditPanel = memo(({
               </div>
             )}
           </div>
-          
+          )}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -609,6 +651,7 @@ const EditPanel = memo(({
             Choisir une image ou glisser-déposer
           </button>
 
+          {!isMobileView && (
           <div className="bg-gray-50 rounded-lg p-3 space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold text-gray-700 flex items-center gap-1">
@@ -665,13 +708,11 @@ const EditPanel = memo(({
               />
             </div>
           </div>
-
-          {selectedVisual !== 'communique' && (
-            <p className="text-xs text-gray-500 text-center">💡 Ajustez la position et le zoom pour un cadrage parfait</p>
           )}
+
+          <p className="text-xs text-gray-500 text-center">💡 {isMobileView ? 'Ajustez depuis l\'aperçu' : 'Ajustez la position et le zoom pour un cadrage parfait'}</p>
         </div>
       </div>
-    )}
 
     {selectedVisual !== 'communique' && (
       <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -841,7 +882,12 @@ const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  
+
+  const [hostLogo, setHostLogo] = useState(null);
+  const [artistLogo, setArtistLogo] = useState(null);
+  const hostLogoInputRef = useRef(null);
+  const artistLogoInputRef = useRef(null);
+
   const [imageSettings, setImageSettings] = useState(() => {
     const saved = localStorage.getItem('hormur_image_settings');
     return saved ? JSON.parse(saved) : {
@@ -962,6 +1008,38 @@ const App = () => {
   const handleResetImagePosition = useCallback(() => {
     updateCurrentSettings({ positionX: 50, positionY: 50, zoom: 100 });
   }, [selectedVisual]);
+
+  const handleHostLogoUpload = useCallback((e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setHostLogo(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handleArtistLogoUpload = useCallback((e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setArtistLogo(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handleHostLogoRemove = useCallback(() => {
+    setHostLogo(null);
+    if (hostLogoInputRef.current) hostLogoInputRef.current.value = '';
+  }, []);
+
+  const handleArtistLogoRemove = useCallback(() => {
+    setArtistLogo(null);
+    if (artistLogoInputRef.current) artistLogoInputRef.current.value = '';
+  }, []);
 
   const getCurrentColor = () => {
     return hormurColors.find(c => c.value === selectedColor) || hormurColors[0];
@@ -1154,6 +1232,34 @@ const App = () => {
       const isAffiche = selectedVisual === 'affiche';
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
+          {/* Image de fond */}
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            zIndex: 0,
+            overflow: 'hidden'
+          }}>
+            <img
+              src={uploadedImage}
+              alt="Event background"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: `translate(calc(-50% + ${translateX}%), calc(-50% + ${translateY}%)) scale(${scale})`,
+                transformOrigin: 'center',
+                filter: 'grayscale(100%) contrast(1.1)',
+                opacity: 0.15
+              }}
+            />
+          </div>
+
           <img
             src="/logo-hormur-couleur.png"
             alt="Hormur"
@@ -1169,92 +1275,42 @@ const App = () => {
 
           <div style={{
             position: 'absolute',
-            top: '13.5%',
-            left: '6%',
-            width: '88%',
-            height: '71%',
-            zIndex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              border: '3px solid #000000',
-              borderRadius: '16px',
-              padding: isAffiche ? '16px 24px' : '12px 18px',
-              display: 'inline-block',
-              maxWidth: '90%'
-            }}>
-              <p style={{
-                fontSize: isAffiche ? '28px' : '22px',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                color: '#000000',
-                margin: 0,
-                lineHeight: '1.1',
-                textAlign: 'center',
-                letterSpacing: '-0.5px'
-              }}>
-                {eventData.artistName}
-              </p>
-            </div>
-          </div>
-
-          {eventData.chezHabitant && (
-            <div style={{
-              position: 'absolute',
-              top: '83%',
-              left: '3%',
-              zIndex: 3
-            }}>
-              <p style={{
-                fontSize: isAffiche ? '13px' : '11px',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                color: '#000000',
-                margin: 0,
-                letterSpacing: '0.8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <span style={{ fontSize: isAffiche ? '16px' : '14px' }}>🏠</span>
-                <span>Chez l'habitant</span>
-              </p>
-            </div>
-          )}
-
-          <div style={{
-            position: 'absolute',
-            bottom: '83.5%',
-            left: '7%',
-            right: '3%',
-            textAlign: 'left',
+            top: '16%',
+            left: '5%',
+            right: '5%',
+            textAlign: 'center',
             zIndex: 3
           }}>
             <h1 style={{
-              fontSize: isAffiche ? '36px' : '28px',
+              fontSize: isAffiche ? '28px' : '22px',
               fontWeight: '900',
               textTransform: 'uppercase',
               color: '#000000',
-              margin: 0,
-              lineHeight: '1',
-              letterSpacing: '-0.5px'
+              margin: '0 0 8px 0',
+              lineHeight: '0.95',
+              letterSpacing: '-1px',
+              textShadow: '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff'
             }}>
               {eventData.title}
             </h1>
+
+            <p style={{
+              fontSize: isAffiche ? '20px' : '16px',
+              fontWeight: '700',
+              color: '#000000',
+              margin: 0,
+              textShadow: '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff'
+            }}>
+              {eventData.artistName}
+            </p>
           </div>
 
           <div style={{
             position: 'absolute',
-            bottom: '18%',
+            bottom: '25%',
             left: '3%',
-            right: '5%',
-            display: 'flex',
-            justifyContent: 'flex-start',
-            gap: '16px',
+            right: '3%',
+            textAlign: 'center',
             zIndex: 3
           }}>
             <p style={{
@@ -1262,7 +1318,8 @@ const App = () => {
               fontWeight: '700',
               textTransform: 'uppercase',
               color: '#000000',
-              margin: 0
+              margin: '0 0 4px 0',
+              textShadow: '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff'
             }}>
               {eventData.date}
             </p>
@@ -1271,11 +1328,35 @@ const App = () => {
               fontWeight: '600',
               textTransform: 'uppercase',
               color: '#000000',
-              margin: 0
+              margin: 0,
+              textShadow: '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff'
             }}>
-              {eventData.city}
+              {eventData.city} ({eventData.department})
             </p>
           </div>
+
+          {eventData.chezHabitant && (
+            <div style={{
+              position: 'absolute',
+              bottom: '20%',
+              left: '3%',
+              right: '3%',
+              textAlign: 'center',
+              zIndex: 3
+            }}>
+              <p style={{
+                fontSize: isAffiche ? '12px' : '10px',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                color: '#000000',
+                margin: 0,
+                letterSpacing: '0.8px',
+                textShadow: '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff'
+              }}>
+                🏠 Chez l'habitant
+              </p>
+            </div>
+          )}
 
           <div style={{
             position: 'absolute',
@@ -1289,23 +1370,16 @@ const App = () => {
           }}>
             <div style={{ flex: 1 }}>
               <p style={{
-                fontSize: isAffiche ? '18px' : '16px',
-                fontWeight: '900',
-                color: '#000000',
-                margin: '0 0 4px 0'
-              }}>
-                ({eventData.department})
-              </p>
-              <p style={{
                 fontSize: isAffiche ? '13px' : '11px',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 color: '#000000',
-                margin: 0
+                margin: 0,
+                textShadow: '1px 1px 0 #ffffff'
               }}>
                 {eventData.organizerNames}
               </p>
-              
+
               {eventData.convivialite !== 'none' && (
                 <p style={{
                   fontSize: isAffiche ? '11px' : '9px',
@@ -1314,52 +1388,26 @@ const App = () => {
                   color: '#000000',
                   margin: '6px 0 0 0',
                   letterSpacing: '0.5px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  textShadow: '1px 1px 0 #ffffff'
                 }}>
                   <span style={{ fontSize: isAffiche ? '14px' : '12px' }}>
                     {eventData.convivialite === 'repas' ? '🍽️' : '🥂'}
                   </span>
-                  <span>{eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}</span>
+                  {' '}{eventData.convivialite === 'repas' ? 'Repas partagé' : 'Apéro participatif'}
                 </p>
               )}
             </div>
 
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ textAlign: 'right', marginRight: '8px' }}>
               <p style={{
                 fontSize: isAffiche ? '10px' : '8px',
                 fontWeight: '700',
                 textTransform: 'uppercase',
                 color: '#000000',
-                margin: '0 0 2px 0'
+                margin: '0 0 2px 0',
+                textShadow: '1px 1px 0 #ffffff'
               }}>
-                Nous contacter
-              </p>
-              <p style={{
-                fontSize: isAffiche ? '10px' : '8px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: '0 0 8px 0'
-              }}>
-                contact@hormur.com
-              </p>
-              <p style={{
-                fontSize: isAffiche ? '10px' : '8px',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                color: '#000000',
-                margin: '0 0 2px 0'
-              }}>
-                Réservation sur
-              </p>
-              <p style={{
-                fontSize: isAffiche ? '10px' : '8px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0
-              }}>
-                Hormur.com
+                Réservation
               </p>
             </div>
 
@@ -1367,8 +1415,7 @@ const App = () => {
               backgroundColor: 'white',
               padding: '4px',
               borderRadius: '6px',
-              border: `2px solid #000000`,
-              marginLeft: '12px'
+              border: `2px solid #000000`
             }}>
               <QRCodeSVG
                 value={eventData.eventUrl}
@@ -1379,6 +1426,36 @@ const App = () => {
               />
             </div>
           </div>
+
+          {/* Logos personnalisés */}
+          {hostLogo && (
+            <div style={{
+              position: 'absolute',
+              bottom: '3%',
+              left: '50%',
+              transform: 'translateX(-120%)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              zIndex: 4
+            }}>
+              <img src={hostLogo} alt="Logo Hôte" style={{ height: isAffiche ? '20px' : '16px', width: 'auto' }} />
+            </div>
+          )}
+          {artistLogo && (
+            <div style={{
+              position: 'absolute',
+              bottom: '3%',
+              left: '50%',
+              transform: 'translateX(20%)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              zIndex: 4
+            }}>
+              <img src={artistLogo} alt="Logo Artiste" style={{ height: isAffiche ? '20px' : '16px', width: 'auto' }} />
+            </div>
+          )}
         </div>
       );
     }
@@ -1386,6 +1463,34 @@ const App = () => {
     if (isNB && selectedVisual === 'post-rs') {
       return (
         <div ref={visualRef} data-download-target="true" style={visualStyle}>
+          {/* Image de fond */}
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            zIndex: 0,
+            overflow: 'hidden'
+          }}>
+            <img
+              src={uploadedImage}
+              alt="Event background"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: `translate(calc(-50% + ${translateX}%), calc(-50% + ${translateY}%)) scale(${scale})`,
+                transformOrigin: 'center',
+                filter: 'grayscale(100%) contrast(1.1)',
+                opacity: 0.2
+              }}
+            />
+          </div>
+
           <img
             src="/logo-hormur-couleur.png"
             alt="Hormur"
@@ -1398,41 +1503,6 @@ const App = () => {
               zIndex: 3
             }}
           />
-
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            zIndex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px'
-          }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              border: '4px solid #000000',
-              borderRadius: '20px',
-              padding: '24px 32px',
-              display: 'inline-block',
-              maxWidth: '85%'
-            }}>
-              <p style={{
-                fontSize: '48px',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                color: '#000000',
-                margin: 0,
-                lineHeight: '1.1',
-                textAlign: 'center',
-                letterSpacing: '-1px'
-              }}>
-                {eventData.artistName}
-              </p>
-            </div>
-          </div>
 
           {eventData.chezHabitant && (
             <div style={{
@@ -1448,123 +1518,163 @@ const App = () => {
                 color: '#000000',
                 margin: 0,
                 letterSpacing: '0.8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
+                textShadow: '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff'
               }}>
-                <span style={{ fontSize: '14px' }}>🏠</span>
-                <span>{eventData.organizerNames}</span>
+                🏠 {eventData.organizerNames}
               </p>
             </div>
           )}
 
           <div style={{
             position: 'absolute',
-            inset: 0,
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            textAlign: 'center',
             color: '#000000',
             zIndex: 2
           }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'start'
-            }}>
-            </div>
-
-            <div>
-              <h2 style={{
-                fontSize: '36px',
+            <h2 style={{
+                fontSize: '44px',
                 fontWeight: '900',
                 textTransform: 'uppercase',
                 lineHeight: '0.95',
-                margin: '-25px 0 12px 0',
-                letterSpacing: '-1px',
-                color: '#000000'
+                margin: '0 0 16px 0',
+                letterSpacing: '-2px',
+                color: '#000000',
+                textShadow: '3px 3px 0 #ffffff, -3px -3px 0 #ffffff, 3px -3px 0 #ffffff, -3px 3px 0 #ffffff'
               }}>
                 {eventData.title}
               </h2>
-              
+
+            <p style={{
+                fontSize: '22px',
+                fontWeight: '700',
+                color: '#000000',
+                margin: '0 0 24px 0',
+                textShadow: '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff'
+              }}>
+                {eventData.artistName}
+              </p>
+
               <p style={{
                 fontSize: '18px',
                 fontWeight: '700',
                 textTransform: 'uppercase',
                 margin: '0 0 4px 0',
-                color: '#000000'
+                color: '#000000',
+                textShadow: '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff'
               }}>
                 {eventData.date}
               </p>
-              
+
               <p style={{
-                fontSize: '15px',
+                fontSize: '16px',
                 fontWeight: '600',
                 textTransform: 'uppercase',
-                margin: '0 0 16px 0',
-                color: '#000000'
+                margin: 0,
+                color: '#000000',
+                textShadow: '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff'
               }}>
-                {eventData.city}
+                {eventData.city} ({eventData.department})
               </p>
+          </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingTop: '12px',
-                borderTop: `2px solid #000000`
-              }}>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{
-                    fontSize: '20px',
-                    fontWeight: '900',
-                    color: '#000000',
-                    margin: '0 0 8px 0'
-                  }}>
-                    ({eventData.department})
-                  </p>
-                  <p style={{
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    color: '#000000',
-                    margin: '0 0 2px 0'
-                  }}>
-                    Nous contacter
-                  </p>
-                  <p style={{
-                    fontSize: '10px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: '0 0 8px 0'
-                  }}>
-                    contact@hormur.com
-                  </p>
-                  <p style={{
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    color: '#000000',
-                    margin: '0 0 2px 0'
-                  }}>
-                    Réservation sur
-                  </p>
-                  <p style={{
-                    fontSize: '10px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0
-                  }}>
-                    Hormur.com
-                  </p>
-                </div>
-              </div>
+          <div style={{
+            position: 'absolute',
+            bottom: '5%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            textAlign: 'center',
+            zIndex: 3
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '6px',
+              borderRadius: '8px',
+              border: '2px solid #000000',
+              display: 'inline-block'
+            }}>
+              <QRCodeSVG
+                value={eventData.eventUrl}
+                size={60}
+                level="M"
+                includeMargin={false}
+                fgColor="#000000"
+              />
             </div>
           </div>
+
+          {/* Logos personnalisés */}
+          {hostLogo && (
+            <div style={{
+              position: 'absolute',
+              bottom: '3%',
+              left: '3%',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              zIndex: 4
+            }}>
+              <img src={hostLogo} alt="Logo Hôte" style={{ height: '24px', width: 'auto' }} />
+            </div>
+          )}
+          {artistLogo && (
+            <div style={{
+              position: 'absolute',
+              bottom: '3%',
+              right: '3%',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              zIndex: 4
+            }}>
+              <img src={artistLogo} alt="Logo Artiste" style={{ height: '24px', width: 'auto' }} />
+            </div>
+          )}
         </div>
       );
     }
+
+    // Ajouter les logos sur tous les autres visuels (couleur)
+    const renderLogos = () => (
+      <>
+        {hostLogo && (
+          <div style={{
+            position: 'absolute',
+            [selectedVisual === 'post-rs' ? 'bottom' : 'top']: '3%',
+            left: '3%',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            zIndex: 10
+          }}>
+            <img src={hostLogo} alt="Logo Hôte" style={{
+              height: selectedVisual === 'post-rs' ? '24px' : selectedVisual === 'affiche' ? '20px' : '16px',
+              width: 'auto'
+            }} />
+          </div>
+        )}
+        {artistLogo && (
+          <div style={{
+            position: 'absolute',
+            [selectedVisual === 'post-rs' ? 'bottom' : 'top']: '3%',
+            right: selectedVisual === 'affiche' || selectedVisual === 'flyer-recto' ? '3%' : artistLogo && hostLogo ? '3%' : 'auto',
+            left: !artistLogo || !hostLogo ? 'auto' : 'auto',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            zIndex: 10
+          }}>
+            <img src={artistLogo} alt="Logo Artiste" style={{
+              height: selectedVisual === 'post-rs' ? '24px' : selectedVisual === 'affiche' ? '20px' : '16px',
+              width: 'auto'
+            }} />
+          </div>
+        )}
+      </>
+    );
 
     switch(selectedVisual) {
       case 'affiche':
@@ -1769,6 +1879,8 @@ const App = () => {
                 </div>
               </div>
             </div>
+
+            {renderLogos()}
           </div>
         );
 
@@ -1941,6 +2053,8 @@ const App = () => {
                   />
                 </div>
               </div>
+
+            {renderLogos()}
             </div>
           </div>
         );
@@ -2113,6 +2227,8 @@ const App = () => {
                 </p>
               </div>
             </div>
+
+            {renderLogos()}
           </div>
         );
 
@@ -2277,6 +2393,8 @@ const App = () => {
                 </div>
               </div>
             </div>
+
+            {renderLogos()}
           </div>
         );
 
@@ -2387,6 +2505,15 @@ const App = () => {
               onImageZoomChange={handleImageZoomChange}
               onResetImagePosition={handleResetImagePosition}
               isBlackAndWhite={isBlackAndWhite()}
+              hostLogo={hostLogo}
+              artistLogo={artistLogo}
+              onHostLogoUpload={handleHostLogoUpload}
+              onArtistLogoUpload={handleArtistLogoUpload}
+              onHostLogoRemove={handleHostLogoRemove}
+              onArtistLogoRemove={handleArtistLogoRemove}
+              hostLogoInputRef={hostLogoInputRef}
+              artistLogoInputRef={artistLogoInputRef}
+              isMobileView={mobileView === 'preview'}
             />
           </div>
 
@@ -2413,6 +2540,65 @@ const App = () => {
                 </div>
               </div>
               <div className="bg-gray-100 p-4 rounded-lg">
+                {mobileView === 'preview' && (
+                  <div className="bg-white rounded-lg p-3 mb-4 space-y-3 lg:hidden">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                        <Move size={14} className="text-orange-500" />
+                        Position & Zoom
+                      </h3>
+                      <button
+                        onClick={handleResetImagePosition}
+                        className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                      >
+                        Réinitialiser
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-1 block">
+                        ↔️ Horizontal : {currentSettings.positionX}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={currentSettings.positionX}
+                        onChange={handleImagePositionXChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-1 block">
+                        ↕️ Vertical : {currentSettings.positionY}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={currentSettings.positionY}
+                        onChange={handleImagePositionYChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-1 block flex items-center gap-1">
+                        <ZoomIn size={12} /> Zoom : {currentSettings.zoom}%
+                      </label>
+                      <input
+                        type="range"
+                        min="60"
+                        max="200"
+                        value={currentSettings.zoom}
+                        onChange={handleImageZoomChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div style={{
                   width: '100%',
                   maxWidth: selectedVisual === 'post-rs' ? '400px' : '350px',
