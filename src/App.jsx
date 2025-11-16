@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
-import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn, Settings } from 'lucide-react';
+import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -733,7 +733,8 @@ const App = () => {
 
   const getAdminUrl = (eventUrl) => {
     if (!eventUrl) return '';
-    return eventUrl.endsWith('/') ? `${eventUrl}admin` : `${eventUrl}/admin`;
+    const url = eventUrl.replace(/\/$/, '');
+    return `${url}/admin`;
   };
 
   const [eventData, setEventData] = useState(() => {
@@ -2289,23 +2290,15 @@ const App = () => {
       <div className="bg-white border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900">
+            <a
+              href={getAdminUrl(eventData.eventUrl)}
+              className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+            >
               <ArrowLeft size={20} />
               <span className="hidden sm:inline text-sm">Retour</span>
-            </button>
+            </a>
             <h1 className="text-base sm:text-lg font-bold text-gray-900">Mes visuels</h1>
-            <div className="flex items-center gap-2">
-              {eventData.eventUrl && (
-                <a
-                  href={getAdminUrl(eventData.eventUrl)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                  title="Gérer les réservations"
-                >
-                  <Settings size={20} />
-                </a>
-              )}
+            <div>
               <button
                 onClick={() => setShowSubscriptionModal(true)}
                 className="text-orange-600 hover:text-orange-700"
