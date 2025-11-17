@@ -117,7 +117,7 @@ const convivialiteOptions = [
 const TitleInput = memo(({ value, onChange }) => (
   <input
     type="text"
-    maxLength={70}
+    maxLength={55}
     value={value}
     onChange={onChange}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -459,7 +459,7 @@ const EditPanel = memo(({
             value={eventData.title}
             onChange={onTitleChange}
           />
-          <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/70</div>
+          <div className="text-xs text-gray-500 mt-1">{eventData.title.length}/55</div>
         </div>
 
         {isBlackAndWhite && (
