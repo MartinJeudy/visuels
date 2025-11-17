@@ -138,6 +138,7 @@ const ArtistNameInput = memo(({ value, onChange }) => (
 const DescriptionInput = memo(({ value, onChange }) => (
   <textarea
     value={value}
+    maxLength={600}
     onChange={onChange}
     rows={3}
     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -453,7 +454,7 @@ const EditPanel = memo(({
       <div className="space-y-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Titre <span className="text-gray-400">(max 70 car.)</span>
+            Titre <span className="text-gray-400">(max 55 car.)</span>
           </label>
           <TitleInput
             value={eventData.title}
@@ -478,12 +479,13 @@ const EditPanel = memo(({
         {(selectedVisual === 'flyer-verso' || selectedVisual === 'communique') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Description <span className="text-gray-400">(max 600 car.)</span>
             </label>
             <DescriptionInput
               value={eventData.description}
               onChange={onDescriptionChange}
             />
+            <div className="text-xs text-gray-500 mt-1">{eventData.description.length}/600</div>
           </div>
         )}
       </div>
@@ -962,7 +964,8 @@ const App = () => {
   const visualRef = useRef(null);
 
   const handleTitleChange = useCallback((e) => {
-    setEventData(prev => ({...prev, title: e.target.value}));
+    const value = e.target.value.slice(0, 55);
+    setEventData(prev => ({...prev, title: value}));
   }, []);
 
   const handleArtistNameChange = useCallback((e) => {
@@ -970,7 +973,8 @@ const App = () => {
   }, []);
 
   const handleDescriptionChange = useCallback((e) => {
-    setEventData(prev => ({...prev, description: e.target.value}));
+    const value = e.target.value.slice(0, 600);
+    setEventData(prev => ({...prev, description: value}));
   }, []);
 
   const handleOrganizerChange = useCallback((e) => {
