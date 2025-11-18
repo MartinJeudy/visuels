@@ -2456,7 +2456,7 @@ const App = () => {
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 font-bold mt-1">•</span>
-                    <span><strong>Créez vos visuels personnalisés</strong> pour promouvoir votre concert Hormur</span>
+                    <span><strong>Créez vos visuels personnalisés</strong> pour promouvoir votre évènement Hormur</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 font-bold mt-1">•</span>
