@@ -2460,7 +2460,7 @@ const App = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 font-bold mt-1">•</span>
-                    <span><strong>Affiches, flyers, posts réseaux sociaux</strong> aux couleurs de votre événement</span>
+                    <span><strong>Affiches, flyers, posts réseaux sociaux</strong> aux couleurs de votre évènement</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 font-bold mt-1">•</span>
