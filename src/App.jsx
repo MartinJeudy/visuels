@@ -746,6 +746,10 @@ const EditPanel = memo(({
   </div>
 ));
 
+// Constante pour activer/désactiver la page d'attente
+// Mettre à false pour revenir à l'application normale
+const UNDER_MAINTENANCE = true;
+
 const App = () => {
   const getUrlParams = () => {
     const params = new URLSearchParams(window.location.search);
@@ -2406,6 +2410,78 @@ const App = () => {
         return null;
     }
   };
+
+  // Page d'attente temporaire
+  if (UNDER_MAINTENANCE) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <a
+                href={getAdminUrl(eventData.eventUrl)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+              >
+                <ArrowLeft size={20} />
+                <span className="hidden sm:inline text-sm">Retour</span>
+              </a>
+              <h1 className="text-base sm:text-lg font-bold text-gray-900">Mes visuels</h1>
+              <div className="w-6"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg p-8 sm:p-12">
+            <div className="text-center">
+              <div className="mb-6">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-100 rounded-full mb-4">
+                  <Palette size={40} className="text-orange-500" />
+                </div>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                Outil en cours de fignolage
+              </h2>
+
+              <p className="text-gray-600 mb-6 text-lg">
+                Notre équipe peaufine les derniers détails pour vous offrir la meilleure expérience possible.
+              </p>
+
+              <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-lg text-left mb-6">
+                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <ImagePlus size={20} className="text-orange-500" />
+                  À quoi va servir cet outil ?
+                </h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500 font-bold mt-1">•</span>
+                    <span><strong>Créez vos visuels personnalisés</strong> pour promouvoir votre concert Hormur</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500 font-bold mt-1">•</span>
+                    <span><strong>Affiches, flyers, posts réseaux sociaux</strong> aux couleurs de votre événement</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500 font-bold mt-1">•</span>
+                    <span><strong>Téléchargez et partagez</strong> en quelques clics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500 font-bold mt-1">•</span>
+                    <span><strong>Design professionnel</strong> sans compétences graphiques requises</span>
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-gray-500 text-sm">
+                L'outil sera bientôt disponible. Merci de votre patience !
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 touch-manipulation">
