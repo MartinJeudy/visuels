@@ -1,7 +1,14 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
+# Edge Function pour les tokens de rendu
+[[edge_functions]]
+  path = "/api/render-token"
+  function = "render-token"
+
+# SPA fallback - doit être en dernier
 [[redirects]]
   from = "/*"
   to = "/index.html"
