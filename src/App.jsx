@@ -1,4 +1,3 @@
-
 import { useState, useRef, memo, useCallback, useEffect } from 'react';
 import { ArrowLeft, Download, ImagePlus, Palette, Type, FileText, X, Eye, Edit3, Home, Mail, CreditCard, Check, Move, ZoomIn, Upload, Settings, Save, Info, Server } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
