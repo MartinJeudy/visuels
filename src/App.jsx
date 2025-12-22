@@ -13,7 +13,7 @@ import { VISUAL_DIMENSIONS } from './config/visualDimensions.js';
 // Pour activer le bouton Envoyer : changer false en true
 const ENABLE_SEND_BUTTON = false;
 // Pour activer la page de maintenance : changer false en true
-const UNDER_MAINTENANCE = true;
+const UNDER_MAINTENANCE = false;
 // ============================================================
 
 // Fonction utilitaire pour compresser les images base64
