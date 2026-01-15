@@ -3431,7 +3431,7 @@ const App = () => {
                       margin: '0 0 6px 0',
                       opacity: 0.9
                     }}>
-                      Message de {eventData.organizerNames}
+                      Message : {eventData.organizerNames}
                     </p>
                     <p style={{
                       fontSize: `${getConfigValue('personalMessage', 'fontSize', 10)}px`,
