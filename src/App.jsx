@@ -116,6 +116,9 @@ if (new URLSearchParams(window.location.search).get('clearStorage') === 'true') 
   window.location.href = url.toString();
 }
 
+// Capturer le referrer au chargement pour le bouton retour
+const initialReferrer = document.referrer;
+
 const hormurColors = [
   {
     name: 'Bleu Océan',
@@ -1422,6 +1425,11 @@ const App = () => {
   };
 
   const getAdminUrl = (eventUrl) => {
+    // Priorité 1: Utiliser le referrer s'il pointe vers hormur.com (c'est l'URL d'où l'utilisateur vient)
+    if (initialReferrer && initialReferrer.includes('hormur.com')) {
+      return initialReferrer;
+    }
+    // Priorité 2: Utiliser l'eventUrl du paramètre
     if (!eventUrl) return '';
     const url = eventUrl.replace(/\/$/, '');
     return `${url}/admin`;
@@ -1468,7 +1476,7 @@ const App = () => {
         time: formatTime(urlParams.eventTime) || "17h",
         city: urlParams.city || "JOUÉ-LÈS-TOURS",
         department: urlParams.department || "37",
-        organizerNames: "Sophie & Martin",
+        organizerNames: "",
         eventUrl: urlParams.eventURL || "https://hormur.com/event/01994344-f113-7096-a7-6f6e28d480",
         description: urlParams.eventDescription || "Découvrez un concert intimiste dans un cadre chaleureux et convivial.",
         personalMessage: "Hâte de vous accueillir pour ce moment de partage artistique !",
@@ -1493,7 +1501,7 @@ const App = () => {
       time: "17h",
       city: "JOUÉ-LÈS-TOURS",
       department: "37",
-      organizerNames: "Sophie & Martin",
+      organizerNames: "",
       eventUrl: "https://hormur.com/event/01994344-f113-7096-a7-6f6e28d480",
       description: "Découvrez un concert intimiste dans un cadre chaleureux et convivial.",
       personalMessage: "Hâte de vous accueillir pour cette soirée unique !",
@@ -2786,11 +2794,8 @@ const App = () => {
         }
       };
 
-      // 5. Envoyer au Webhook de Capture
-      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
-      if (!webhookUrl) throw new Error("VITE_N8N_WEBHOOK_URL non défini");
-
-      const response = await fetch(webhookUrl, {
+      // 5. Envoyer au Webhook de Capture via Netlify Function proxy
+      const response = await fetch('/.netlify/functions/capture-visual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -2892,7 +2897,7 @@ const App = () => {
       height: `${100 * scale}%`,
       maxWidth: 'none',
       maxHeight: 'none',
-      objectFit: selectedVisual === 'communique' ? 'contain' : 'cover',
+      objectFit: 'contain',
       transform: 'translate(-50%, -50%)',
       transformOrigin: 'center'
     };
@@ -3011,38 +3016,40 @@ const App = () => {
             />
 
             {/* Nom de l'artiste - NOUVEAU ENCART */}
-            <DraggableElement
-              id="artistName"
-              isSelected={selectedElement === 'artistName'}
-              onSelect={setSelectedElement}
-              onDragStart={handleDragStart}
-              editMode={editMode}
-              style={{
-                position: 'absolute',
-                bottom: `${getConfigValue('artistName', 'bottom', 17)}%`,
-                left: `${getConfigValue('artistName', 'left', 3)}%`,
-                right: `${getConfigValue('artistName', 'right', 3)}%`,
-                zIndex: 3,
-              }}
-            >
-              <div style={{
-                backgroundColor: isNB ? 'transparent' : bgColor,
-                padding: `${getConfigValue('artistName', 'padding', selectedVisual === 'affiche' ? 8 : 6)}px`,
-                borderRadius: '4px',
-                display: 'inline-block',
-              }}>
-                <p style={{
-                  fontSize: `${getConfigValue('artistName', 'fontSize', selectedVisual === 'affiche' ? 12 : 10)}px`,
-                  fontWeight: getConfigValue('artistName', 'fontWeight', 700),
-                  color: textColor,
-                  margin: 0,
-                  whiteSpace: 'nowrap',
-                  textShadow: isNB ? '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff' : '1px 1px 2px rgba(0,0,0,0.2)'
+            {eventData.artistName && eventData.artistName.trim() && (
+              <DraggableElement
+                id="artistName"
+                isSelected={selectedElement === 'artistName'}
+                onSelect={setSelectedElement}
+                onDragStart={handleDragStart}
+                editMode={editMode}
+                style={{
+                  position: 'absolute',
+                  bottom: `${getConfigValue('artistName', 'bottom', 17)}%`,
+                  left: `${getConfigValue('artistName', 'left', 3)}%`,
+                  right: `${getConfigValue('artistName', 'right', 3)}%`,
+                  zIndex: 3,
+                }}
+              >
+                <div style={{
+                  backgroundColor: isNB ? 'transparent' : bgColor,
+                  padding: `${getConfigValue('artistName', 'padding', selectedVisual === 'affiche' ? 8 : 6)}px`,
+                  borderRadius: '4px',
+                  display: 'inline-block',
                 }}>
-                  {eventData.artistName}
-                </p>
-              </div>
-            </DraggableElement>
+                  <p style={{
+                    fontSize: `${getConfigValue('artistName', 'fontSize', selectedVisual === 'affiche' ? 12 : 10)}px`,
+                    fontWeight: getConfigValue('artistName', 'fontWeight', 700),
+                    color: textColor,
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    textShadow: isNB ? '1px 1px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff' : '1px 1px 2px rgba(0,0,0,0.2)'
+                  }}>
+                    {eventData.artistName}
+                  </p>
+                </div>
+              </DraggableElement>
+            )}
 
             {/* Titre */}
             <DraggableElement
@@ -3840,38 +3847,40 @@ const App = () => {
             </DraggableElement>
 
             {/* Nom de l'artiste avec fond couleur - NOUVEAU */}
-            <DraggableElement
-              id="artistName"
-              isSelected={selectedElement === 'artistName'}
-              onSelect={setSelectedElement}
-              onDragStart={handleDragStart}
-              editMode={editMode}
-              style={{
-                position: 'absolute',
-                bottom: `${getConfigValue('artistName', 'bottom', 40)}%`,
-                left: `${getConfigValue('artistName', 'left', 6)}%`,
-                right: `${getConfigValue('artistName', 'right', 6)}%`,
-                zIndex: 3,
-              }}
-            >
-              <div style={{
-                backgroundColor: isNB ? 'transparent' : bgColor,
-                padding: `${getConfigValue('artistName', 'padding', 8)}px`,
-                borderRadius: '4px',
-                display: 'inline-block',
-              }}>
-                <p style={{
-                  fontSize: `${getConfigValue('artistName', 'fontSize', 18)}px`,
-                  fontWeight: getConfigValue('artistName', 'fontWeight', 700),
-                  color: textColor,
-                  margin: 0,
-                  whiteSpace: 'nowrap',
-                  textShadow: isNB ? '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff' : '1px 1px 2px rgba(0,0,0,0.2)'
+            {eventData.artistName && eventData.artistName.trim() && (
+              <DraggableElement
+                id="artistName"
+                isSelected={selectedElement === 'artistName'}
+                onSelect={setSelectedElement}
+                onDragStart={handleDragStart}
+                editMode={editMode}
+                style={{
+                  position: 'absolute',
+                  bottom: `${getConfigValue('artistName', 'bottom', 40)}%`,
+                  left: `${getConfigValue('artistName', 'left', 6)}%`,
+                  right: `${getConfigValue('artistName', 'right', 6)}%`,
+                  zIndex: 3,
+                }}
+              >
+                <div style={{
+                  backgroundColor: isNB ? 'transparent' : bgColor,
+                  padding: `${getConfigValue('artistName', 'padding', 8)}px`,
+                  borderRadius: '4px',
+                  display: 'inline-block',
                 }}>
-                  {eventData.artistName}
-                </p>
-              </div>
-            </DraggableElement>
+                  <p style={{
+                    fontSize: `${getConfigValue('artistName', 'fontSize', 18)}px`,
+                    fontWeight: getConfigValue('artistName', 'fontWeight', 700),
+                    color: textColor,
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    textShadow: isNB ? '2px 2px 0 #ffffff, -2px -2px 0 #ffffff, 2px -2px 0 #ffffff, -2px 2px 0 #ffffff' : '1px 1px 2px rgba(0,0,0,0.2)'
+                  }}>
+                    {eventData.artistName}
+                  </p>
+                </div>
+              </DraggableElement>
+            )}
 
             {/* Date - Déplaçable */}
             <DraggableElement
