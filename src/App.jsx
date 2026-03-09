@@ -1415,7 +1415,7 @@ const App = () => {
       const [day, month] = parts;
       const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
       const monthIndex = parseInt(month) - 1;
-      return `${day} ${months[monthIndex] || month} 2025`;
+      return `${day} ${months[monthIndex] || month} ${new Date().getFullYear()}`;
     }
     return dateStr;
   };
@@ -1472,7 +1472,7 @@ const App = () => {
       const initialData = truncateEventData({
         title: urlParams.eventName || "Trio de contrebasses",
         artistName: urlParams.artistName || "La Valse des Hippos",
-        date: formatDate(urlParams.eventDate) || "16 NOV 2025",
+        date: formatDate(urlParams.eventDate) || `16 NOV ${new Date().getFullYear()}`,
         time: formatTime(urlParams.eventTime) || "17h",
         city: urlParams.city || "JOUÉ-LÈS-TOURS",
         department: urlParams.department || "37",
@@ -1497,7 +1497,7 @@ const App = () => {
     return truncateEventData({
       title: "Trio de contrebasses",
       artistName: "La Valse des Hippos",
-      date: "16 NOV 2025",
+      date: `16 NOV ${new Date().getFullYear()}`,
       time: "17h",
       city: "JOUÉ-LÈS-TOURS",
       department: "37",
