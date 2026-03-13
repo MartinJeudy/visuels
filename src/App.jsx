@@ -1463,8 +1463,22 @@ const App = () => {
       // Si on a des données sauvegardées pour le MÊME événement (même URL),
       // on les garde (préserve les reformulations IA et modifications utilisateur)
       if (parsedSavedData && parsedSavedData.eventUrl === urlParams.eventURL) {
-        console.log('📂 Données existantes trouvées pour cet événement, conservation des modifications');
-        return truncateEventData(parsedSavedData);
+        console.log('📂 Données existantes trouvées pour cet événement, mise à jour avec les nouveaux paramètres URL si présents');
+        
+        const currentYear = new Date().getFullYear();
+        const lastYear = currentYear - 1;
+        
+        let updatedDate = urlParams.eventDate ? formatDate(urlParams.eventDate) : parsedSavedData.date;
+        
+        // Si aucune nouvelle date n'est fournie et que l'ancienne contient l'année précédente, on la met à jour
+        if (updatedDate && updatedDate.includes(lastYear.toString()) && !urlParams.eventDate) {
+            updatedDate = updatedDate.replace(lastYear.toString(), currentYear.toString());
+        }
+
+        return truncateEventData({
+          ...parsedSavedData,
+          date: updatedDate
+        });
       }
 
       // Sinon, c'est un nouvel événement, on charge depuis l'URL
@@ -1491,7 +1505,17 @@ const App = () => {
     }
 
     if (parsedSavedData) {
-      return truncateEventData(parsedSavedData);
+      const currentYear = new Date().getFullYear();
+      const lastYear = currentYear - 1;
+      let updatedDate = parsedSavedData.date;
+      
+      if (updatedDate && updatedDate.includes(lastYear.toString())) {
+          updatedDate = updatedDate.replace(lastYear.toString(), currentYear.toString());
+      }
+      return truncateEventData({
+        ...parsedSavedData,
+        date: updatedDate
+      });
     }
 
     return truncateEventData({
