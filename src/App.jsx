@@ -1408,18 +1408,18 @@ const App = () => {
     return timeStr;
   };
 
-  const formatDate = (dateStr) => {
+  const formatDate = (dateStr, fallbackYear = null) => {
     if (!dateStr) return '';
     const parts = dateStr.split('/');
     if (parts.length >= 2) {
       const day = parts[0];
       const month = parts[1];
-      const yearStr = parts.length === 3 ? parts[2] : new Date().getFullYear().toString();
+      const yearStr = parts.length === 3 ? parts[2] : (fallbackYear || new Date().getFullYear().toString());
       
       const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
       const monthIndex = parseInt(month) - 1;
       
-      let finalYear = yearStr;
+      let finalYear = yearStr.toString();
       if (finalYear.length === 2) {
         finalYear = "20" + finalYear;
       }
@@ -1474,7 +1474,13 @@ const App = () => {
       if (parsedSavedData && parsedSavedData.eventUrl === urlParams.eventURL) {
         console.log('📂 Données existantes trouvées pour cet événement, mise à jour avec les nouveaux paramètres URL si présents');
         
-        let updatedDate = urlParams.eventDate ? formatDate(urlParams.eventDate) : parsedSavedData.date;
+        let fallbackYear = null;
+        if (parsedSavedData.date) {
+          const match = parsedSavedData.date.match(/\b(20\d{2})\b/);
+          if (match) fallbackYear = match[1];
+        }
+
+        let updatedDate = urlParams.eventDate ? formatDate(urlParams.eventDate, fallbackYear) : parsedSavedData.date;
 
         return truncateEventData({
           ...parsedSavedData,
