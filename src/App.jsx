@@ -1411,11 +1411,20 @@ const App = () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const parts = dateStr.split('/');
-    if (parts.length === 2) {
-      const [day, month] = parts;
+    if (parts.length >= 2) {
+      const day = parts[0];
+      const month = parts[1];
+      const yearStr = parts.length === 3 ? parts[2] : new Date().getFullYear().toString();
+      
       const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
       const monthIndex = parseInt(month) - 1;
-      return `${day} ${months[monthIndex] || month} ${new Date().getFullYear()}`;
+      
+      let finalYear = yearStr;
+      if (finalYear.length === 2) {
+        finalYear = "20" + finalYear;
+      }
+
+      return `${day} ${months[monthIndex] || month} ${finalYear}`;
     }
     return dateStr;
   };
@@ -1465,15 +1474,7 @@ const App = () => {
       if (parsedSavedData && parsedSavedData.eventUrl === urlParams.eventURL) {
         console.log('📂 Données existantes trouvées pour cet événement, mise à jour avec les nouveaux paramètres URL si présents');
         
-        const currentYear = new Date().getFullYear();
-        const lastYear = currentYear - 1;
-        
         let updatedDate = urlParams.eventDate ? formatDate(urlParams.eventDate) : parsedSavedData.date;
-        
-        // Si aucune nouvelle date n'est fournie et que l'ancienne contient l'année précédente, on la met à jour
-        if (updatedDate && updatedDate.includes(lastYear.toString()) && !urlParams.eventDate) {
-            updatedDate = updatedDate.replace(lastYear.toString(), currentYear.toString());
-        }
 
         return truncateEventData({
           ...parsedSavedData,
@@ -1505,17 +1506,7 @@ const App = () => {
     }
 
     if (parsedSavedData) {
-      const currentYear = new Date().getFullYear();
-      const lastYear = currentYear - 1;
-      let updatedDate = parsedSavedData.date;
-      
-      if (updatedDate && updatedDate.includes(lastYear.toString())) {
-          updatedDate = updatedDate.replace(lastYear.toString(), currentYear.toString());
-      }
-      return truncateEventData({
-        ...parsedSavedData,
-        date: updatedDate
-      });
+      return truncateEventData(parsedSavedData);
     }
 
     return truncateEventData({
